@@ -2,7 +2,9 @@
   <NConfigProvider
     class="h-full"
     :theme="theme === 'light' ? lightTheme : darkTheme"
-    :theme-overrides="theme === 'light' ? lightThemeOverrides : darkThemeOverrides"
+    :theme-overrides="
+      theme === 'light' ? lightThemeOverrides : darkThemeOverrides
+    "
   >
     <RouterView />
     <NGlobalStyle />
