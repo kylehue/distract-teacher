@@ -1,92 +1,112 @@
 <template>
-  <div>
-    <div
-      style="
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 32px;
-      "
-    >
-      <h1 style="font-size: 32px; font-weight: bold">Rooms</h1>
-      <RouterLink to="/dashboard/rooms/create">
-        <n-button type="primary">+ Create Room</n-button>
-      </RouterLink>
-    </div>
+   <!-- Main -->
+   <Layout title="Rooms">
+      <NGrid :x-gap="16" :y-gap="16" cols="1 m:2 l:3 xl:4" responsive="screen">
+         <NGridItem v-for="i in 10" :key="i">
+            <RoomItem
+               :title="'Test Room ' + i"
+               :code="'test' + i"
+               :students="5"
+               :max-students="10"
+               :date-created="'2024-06-01'"
+               :time="'10:00 AM - 11:30 AM'"
+               :status="Math.random() > 0.5 ? 'ongoing' : 'concluded'"
+            />
+         </NGridItem>
+      </NGrid>
+      <template #header-extra>
+         <div class="flex flex-row gap-2">
+            <NInput placeholder="Search Rooms">
+               <template #prefix>
+                  <PhMagnifyingGlass></PhMagnifyingGlass>
+               </template>
+            </NInput>
+            <NButton @click="showCreateRoomModal = true">
+               Create New Room
+               <template #icon><PhPlus></PhPlus></template>
+            </NButton>
+         </div>
+      </template>
+   </Layout>
 
-    <!-- Rooms Grid -->
-    <div
-      v-if="rooms.length === 0"
-      style="text-align: center; padding: 32px 0; color: #999"
-    >
-      No rooms created yet.
-      <RouterLink
-        to="/dashboard/rooms/create"
-        style="color: #0ea5e9; text-decoration: underline"
+   <!-- Create Room Modal -->
+   <NModal v-model:show="showCreateRoomModal" closable>
+      <NCard
+         title="Create New Room"
+         closable
+         @close="showCreateRoomModal = false"
+         class="w-[420px]!"
       >
-        Create one now
-      </RouterLink>
-    </div>
+         <NForm>
+            <NFormItem label="Room Title">
+               <NInput
+                  v-model:value="createRoomModalForm.title"
+                  placeholder="Enter the room title"
+               />
+            </NFormItem>
 
-    <n-grid v-else :cols="3" :x-gap="24" :y-gap="24" responsive="screen">
-      <n-gi v-for="room in rooms" :key="room.id" span="3 m:2 s:1">
-        <n-card style="cursor: pointer">
-          <div
-            style="
-              display: flex;
-              align-items: flex-start;
-              justify-content: space-between;
-              margin-bottom: 16px;
-            "
-          >
-            <div>
-              <h3 style="font-size: 18px; font-weight: bold">
-                {{ room.name }}
-              </h3>
-              <p style="color: #999; font-size: 14px">{{ room.subject }}</p>
-            </div>
-            <n-tag type="info">{{ room.students?.length || 0 }} students</n-tag>
-          </div>
+            <NFormItem label="Room Code">
+               <div class="flex flex-col gap-1 w-full">
+                  <NInput
+                     v-model:value="createRoomModalForm.code"
+                     placeholder="Enter the room code"
+                     :disabled="createRoomModalForm.autoGenerateCode"
+                  />
+                  <NCheckbox
+                     class="w-fit"
+                     v-model:checked="createRoomModalForm.autoGenerateCode"
+                     size="small"
+                  >
+                     <NText depth="3" class="text-xs">
+                        Auto-generate room code
+                     </NText>
+                  </NCheckbox>
+               </div>
+            </NFormItem>
 
-          <p style="color: #999; font-size: 14px; margin-bottom: 16px">
-            {{ room.description }}
-          </p>
+            <NFormItem label="Max Students">
+               <NInputNumber
+                  v-model:value="createRoomModalForm.maxStudents"
+                  placeholder="Enter the max number of students"
+                  class="w-full"
+               />
+            </NFormItem>
 
-          <div style="display: flex; gap: 8px">
-            <RouterLink :to="`/dashboard/rooms/${room.id}`" style="flex: 1">
-              <n-button type="primary" block>View Room</n-button>
-            </RouterLink>
-            <n-button type="error" @click="deleteRoom(room.id)"
-              >Delete</n-button
-            >
-          </div>
-        </n-card>
-      </n-gi>
-    </n-grid>
-  </div>
+            <NButton type="primary" block> Create </NButton>
+         </NForm>
+      </NCard>
+   </NModal>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
-import { useRouter } from "vue-router";
-import { NGrid, NGi, NCard, NButton, NTag } from "naive-ui";
+import Layout from "./layout.vue";
+import RoomItem from "@/app/components/room-item.vue";
+import {
+   PhArrowsClockwise,
+   PhMagnifyingGlass,
+   PhPlus,
+} from "@phosphor-icons/vue";
+import {
+   NButton,
+   NGrid,
+   NGridItem,
+   NModal,
+   NCard,
+   NForm,
+   NFormItem,
+   NInput,
+   NInputNumber,
+   NTooltip,
+   NCheckbox,
+   NText,
+} from "naive-ui";
+import { reactive, ref } from "vue";
 
-const router = useRouter();
-const rooms = ref<any[]>([]);
-
-onMounted(() => {
-  loadRooms();
+const showCreateRoomModal = ref(false);
+const createRoomModalForm = reactive({
+   title: "",
+   code: "",
+   autoGenerateCode: true,
+   maxStudents: 10,
 });
-
-const loadRooms = () => {
-  rooms.value = JSON.parse(localStorage.getItem("rooms") || "[]");
-};
-
-const deleteRoom = (id: string) => {
-  if (confirm("Are you sure you want to delete this room?")) {
-    rooms.value = rooms.value.filter((r) => r.id !== id);
-    localStorage.setItem("rooms", JSON.stringify(rooms.value));
-    loadRooms();
-  }
-};
 </script>
