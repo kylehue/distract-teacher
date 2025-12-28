@@ -1,19 +1,13 @@
 <template>
    <!-- Main -->
    <Layout title="Rooms">
-      <NGrid :x-gap="16" :y-gap="16" cols="1 m:2 l:3 xl:4" responsive="screen">
-         <NGridItem v-for="i in 10" :key="i">
-            <RoomItem
-               :title="'Test Room ' + i"
-               :code="'test' + i"
-               :students="5"
-               :max-students="10"
-               :date-created="'2024-06-01'"
-               :time="'10:00 AM - 11:30 AM'"
-               :status="Math.random() > 0.5 ? 'ongoing' : 'concluded'"
-            />
-         </NGridItem>
-      </NGrid>
+      <NDataTable
+         :columns="columns"
+         :data="rooms"
+         :pagination="{ pageSize: 10 }"
+         :single-line="false"
+         :loading="isLoadRoomsDataLoading"
+      />
       <template #header-extra>
          <div class="flex flex-row gap-2">
             <NInput placeholder="Search Rooms">
@@ -38,24 +32,37 @@
          class="w-[420px]!"
       >
          <NForm>
-            <NFormItem label="Room Title">
+            <NFormItem
+               label="Room Title"
+               :validation-status="createRoomModalForm.titleStatus"
+               :feedback="createRoomModalForm.titleFeedback"
+            >
                <NInput
                   v-model:value="createRoomModalForm.title"
                   placeholder="Enter the room title"
+                  :disabled="isCreateRoomLoading"
                />
             </NFormItem>
 
-            <NFormItem label="Room Code">
+            <NFormItem
+               label="Room Code"
+               :validation-status="createRoomModalForm.codeStatus"
+               :feedback="createRoomModalForm.codeFeedback"
+            >
                <div class="flex flex-col gap-1 w-full">
                   <NInput
                      v-model:value="createRoomModalForm.code"
                      placeholder="Enter the room code"
-                     :disabled="createRoomModalForm.autoGenerateCode"
+                     :disabled="
+                        createRoomModalForm.autoGenerateCode ||
+                        isCreateRoomLoading
+                     "
                   />
                   <NCheckbox
                      class="w-fit"
                      v-model:checked="createRoomModalForm.autoGenerateCode"
                      size="small"
+                     :disabled="isCreateRoomLoading"
                   >
                      <NText depth="3" class="text-xs">
                         Auto-generate room code
@@ -64,49 +71,230 @@
                </div>
             </NFormItem>
 
-            <NFormItem label="Max Students">
+            <NFormItem
+               label="Student Capacity"
+               :validation-status="createRoomModalForm.studentCapacityStatus"
+               :feedback="createRoomModalForm.studentCapacityFeedback"
+            >
                <NInputNumber
-                  v-model:value="createRoomModalForm.maxStudents"
+                  v-model:value="createRoomModalForm.studentCapacity"
                   placeholder="Enter the max number of students"
                   class="w-full"
+                  :disabled="isCreateRoomLoading"
+                  :min="0"
                />
             </NFormItem>
 
-            <NButton type="primary" block> Create </NButton>
+            <NButton
+               type="primary"
+               block
+               class="mt-2!"
+               :loading="isCreateRoomLoading"
+               @click="createRoom()"
+            >
+               Create
+            </NButton>
          </NForm>
       </NCard>
    </NModal>
 </template>
 
 <script setup lang="ts">
+import { useSocket } from "@/app/composables/use-socket";
 import Layout from "./layout.vue";
-import RoomItem from "@/app/components/room-item.vue";
-import {
-   PhArrowsClockwise,
-   PhMagnifyingGlass,
-   PhPlus,
-} from "@phosphor-icons/vue";
+import { PhCopy, PhMagnifyingGlass, PhPlus } from "@phosphor-icons/vue";
 import {
    NButton,
-   NGrid,
-   NGridItem,
+   NDataTable,
    NModal,
    NCard,
    NForm,
    NFormItem,
    NInput,
    NInputNumber,
-   NTooltip,
    NCheckbox,
    NText,
+   DataTableColumns,
+   useMessage,
 } from "naive-ui";
-import { reactive, ref } from "vue";
+import { computed, h, onMounted, reactive, ref, watch } from "vue";
+import { RoomInfo } from "@/lib/typings";
+import { RouterLink } from "vue-router";
+import { useSocketEvent } from "@/app/composables/use-socket.event";
 
+const message = useMessage();
 const showCreateRoomModal = ref(false);
 const createRoomModalForm = reactive({
    title: "",
    code: "",
+   studentCapacity: 10,
    autoGenerateCode: true,
-   maxStudents: 10,
+   titleFeedback: "",
+   codeFeedback: "",
+   studentCapacityFeedback: "",
+   titleStatus: "success" as "success" | "error",
+   codeStatus: "success" as "success" | "error",
+   studentCapacityStatus: "success" as "success" | "error",
+});
+
+const columns: DataTableColumns<RoomInfo> = [
+   {
+      title: "Title",
+      key: "title",
+      ellipsis: { tooltip: { placement: "bottom" } },
+   },
+   {
+      title: "Code",
+      key: "code",
+      render(row) {
+         return h(
+            NButton,
+            {
+               size: "small",
+               quaternary: true,
+               onClick: () => {
+                  navigator.clipboard.writeText(row.code);
+                  message.success("Room code copied to clipboard!");
+               },
+            },
+            {
+               default: () => h("code", row.code),
+               icon: () => h(PhCopy),
+            }
+         );
+      },
+      ellipsis: { tooltip: { placement: "bottom" } },
+      align: "center",
+   },
+   {
+      title: "Students",
+      key: "students",
+      render(row) {
+         return `${row.studentCount} / ${row.studentCapacity}`;
+      },
+   },
+   {
+      title: "Status",
+      key: "status",
+      render(row) {
+         let color: "error" | "success" = "error";
+         if (row.status !== "concluded") color = "success";
+         return h(
+            NText,
+            { type: color },
+            {
+               default: () =>
+                  row.status !== "concluded" ? "Ongoing" : "Concluded",
+            }
+         );
+      },
+   },
+   {
+      title: "Time Started",
+      key: "timeStarted",
+      render(row) {
+         if (!row.timeStarted) return "N/A";
+         const date = new Date(row.timeStarted);
+         return date.toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+         });
+      },
+   },
+   {
+      title: "Time Ended",
+      key: "timeEnded",
+      render(row) {
+         if (!row.timeEnded) return "N/A";
+         const date = new Date(row.timeEnded);
+         return date.toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+         });
+      },
+   },
+   {
+      title: "Date Created",
+      key: "dateCreated",
+      render(row) {
+         const date = new Date(row.createdAt);
+         return date.toLocaleDateString();
+      },
+   },
+   {
+      title: "Actions",
+      key: "actions",
+      render(row) {
+         return h(RouterLink, { to: "/dashboard/rooms/" + row.id }, () =>
+            h(NButton, { size: "small" }, { default: () => "View Room" })
+         );
+      },
+   },
+];
+
+const { execute: createRoom, isLoading: isCreateRoomLoading } = useSocketEvent({
+   successEvent: "teacher:create_room_success",
+   errorEvent: "teacher:create_room_error",
+   executeEvent: "teacher:create_room",
+   onBeforeExecute() {
+      createRoomModalForm.titleFeedback = "";
+      createRoomModalForm.codeFeedback = "";
+      createRoomModalForm.studentCapacityFeedback = "";
+      createRoomModalForm.titleStatus = "success";
+      createRoomModalForm.codeStatus = "success";
+      createRoomModalForm.studentCapacityStatus = "success";
+      return true;
+   },
+   onSuccess(data) {
+      rooms.value.unshift(data.room);
+      showCreateRoomModal.value = false;
+      createRoomModalForm.title = "";
+      createRoomModalForm.code = "";
+      createRoomModalForm.studentCapacity = 10;
+      createRoomModalForm.autoGenerateCode = true;
+      message.success("Room created successfully!");
+   },
+   onError(errorData) {
+      const fieldErrors = errorData.fieldErrors;
+      if (fieldErrors.title) {
+         createRoomModalForm.titleStatus = "error";
+         createRoomModalForm.titleFeedback = fieldErrors.title;
+      }
+      if (fieldErrors.code) {
+         createRoomModalForm.codeStatus = "error";
+         createRoomModalForm.codeFeedback = fieldErrors.code;
+      }
+      if (fieldErrors.studentCapacity) {
+         createRoomModalForm.studentCapacityStatus = "error";
+         createRoomModalForm.studentCapacityFeedback =
+            fieldErrors.studentCapacity;
+      }
+   },
+   executePayload: () => ({
+      title: createRoomModalForm.title,
+      code: createRoomModalForm.code,
+      autoGenerateCode: createRoomModalForm.autoGenerateCode,
+      studentCapacity: createRoomModalForm.studentCapacity,
+   }),
+});
+
+const { data: loadRoomsData, isLoading: isLoadRoomsDataLoading } =
+   useSocketEvent<{
+      rooms: RoomInfo[];
+   }>({
+      successEvent: "teacher:load_rooms_success",
+      errorEvent: "teacher:load_rooms_error",
+      executeEvent: "teacher:load_rooms",
+      executeImmediately: true,
+   });
+
+const rooms = ref<RoomInfo[]>([]);
+
+watch(loadRoomsData, (newVal) => {
+   if (newVal) {
+      rooms.value = newVal.rooms.sort(
+         (a: RoomInfo, b: RoomInfo) => b.createdAt - a.createdAt
+      );
+   }
 });
 </script>

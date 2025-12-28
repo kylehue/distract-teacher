@@ -1,6 +1,4 @@
-<template>
-   <Layout> general room info goes here </Layout>
-</template>
+<template>general room info goes here</template>
 
 <script setup lang="ts">
 import { NButton } from "naive-ui";

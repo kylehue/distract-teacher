@@ -6,7 +6,7 @@
          theme === 'light' ? lightThemeOverrides : darkThemeOverrides
       "
    >
-      <NMessageProvider>
+      <NMessageProvider placement="bottom-left" closable keep-alive-on-hover>
          <RouterView />
       </NMessageProvider>
       <NGlobalStyle />
@@ -22,7 +22,7 @@ import {
    darkTheme,
    NMessageProvider,
 } from "naive-ui";
-import { ref, watchEffect } from "vue";
+import { KeepAlive, ref, watchEffect } from "vue";
 import { RouterView } from "vue-router";
 import { darkThemeOverrides, lightThemeOverrides } from "@/lib/theme-overrides";
 

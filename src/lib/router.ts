@@ -10,6 +10,8 @@ import RoomOverviewPage from "@/app/pages/dashboard/room/overview.vue";
 import RoomSettingsPage from "@/app/pages/dashboard/room/settings.vue";
 import RoomStudentsPage from "@/app/pages/dashboard/room/students.vue";
 import RoomMonitoringPage from "@/app/pages/dashboard/room/monitoring.vue";
+import UnauthorizedPage from "@/app/pages/unauthorized.vue";
+import RoomLayout from "@/app/pages/dashboard/room/layout.vue";
 
 const routes: RouteRecordRaw[] = [
    { path: "/", redirect: "/login" },
@@ -19,16 +21,17 @@ const routes: RouteRecordRaw[] = [
    {
       path: "/dashboard",
       children: [
-         { path: "", redirect: "overview" },
+         { path: "", redirect: "/dashboard/overview" },
          { path: "overview", component: DashboardOverviewPage },
          { path: "rooms", component: DashboardRoomsPage },
          { path: "reports", component: DashboardReportsPage },
-         { path: "records/:id", component: DashboardRecordPage },
+         { path: "records/:recordId", component: DashboardRecordPage },
 
          {
-            path: "rooms/:id",
+            path: "rooms/:roomId",
+            component: RoomLayout,
             redirect: (to) => ({
-               path: `/dashboard/rooms/${to.params.id}/overview`,
+               path: `/dashboard/rooms/${to.params.roomId}/overview`,
             }),
             children: [
                { path: "overview", component: RoomOverviewPage },
@@ -39,6 +42,7 @@ const routes: RouteRecordRaw[] = [
          },
       ],
    },
+   { path: "/unauthorized", component: UnauthorizedPage },
 ];
 
 const router = createRouter({

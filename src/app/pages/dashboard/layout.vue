@@ -10,16 +10,32 @@
                :accordion="true"
             />
 
-            <NButton type="tertiary" class="mt-auto!" block> Logout </NButton>
+            <NButton
+               type="tertiary"
+               class="mt-auto!"
+               block
+               @click="logout"
+               :loading="isLogoutLoading"
+            >
+               Logout
+            </NButton>
          </div>
       </NLayoutSider>
 
       <!-- Main Content Area -->
       <NLayout>
-         <NLayoutContent content-class="flex flex-col gap-8 p-8">
+         <NLayoutContent
+            class="w-full h-full"
+            content-class="flex flex-col gap-8 p-8"
+         >
             <div class="flex flex-row items-center justify-between">
-               <NText strong class="text-lg">{{ title }}</NText>
-               <div class="flex">
+               <div class="flex items-center">
+                  <NText v-if="!!title" strong class="text-lg">
+                     {{ title }}
+                  </NText>
+                  <slot name="header"></slot>
+               </div>
+               <div class="flex items-center">
                   <slot name="header-extra"></slot>
                </div>
             </div>
@@ -33,8 +49,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, h } from "vue";
-import { useRouter, useRoute } from "vue-router";
+import { computed, h, onMounted, ref } from "vue";
+import { useRouter, useRoute, RouterLink } from "vue-router";
 import {
    NLayout,
    NLayoutSider,
@@ -47,32 +63,78 @@ import {
 import { MenuMixedOption } from "naive-ui/es/menu/src/interface";
 import { PhChartBar, PhHouse, PhVideoConference } from "@phosphor-icons/vue";
 import { renderIcon } from "@/lib/ui";
+import { useSocket } from "@/app/composables/use-socket";
+import { isUrlRelatedToParent } from "@/lib/url";
 
 const props = defineProps<{
-   title: string;
+   title?: string;
    noDivider?: boolean;
 }>();
 
 const router = useRouter();
 const route = useRoute();
+const socket = useSocket();
+const isLogoutLoading = ref(false);
 
 const menuOptions: MenuMixedOption[] = [
    {
-      label: "Overview",
+      label: () =>
+         h(
+            RouterLink,
+            { to: "/dashboard/overview" },
+            { default: () => "Overview" }
+         ),
       key: "/dashboard/overview",
       icon: renderIcon(PhHouse),
    },
    {
-      label: "Rooms",
+      label: () =>
+         h(RouterLink, { to: "/dashboard/rooms" }, { default: () => "Rooms" }),
       key: "/dashboard/rooms",
       icon: renderIcon(PhVideoConference),
    },
    {
-      label: "Student Reports",
+      label: () =>
+         h(
+            RouterLink,
+            { to: "/dashboard/reports" },
+            {
+               default: () => "Student Reports",
+            }
+         ),
       key: "/dashboard/reports",
       icon: renderIcon(PhChartBar),
    },
 ];
 
-const activeKey = computed(() => route.path);
+const activeKey = computed(() => {
+   const path = route.path;
+
+   if (isUrlRelatedToParent(path, "/dashboard/rooms")) {
+      return "/dashboard/rooms";
+   }
+
+   if (isUrlRelatedToParent(path, "/dashboard/reports")) {
+      return "/dashboard/reports";
+   }
+
+   if (isUrlRelatedToParent(path, "/dashboard/overview")) {
+      return "/dashboard/overview";
+   }
+
+   return path;
+});
+
+function logout() {
+   isLogoutLoading.value = true;
+   socket.emit("teacher:logout", {});
+}
+
+socket.on("teacher:logout_success", () => {
+   isLogoutLoading.value = false;
+});
+
+onMounted(() => {
+   socket.emit("teacher:validate_session", { kickOnInvalid: true });
+});
 </script>

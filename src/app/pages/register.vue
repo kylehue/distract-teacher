@@ -2,34 +2,58 @@
    <div class="flex items-center justify-center h-screen">
       <NCard class="flex w-[420px]!" title="Register">
          <NForm>
-            <NFormItem label="Username">
+            <NFormItem
+               label="Username"
+               :validation-status="usernameStatus"
+               :feedback="usernameFeedback"
+            >
                <NInput
                   v-model:value="username"
                   placeholder="Enter your username"
+                  :disabled="isLoading"
                />
             </NFormItem>
 
-            <NFormItem label="Password">
+            <NFormItem
+               label="Password"
+               :validation-status="password1Status"
+               :feedback="password1Feedback"
+            >
                <NInput
                   v-model:value="password1"
                   type="password"
                   placeholder="Enter your password"
+                  :disabled="isLoading"
                />
             </NFormItem>
 
-            <NFormItem label="Confirm Password">
+            <NFormItem
+               label="Confirm Password"
+               :validation-status="password2Status"
+               :feedback="password2Feedback"
+            >
                <NInput
                   v-model:value="password2"
                   type="password"
                   placeholder="Enter your password again"
+                  :disabled="isLoading"
                />
             </NFormItem>
 
-            <div class="flex flex-col items-start gap-4">
-               <NButton type="primary" block> Register </NButton>
-               <NButton type="tertiary" text block>
-                  Already have an account? Login
+            <div class="flex flex-col items-center gap-4 mt-2">
+               <NButton
+                  type="primary"
+                  block
+                  :loading="isLoading"
+                  @click="register"
+               >
+                  Register
                </NButton>
+               <RouterLink to="/login">
+                  <NButton type="tertiary" text>
+                     Already have an account? Login
+                  </NButton>
+               </RouterLink>
             </div>
          </NForm>
       </NCard>
@@ -39,10 +63,60 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { NCard, NForm, NFormItem, NInput, NButton } from "naive-ui";
+import { useSocket } from "../composables/use-socket";
+import { useRouter, RouterLink } from "vue-router";
 
+const socket = useSocket();
+const router = useRouter();
 const username = ref("");
 const password1 = ref("");
 const password2 = ref("");
+const usernameStatus = ref<"success" | "error">("success");
+const password1Status = ref<"success" | "error">("success");
+const password2Status = ref<"success" | "error">("success");
+const usernameFeedback = ref("");
+const password1Feedback = ref("");
+const password2Feedback = ref("");
+const isLoading = ref(false);
+
+function register() {
+   isLoading.value = true;
+   usernameStatus.value = "success";
+   password1Status.value = "success";
+   password2Status.value = "success";
+   usernameFeedback.value = "";
+   password1Feedback.value = "";
+   password2Feedback.value = "";
+   socket.emit("teacher:register", {
+      username: username.value,
+      password1: password1.value,
+      password2: password2.value,
+   });
+}
+
+socket.on("teacher:register_success", () => {
+   isLoading.value = false;
+   alert("Registration successful!");
+   router.push("/login");
+});
+
+socket.on("teacher:register_error", (data) => {
+   isLoading.value = false;
+
+   const fieldErrors = data.fieldErrors;
+   if (fieldErrors.username) {
+      usernameStatus.value = "error";
+      usernameFeedback.value = fieldErrors.username;
+   }
+   if (fieldErrors.password1) {
+      password1Status.value = "error";
+      password1Feedback.value = fieldErrors.password1;
+   }
+   if (fieldErrors.password2) {
+      password2Status.value = "error";
+      password2Feedback.value = fieldErrors.password2;
+   }
+});
 </script>
 
 <style scoped></style>
