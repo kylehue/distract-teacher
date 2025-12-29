@@ -121,6 +121,7 @@ import { computed, h, onMounted, reactive, ref, watch } from "vue";
 import { RoomInfo } from "@/lib/typings";
 import { RouterLink } from "vue-router";
 import { useSocketEvent } from "@/app/composables/use-socket.event";
+import CopyButton from "@/app/components/copy-button.vue";
 
 const message = useMessage();
 const showCreateRoomModal = ref(false);
@@ -147,21 +148,12 @@ const columns: DataTableColumns<RoomInfo> = [
       title: "Code",
       key: "code",
       render(row) {
-         return h(
-            NButton,
-            {
-               size: "small",
-               quaternary: true,
-               onClick: () => {
-                  navigator.clipboard.writeText(row.code);
-                  message.success("Room code copied to clipboard!");
-               },
-            },
-            {
-               default: () => h("code", row.code),
-               icon: () => h(PhCopy),
-            }
-         );
+         return h(CopyButton, {
+            textToCopy: row.code,
+            size: "small",
+            quaternary: true,
+            textClass: "font-mono",
+         });
       },
       ellipsis: { tooltip: { placement: "bottom" } },
       align: "center",

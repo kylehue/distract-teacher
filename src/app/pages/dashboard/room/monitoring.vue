@@ -64,6 +64,7 @@ import { useRoute } from "vue-router";
 import { renderIcon } from "@/lib/ui";
 import { useSocketEvent } from "@/app/composables/use-socket.event";
 import { roomInfo } from "./store";
+import { useSocket } from "@/app/composables/use-socket";
 
 const route = useRoute();
 const message = useMessage();
@@ -167,4 +168,12 @@ const { execute: stopMonitoring, isLoading: isStopMonitoringLoading } =
          );
       },
    });
+
+const socket = useSocket();
+socket.on("teacher:monitoring_data", (data) => {
+   console.log(data.monitoringData);
+   console.log("Integrity Score:", data.monitoringData.integrityScore);
+   console.log("RF:", data.monitoringData.rfScoreAvg);
+   console.log("IF:", data.monitoringData.ifScoreAvg);
+});
 </script>

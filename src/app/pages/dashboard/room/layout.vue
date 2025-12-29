@@ -59,6 +59,7 @@ import { useSocket } from "@/app/composables/use-socket";
 import { RoomInfo, RoomStudentInfo } from "@/lib/typings";
 import { useSocketEvent } from "@/app/composables/use-socket.event";
 import { roomInfo, studentInfos } from "./store";
+import CopyButton from "@/app/components/copy-button.vue";
 
 const router = useRouter();
 const route = useRoute();
@@ -72,10 +73,9 @@ const tabs = [
 ];
 const activeKey = computed(() => route.path.split("/").pop() || "overview");
 
-const { data: loadRoomData, isLoading: isRoomLoading } = useSocketEvent<
-   { room: RoomInfo },
-   { room: RoomInfo }
->({
+const { data: loadRoomData, isLoading: isRoomLoading } = useSocketEvent<{
+   room: RoomInfo;
+}>({
    successEvent: "teacher:load_room_success",
    errorEvent: "teacher:load_room_error",
    executeEvent: "teacher:load_room",
