@@ -1,8 +1,8 @@
-export interface MonitoringRecord {
+export interface MonitorLog {
    id: string | number;
-   studentName: string;
+   studentId: string | number;
    warningLevel: WarningLevel;
-   time: number;
+   createdAt: number;
 }
 
 export type WarningLevel = "low" | "moderate" | "severe";
@@ -29,4 +29,5 @@ export interface RoomStudentInfo {
    timeJoined: number;
    timeLeft?: number;
    active: boolean;
+   createdAt: number;
 }

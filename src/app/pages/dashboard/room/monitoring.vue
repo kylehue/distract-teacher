@@ -41,7 +41,7 @@
       </div>
       <NDataTable
          :columns="columns"
-         :data="data"
+         :data="sortedMonitorLogs"
          :pagination="{ pageSize: 10 }"
          :single-line="false"
       />
@@ -57,22 +57,30 @@ import {
    useMessage,
 } from "naive-ui";
 import Layout from "./layout.vue";
-import { h, ref } from "vue";
-import { MonitoringRecord } from "@/lib/typings";
+import { computed, h, ref, watch } from "vue";
+import { MonitorLog } from "@/lib/typings";
 import { PhPause, PhPlay, PhStop } from "@phosphor-icons/vue";
 import { useRoute } from "vue-router";
 import { renderIcon } from "@/lib/ui";
 import { useSocketEvent } from "@/app/composables/use-socket.event";
-import { roomInfo } from "./store";
+import { roomInfo, studentInfos, monitorLogs } from "./store";
 import { useSocket } from "@/app/composables/use-socket";
+import { createMappingById } from "@/lib/object";
 
 const route = useRoute();
 const message = useMessage();
 
-const columns: DataTableColumns<MonitoringRecord> = [
+const columns: DataTableColumns<MonitorLog> = [
    {
       title: "Student Name",
       key: "studentName",
+      render(row) {
+         // console.log(studentInfos);
+         
+         return (
+            studentInfos.value.get(row.studentId)?.studentName || "<unnamed>"
+         );
+      },
    },
    {
       title: "Warning Level",
@@ -81,14 +89,18 @@ const columns: DataTableColumns<MonitoringRecord> = [
          let color: "default" | "warning" | "error" = "default";
          if (row.warningLevel === "moderate") color = "warning";
          else if (row.warningLevel === "severe") color = "error";
-         return h(NTag, { type: color }, { default: () => row.warningLevel });
+         return h(
+            NTag,
+            { type: color, round: true },
+            { default: () => row.warningLevel }
+         );
       },
    },
    {
       title: "Time",
       key: "time",
       render(row) {
-         const date = new Date(row.time);
+         const date = new Date(row.createdAt);
          return date.toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
@@ -110,8 +122,6 @@ const columns: DataTableColumns<MonitoringRecord> = [
       },
    },
 ];
-
-const data = ref<MonitoringRecord[]>([]);
 
 const { execute: startMonitoring, isLoading: isStartMonitoringLoading } =
    useSocketEvent({
@@ -169,11 +179,10 @@ const { execute: stopMonitoring, isLoading: isStopMonitoringLoading } =
       },
    });
 
-const socket = useSocket();
-socket.on("teacher:monitoring_data", (data) => {
-   console.log(data.monitoringData);
-   console.log("Integrity Score:", data.monitoringData.integrityScore);
-   console.log("RF:", data.monitoringData.rfScoreAvg);
-   console.log("IF:", data.monitoringData.ifScoreAvg);
-});
+// sorted by newest to oldest
+const sortedMonitorLogs = computed(() =>
+   Array.from(monitorLogs.value.values()).sort(
+      (a, b) => b.createdAt - a.createdAt
+   )
+);
 </script>

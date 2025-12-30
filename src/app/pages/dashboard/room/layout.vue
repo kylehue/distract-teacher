@@ -56,10 +56,10 @@ import { useRouter, useRoute, RouterLink, RouterView } from "vue-router";
 import { renderIcon } from "@/lib/ui";
 import { PhGear, PhHouse, PhUserFocus, PhUsers } from "@phosphor-icons/vue";
 import { useSocket } from "@/app/composables/use-socket";
-import { RoomInfo, RoomStudentInfo } from "@/lib/typings";
+import { MonitorLog, RoomInfo, RoomStudentInfo } from "@/lib/typings";
 import { useSocketEvent } from "@/app/composables/use-socket.event";
-import { roomInfo, studentInfos } from "./store";
-import CopyButton from "@/app/components/copy-button.vue";
+import { roomInfo, studentInfos, monitorLogs } from "./store";
+import { createMappingById } from "@/lib/object";
 
 const router = useRouter();
 const route = useRoute();
@@ -73,8 +73,11 @@ const tabs = [
 ];
 const activeKey = computed(() => route.path.split("/").pop() || "overview");
 
+// initial load update
 const { data: loadRoomData, isLoading: isRoomLoading } = useSocketEvent<{
    room: RoomInfo;
+   students: RoomStudentInfo[];
+   monitorLogs: MonitorLog[];
 }>({
    successEvent: "teacher:load_room_success",
    errorEvent: "teacher:load_room_error",
@@ -83,20 +86,37 @@ const { data: loadRoomData, isLoading: isRoomLoading } = useSocketEvent<{
    executeImmediately: true,
 });
 
-watch(loadRoomData, (newVal) => {
-   roomInfo.value = newVal?.room ?? null;
+watch(loadRoomData, (data) => {
+   roomInfo.value = data?.room ?? null;
+   studentInfos.value = createMappingById(data?.students ?? []);
+   monitorLogs.value = createMappingById(data?.monitorLogs ?? []);
 });
 
-socket.on("teacher:room_update", (data) => {
+// real-time updates
+socket.on("teacher:update_room", (data) => {
    const room = data.room as RoomInfo;
-   const students = data.students as RoomStudentInfo[];
-
    roomInfo.value = room;
-   studentInfos.value = students;
 });
 
+socket.on("teacher:create_student", (data) => {
+   const student = data.student as RoomStudentInfo;
+   studentInfos.value.set(student.id, student);
+});
+
+socket.on("teacher:update_student", (data) => {
+   const student = data.student as RoomStudentInfo;
+   studentInfos.value.set(student.id, student);
+});
+
+socket.on("teacher:create_monitor_log", (data) => {
+   console.table(data.monitorLog);
+   monitorLogs.value.set(data.monitorLog.id, data.monitorLog);
+});
+
+// reset store on unmount
 onUnmounted(() => {
    roomInfo.value = null;
-   studentInfos.value = [];
+   studentInfos.value = new Map();
+   monitorLogs.value = new Map();
 });
 </script>

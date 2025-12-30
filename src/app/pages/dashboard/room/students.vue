@@ -13,7 +13,6 @@
          :pagination="{ pageSize: 10 }"
          :single-line="false"
          :row-class-name="(row) => (!row.active ? 'opacity-50' : '')"
-         :loading="isLoadRoomStudentsDataLoading"
       />
    </div>
 </template>
@@ -27,13 +26,10 @@ import {
    NInput,
    NText,
 } from "naive-ui";
-import Layout from "./layout.vue";
 import { computed, h, watch } from "vue";
 import { RoomInfo, RoomStudentInfo } from "@/lib/typings";
 import { PhMagnifyingGlass } from "@phosphor-icons/vue";
-import { useSocket } from "@/app/composables/use-socket";
 import { studentInfos } from "./store";
-import { useSocketEvent } from "@/app/composables/use-socket.event";
 import { useRoute } from "vue-router";
 
 const route = useRoute();
@@ -108,21 +104,8 @@ const columns: DataTableColumns<RoomStudentInfo> = [
    },
 ];
 
-const { data: loadRoomStudentsData, isLoading: isLoadRoomStudentsDataLoading } =
-   useSocketEvent<{ students: RoomStudentInfo[] }>({
-      successEvent: "teacher:load_room_students_success",
-      errorEvent: "teacher:load_room_students_error",
-      executeEvent: "teacher:load_room_students",
-      executePayload: { roomId: route.params.roomId },
-      executeImmediately: true,
-   });
-
-watch(loadRoomStudentsData, (newVal) => {
-   studentInfos.value = newVal?.students ?? [];
-});
-
 const sortedStudentInfos = computed(() =>
-   studentInfos.value.sort((a, b) => {
+   Array.from(studentInfos.value.values()).sort((a, b) => {
       // first sort by active (inactives go last)
       if (a.active !== b.active) return a.active ? -1 : 1;
       // then sort by studentName
