@@ -1,14 +1,19 @@
-import { inject, onBeforeUnmount, unref } from "vue";
+import { inject, onUnmounted, unref } from "vue";
 import { getSocket } from "@/plugins/socket";
 
 export function useSocket() {
    const socket = getSocket();
    const sessionToken = inject<string | null>("sessionToken");
 
-   function on(event: string, handler: (data: Record<any, any>) => void) {
+   function on(
+      event: string,
+      handler: (data: Record<any, any>) => void,
+      { autoClean = true } = {}
+   ) {
       socket.on(event, handler);
-      // auto-clean on component unmount
-      onBeforeUnmount(() => socket.off(event, handler));
+      if (autoClean) {
+         onUnmounted(() => socket.off(event, handler));
+      }
 
       // dev logging
       if (process.env.NODE_ENV === "development") {
@@ -16,7 +21,9 @@ export function useSocket() {
             console.log(`SERVER -> CLIENT (${event}):\n`, args);
          };
          socket.on(event, _test_handler_);
-         onBeforeUnmount(() => socket.off(event, _test_handler_));
+         if (autoClean) {
+            onUnmounted(() => socket.off(event, _test_handler_));
+         }
       }
    }
 

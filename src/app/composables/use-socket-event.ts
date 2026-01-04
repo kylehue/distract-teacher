@@ -10,6 +10,7 @@ interface UseSocketEventOptions<T = any, E = any> {
    onSuccess?: (data: T) => void;
    onError?: (errorData: E) => void;
    onBeforeExecute?: (payload?: any) => boolean;
+   autoClean?: boolean;
 }
 
 export function useSocketEvent<T = any, E = any>(
@@ -28,7 +29,7 @@ export function useSocketEvent<T = any, E = any>(
          return options.executePayload();
       }
       return options.executePayload;
-   }
+   };
 
    const execute = (payload?: any): Promise<T> => {
       if (typeof options.onBeforeExecute === "function") {
@@ -51,27 +52,39 @@ export function useSocketEvent<T = any, E = any>(
    };
 
    // success handler
-   on(options.successEvent, (payload: T) => {
-      isLoading.value = false;
-      data.value = payload;
+   on(
+      options.successEvent,
+      (payload: T) => {
+         isLoading.value = false;
+         data.value = payload;
 
-      options.onSuccess?.(payload);
-      resolvePromise?.(payload);
-      resolvePromise = null;
-      rejectPromise = null;
-   });
+         options.onSuccess?.(payload);
+         resolvePromise?.(payload);
+         resolvePromise = null;
+         rejectPromise = null;
+      },
+      {
+         autoClean: options.autoClean,
+      }
+   );
 
    // error handler (optional)
    if (options.errorEvent) {
-      on(options.errorEvent, (payload: E) => {
-         isLoading.value = false;
-         errorData.value = payload;
+      on(
+         options.errorEvent,
+         (payload: E) => {
+            isLoading.value = false;
+            errorData.value = payload;
 
-         options.onError?.(payload);
-         rejectPromise?.(payload);
-         resolvePromise = null;
-         rejectPromise = null;
-      });
+            options.onError?.(payload);
+            rejectPromise?.(payload);
+            resolvePromise = null;
+            rejectPromise = null;
+         },
+         {
+            autoClean: options.autoClean,
+         }
+      );
    }
 
    // execute immediately if requested

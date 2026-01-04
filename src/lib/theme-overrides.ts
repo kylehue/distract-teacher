@@ -18,6 +18,10 @@ const baseThemeOverrides: GlobalThemeOverrides = {
       feedbackHeightMedium: "1.5em",
       feedbackHeightLarge: "1.7em",
    },
+   DataTable: {
+      thColorSorting: "transparent",
+      tdColorSorting: "transparent",
+   },
 };
 
 export const lightThemeOverrides: GlobalThemeOverrides = {

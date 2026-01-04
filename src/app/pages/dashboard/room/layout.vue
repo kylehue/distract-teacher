@@ -1,15 +1,15 @@
 <template>
    <Layout no-divider>
-      <template v-if="!!roomInfo" #header>
+      <template v-if="!!room" #header>
          <div class="flex items-center gap-2">
             <NText strong class="text-lg">
-               {{ roomInfo.title }}
+               {{ room.title }}
             </NText>
             <NTag
-               :type="roomInfo.status !== 'concluded' ? 'success' : 'error'"
+               :type="room.status !== 'concluded' ? 'success' : 'error'"
                round
             >
-               {{ roomInfo.status !== "concluded" ? "Ongoing" : "Concluded" }}
+               {{ room.status !== "concluded" ? "Ongoing" : "Concluded" }}
             </NTag>
          </div>
       </template>
@@ -18,11 +18,8 @@
             <NButton text>Back To Rooms</NButton>
          </RouterLink>
       </template>
-      <div
-         v-if="!roomInfo"
-         class="flex items-center justify-center w-full h-full"
-      >
-         <div v-if="isRoomLoading" class="flex gap-2 items-center">
+      <div v-if="!room" class="flex items-center justify-center w-full h-full">
+         <div v-if="store.isLoadRoomLoading" class="flex gap-2 items-center">
             <NSpin></NSpin>
             <NText>Loading...</NText>
          </div>
@@ -51,20 +48,19 @@
 <script setup lang="ts">
 import { NButton, NTabs, NTab, NSpin, NText, NTag } from "naive-ui";
 import Layout from "../layout.vue";
-import { computed, watch, onMounted, ref, onUnmounted } from "vue";
+import { computed, onMounted } from "vue";
 import { useRouter, useRoute, RouterLink, RouterView } from "vue-router";
 import { renderIcon } from "@/lib/ui";
 import { PhGear, PhHouse, PhUserFocus, PhUsers } from "@phosphor-icons/vue";
-import { useSocket } from "@/app/composables/use-socket";
-import { MonitorLog, RoomInfo, RoomStudentInfo } from "@/lib/typings";
-import { useSocketEvent } from "@/app/composables/use-socket.event";
-import { roomInfo, studentInfos, monitorLogs } from "./store";
-import { createMappingById } from "@/lib/object";
+import { useStore } from "@/app/composables/use-store";
 
 const router = useRouter();
 const route = useRoute();
-const socket = useSocket();
+const store = useStore();
 
+const room = computed(() =>
+   store.allRooms.get(Number(route.params.roomId as string))
+);
 const tabs = [
    { name: "Overview", key: "overview", icon: renderIcon(PhHouse) },
    { name: "Monitoring", key: "monitoring", icon: renderIcon(PhUserFocus) },
@@ -73,50 +69,7 @@ const tabs = [
 ];
 const activeKey = computed(() => route.path.split("/").pop() || "overview");
 
-// initial load update
-const { data: loadRoomData, isLoading: isRoomLoading } = useSocketEvent<{
-   room: RoomInfo;
-   students: RoomStudentInfo[];
-   monitorLogs: MonitorLog[];
-}>({
-   successEvent: "teacher:load_room_success",
-   errorEvent: "teacher:load_room_error",
-   executeEvent: "teacher:load_room",
-   executePayload: { roomId: route.params.roomId },
-   executeImmediately: true,
-});
-
-watch(loadRoomData, (data) => {
-   roomInfo.value = data?.room ?? null;
-   studentInfos.value = createMappingById(data?.students ?? []);
-   monitorLogs.value = createMappingById(data?.monitorLogs ?? []);
-});
-
-// real-time updates
-socket.on("teacher:update_room", (data) => {
-   const room = data.room as RoomInfo;
-   roomInfo.value = room;
-});
-
-socket.on("teacher:create_student", (data) => {
-   const student = data.student as RoomStudentInfo;
-   studentInfos.value.set(student.id, student);
-});
-
-socket.on("teacher:update_student", (data) => {
-   const student = data.student as RoomStudentInfo;
-   studentInfos.value.set(student.id, student);
-});
-
-socket.on("teacher:create_monitor_log", (data) => {
-   console.table(data.monitorLog);
-   monitorLogs.value.set(data.monitorLog.id, data.monitorLog);
-});
-
-// reset store on unmount
-onUnmounted(() => {
-   roomInfo.value = null;
-   studentInfos.value = new Map();
-   monitorLogs.value = new Map();
+onMounted(() => {
+   store.loadRoom(route.params.roomId as string);
 });
 </script>

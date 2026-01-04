@@ -1,15 +1,24 @@
 <template>
    <div class="flex flex-col gap-4">
       <div class="flex justify-end w-full gap-2">
-         <NInput placeholder="Search Students" class="w-fit!">
-            <template #prefix>
-               <PhMagnifyingGlass></PhMagnifyingGlass>
-            </template>
-         </NInput>
+         <InputSearch
+            :documents="studentsArray"
+            :fields="['studentName']"
+            label-field="studentName"
+            id-field="id"
+            placeholder="Search students..."
+            class="w-fit!"
+            @search="
+               (ids) => {
+                  table?.filters({ studentName: ids });
+               }
+            "
+         ></InputSearch>
       </div>
       <NDataTable
+         ref="table"
          :columns="columns"
-         :data="sortedStudentInfos"
+         :data="studentsArray"
          :pagination="{ pageSize: 10 }"
          :single-line="false"
          :row-class-name="(row) => (!row.active ? 'opacity-50' : '')"
@@ -18,21 +27,28 @@
 </template>
 
 <script setup lang="ts">
-import {
-   DataTableColumns,
-   NButton,
-   NDataTable,
-   NTag,
-   NInput,
-   NText,
-} from "naive-ui";
-import { computed, h, watch } from "vue";
-import { RoomInfo, RoomStudentInfo } from "@/lib/typings";
-import { PhMagnifyingGlass } from "@phosphor-icons/vue";
-import { studentInfos } from "./store";
-import { useRoute } from "vue-router";
+import { DataTableColumns, NButton, NDataTable, NTag, NText } from "naive-ui";
+import { computed, h, useTemplateRef } from "vue";
+import { RoomStudentInfo } from "@/lib/typings";
+import { RouterLink, useRoute } from "vue-router";
+import InputSearch from "@/app/components/input-search.vue";
+import { getWithDefault } from "@/lib/object";
+import { useStore } from "@/app/composables/use-store";
 
+const table = useTemplateRef("table");
 const route = useRoute();
+const store = useStore();
+const room = computed(() =>
+   store.allRooms.get(Number(route.params.roomId as string))
+);
+const students = computed(() =>
+   getWithDefault(
+      store.studentsGroupedByRoomId,
+      room.value?.id || "",
+      new Map() as typeof store.allStudents
+   )
+);
+const studentsArray = computed(() => Array.from(students.value.values()));
 const columns: DataTableColumns<RoomStudentInfo> = [
    {
       title: "Student Name",
@@ -50,10 +66,27 @@ const columns: DataTableColumns<RoomStudentInfo> = [
                : "",
          ]);
       },
+      sorter: {
+         compare(rowA, rowB) {
+            return rowA.studentName.localeCompare(rowB.studentName);
+         },
+         multiple: 1,
+      },
+      defaultSortOrder: "ascend",
+      filterMultiple: true,
+      filter(value, row) {
+         return value === row.id;
+      },
    },
    {
       title: "Total Logs",
       key: "totalLogs",
+      sorter: {
+         compare(rowA, rowB) {
+            return rowA.totalLogs - rowB.totalLogs;
+         },
+         multiple: 2,
+      },
    },
    {
       title: "Time Joined",
@@ -64,6 +97,14 @@ const columns: DataTableColumns<RoomStudentInfo> = [
             hour: "2-digit",
             minute: "2-digit",
          });
+      },
+      sorter: {
+         compare(rowA, rowB) {
+            const timeA = rowA.timeJoined || 0;
+            const timeB = rowB.timeJoined || 0;
+            return timeA - timeB;
+         },
+         multiple: 3,
       },
    },
    {
@@ -77,39 +118,51 @@ const columns: DataTableColumns<RoomStudentInfo> = [
             minute: "2-digit",
          });
       },
+      sorter: {
+         compare(rowA, rowB) {
+            const timeA = rowA.timeLeft || 0;
+            const timeB = rowB.timeLeft || 0;
+            return timeA - timeB;
+         },
+         multiple: 3,
+      },
    },
    {
       title: "Actions",
       key: "actions",
-      render() {
+      render(row) {
          return h("div", { class: "flex flex-col gap-2" }, [
             h(
-               NButton,
+               RouterLink,
+               { to: "" },
                {
-                  size: "small",
-                  onClick: () => {},
-               },
-               { default: () => "Reports" }
+                  default: () =>
+                     h(
+                        NButton,
+                        { size: "small" },
+                        { default: () => "Reports" }
+                     ),
+               }
             ),
             h(
-               NButton,
+               RouterLink,
                {
-                  size: "small",
-                  onClick: () => {},
+                  to: {
+                     path: "monitoring",
+                     query: { filterByStudent: row.id },
+                  },
                },
-               { default: () => "View Logs" }
+               {
+                  default: () =>
+                     h(
+                        NButton,
+                        { size: "small" },
+                        { default: () => "View Logs" }
+                     ),
+               }
             ),
          ]);
       },
    },
 ];
-
-const sortedStudentInfos = computed(() =>
-   Array.from(studentInfos.value.values()).sort((a, b) => {
-      // first sort by active (inactives go last)
-      if (a.active !== b.active) return a.active ? -1 : 1;
-      // then sort by studentName
-      return a.studentName.localeCompare(b.studentName);
-   })
-);
 </script>

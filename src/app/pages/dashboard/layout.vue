@@ -26,9 +26,9 @@
       <NLayout>
          <NLayoutContent
             class="w-full h-full"
-            content-class="flex flex-col gap-8 p-8"
+            content-class="flex flex-col p-8"
          >
-            <div class="flex flex-row items-center justify-between">
+            <div class="flex flex-row items-center justify-between mb-8">
                <div class="flex items-center">
                   <NText v-if="!!title" strong class="text-lg">
                      {{ title }}
@@ -41,7 +41,9 @@
             </div>
             <NDivider v-if="!noDivider" class="m-0!" />
             <div class="flex flex-col h-full">
+               <div class="w-full h-4 flex-none"></div>
                <slot></slot>
+               <div class="w-full h-8 flex-none"></div>
             </div>
          </NLayoutContent>
       </NLayout>

@@ -1,9 +1,9 @@
 <template>
-   <template v-if="!roomInfo">Nothing</template>
+   <template v-if="!room">Nothing</template>
    <div v-else class="flex flex-col gap-4">
       <div class="flex flex-row justify-end gap-2">
          <NButton
-            v-if="!!roomInfo.timeStarted && roomInfo.status !== 'concluded'"
+            v-if="!!room.timeStarted && room.status !== 'concluded'"
             type="error"
             tertiary
             @click="stopMonitoring()"
@@ -15,19 +15,19 @@
             </template>
          </NButton>
          <NButton
-            v-if="roomInfo.status === 'paused'"
+            v-if="room.status === 'paused'"
             type="success"
             secondary
             @click="startMonitoring()"
             :loading="isStartMonitoringLoading"
          >
-            {{ !!roomInfo.timeStarted ? "Continue" : "Start" }} Monitoring
+            {{ !!room.timeStarted ? "Continue" : "Start" }} Monitoring
             <template #icon>
                <PhPlay />
             </template>
          </NButton>
          <NButton
-            v-if="roomInfo.status === 'monitoring'"
+            v-if="room.status === 'monitoring'"
             type="warning"
             ghost
             @click="pauseMonitoring()"
@@ -41,47 +41,108 @@
       </div>
       <NDataTable
          :columns="columns"
-         :data="sortedMonitorLogs"
+         :data="Array.from(monitorLogs?.values() ?? [])"
          :pagination="{ pageSize: 10 }"
          :single-line="false"
+         :row-class-name="
+            (row) => (!students.get(row.studentId)?.active ? 'opacity-50' : '')
+         "
       />
    </div>
 </template>
 
 <script setup lang="ts">
 import {
+   DataTableBaseColumn,
    DataTableColumns,
    NButton,
    NDataTable,
    NTag,
+   NText,
    useMessage,
 } from "naive-ui";
-import Layout from "./layout.vue";
-import { computed, h, ref, watch } from "vue";
+import { computed, h, onMounted, reactive, ref, watch } from "vue";
 import { MonitorLog } from "@/lib/typings";
 import { PhPause, PhPlay, PhStop } from "@phosphor-icons/vue";
-import { useRoute } from "vue-router";
+import { RouterLink, useRoute } from "vue-router";
 import { renderIcon } from "@/lib/ui";
-import { useSocketEvent } from "@/app/composables/use-socket.event";
-import { roomInfo, studentInfos, monitorLogs } from "./store";
-import { useSocket } from "@/app/composables/use-socket";
-import { createMappingById } from "@/lib/object";
+import { useSocketEvent } from "@/app/composables/use-socket-event";
+import FilterMenuMultiselect from "@/app/components/filter-menu-multiselect.vue";
+import { useEvidence } from "@/app/composables/use-evidence";
+import { useStore } from "@/app/composables/use-store";
 
 const route = useRoute();
 const message = useMessage();
+const evidence = useEvidence();
+const store = useStore();
+const filteredStudentIds = ref<(string | number)[]>([]);
+const room = computed(() =>
+   store.allRooms.get(Number(route.params.roomId as string))
+);
+const students = computed(
+   () =>
+      store.studentsGroupedByRoomId.get(room.value?.id || "") ||
+      (new Map() as typeof store.allStudents)
+);
+const monitorLogs = computed(
+   () =>
+      store.monitorLogsGroupedByRoomId.get(room.value?.id || "") ||
+      (new Map() as typeof store.allMonitorLogs)
+);
 
 const columns: DataTableColumns<MonitorLog> = [
-   {
+   reactive({
       title: "Student Name",
       key: "studentName",
       render(row) {
-         // console.log(studentInfos);
-         
-         return (
-            studentInfos.value.get(row.studentId)?.studentName || "<unnamed>"
-         );
+         let student = students.value.get(row.studentId);
+         return h("div", { class: "flex flex-wrap items-center gap-1" }, [
+            h(NText, null, {
+               default: () => student?.studentName || "<Unnamed>",
+            }),
+            !student?.active
+               ? h(
+                    NTag,
+                    { type: "error", round: true, size: "small" },
+                    { default: () => "Out of room" }
+                 )
+               : "",
+         ]);
       },
-   },
+      filterMultiple: true,
+      renderFilterMenu({ hide }) {
+         return h(FilterMenuMultiselect, {
+            class: "w-[200px]!",
+            placeholder: "Filter students",
+            placement: "right-start",
+            options: Array.from(students.value.values()).map((s) => ({
+               label: s.studentName,
+               value: s.id,
+            })),
+            value: filteredStudentIds.value,
+            onConfirm(data) {
+               filterByStudentIds(data);
+               hide();
+            },
+            onClear() {
+               filterByStudentIds([]);
+               hide();
+            },
+         });
+      },
+      filter(value, row) {
+         return value === row.studentId;
+      },
+      sorter: {
+         compare(rowA, rowB) {
+            const studentA = students.value.get(rowA.studentId);
+            const studentB = students.value.get(rowB.studentId);
+            if (!studentA || !studentB) return 0;
+            return studentA.studentName.localeCompare(studentB.studentName);
+         },
+         multiple: 1,
+      },
+   }),
    {
       title: "Warning Level",
       key: "warningLevel",
@@ -95,6 +156,31 @@ const columns: DataTableColumns<MonitorLog> = [
             { default: () => row.warningLevel }
          );
       },
+      filterOptions: [
+         {
+            label: "Low",
+            value: "low",
+         },
+         {
+            label: "Moderate",
+            value: "moderate",
+         },
+         {
+            label: "Severe",
+            value: "severe",
+         },
+      ],
+      filterMultiple: true,
+      filter(value, row) {
+         return row.warningLevel === value;
+      },
+      sorter: {
+         compare(rowA, rowB) {
+            const levels = { low: 1, moderate: 2, severe: 3 };
+            return levels[rowA.warningLevel] - levels[rowB.warningLevel];
+         },
+         multiple: 3,
+      },
    },
    {
       title: "Time",
@@ -106,18 +192,34 @@ const columns: DataTableColumns<MonitorLog> = [
             minute: "2-digit",
          });
       },
+      sorter: {
+         compare(rowA, rowB) {
+            return rowA.createdAt - rowB.createdAt;
+         },
+         multiple: 2,
+      },
+      defaultSortOrder: "descend",
    },
    {
       title: "Actions",
       key: "actions",
       render() {
          return h(
-            NButton,
+            RouterLink,
+            { to: { query: { monitorLogId: 1 } } },
             {
-               size: "small",
-               onClick: () => {},
-            },
-            { default: () => "View Record" }
+               default: () =>
+                  h(
+                     NButton,
+                     {
+                        size: "small",
+                        onClick: () => {
+                           evidence.show(1);
+                        },
+                     },
+                     { default: () => "View Evidence" }
+                  ),
+            }
          );
       },
    },
@@ -130,7 +232,6 @@ const { execute: startMonitoring, isLoading: isStartMonitoringLoading } =
       executeEvent: "teacher:start_monitoring",
       executePayload: { roomId: route.params.roomId },
       onSuccess(data) {
-         roomInfo.value = data.room;
          message.success("Monitoring has started.", {
             icon: renderIcon(PhPlay),
          });
@@ -147,7 +248,6 @@ const { execute: pauseMonitoring, isLoading: isPauseMonitoringLoading } =
       executeEvent: "teacher:pause_monitoring",
       executePayload: { roomId: route.params.roomId },
       onSuccess(data) {
-         roomInfo.value = data.room;
          message.warning("Monitoring has been paused.", {
             icon: renderIcon(PhPause),
          });
@@ -164,7 +264,6 @@ const { execute: stopMonitoring, isLoading: isStopMonitoringLoading } =
       executeEvent: "teacher:stop_monitoring",
       executePayload: { roomId: route.params.roomId },
       onSuccess(data) {
-         roomInfo.value = data.room;
          message.error("Monitoring has been stopped.", {
             icon: renderIcon(PhStop),
          });
@@ -179,10 +278,18 @@ const { execute: stopMonitoring, isLoading: isStopMonitoringLoading } =
       },
    });
 
-// sorted by newest to oldest
-const sortedMonitorLogs = computed(() =>
-   Array.from(monitorLogs.value.values()).sort(
-      (a, b) => b.createdAt - a.createdAt
-   )
-);
+function filterByStudentIds(ids: (string | number)[]) {
+   const studentNameColumn = columns.find(
+      (col) => (col as any).key === "studentName"
+   ) as DataTableBaseColumn<MonitorLog>;
+   filteredStudentIds.value = ids;
+   studentNameColumn.filterOptionValues = ids;
+}
+
+onMounted(() => {
+   if (route.query.filterByStudent) {
+      filteredStudentIds.value = [Number(route.query.filterByStudent)];
+      filterByStudentIds(filteredStudentIds.value);
+   }
+});
 </script>

@@ -5,7 +5,6 @@ import RegisterPage from "@/app/pages/register.vue";
 import DashboardOverviewPage from "@/app/pages/dashboard/overview.vue";
 import DashboardRoomsPage from "@/app/pages/dashboard/rooms.vue";
 import DashboardReportsPage from "@/app/pages/dashboard/reports.vue";
-import DashboardRecordPage from "@/app/pages/dashboard/record.vue";
 import RoomOverviewPage from "@/app/pages/dashboard/room/overview.vue";
 import RoomSettingsPage from "@/app/pages/dashboard/room/settings.vue";
 import RoomStudentsPage from "@/app/pages/dashboard/room/students.vue";
@@ -25,8 +24,6 @@ const routes: RouteRecordRaw[] = [
          { path: "overview", component: DashboardOverviewPage },
          { path: "rooms", component: DashboardRoomsPage },
          { path: "reports", component: DashboardReportsPage },
-         { path: "records/:recordId", component: DashboardRecordPage },
-
          {
             path: "rooms/:roomId",
             component: RoomLayout,

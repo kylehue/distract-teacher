@@ -10,6 +10,7 @@
          <RouterView />
       </NMessageProvider>
       <NGlobalStyle />
+      <EvidenceProvider />
    </NConfigProvider>
 </template>
 
@@ -25,6 +26,7 @@ import {
 import { KeepAlive, ref, watchEffect } from "vue";
 import { RouterView } from "vue-router";
 import { darkThemeOverrides, lightThemeOverrides } from "@/lib/theme-overrides";
+import EvidenceProvider from "./components/evidence-provider.vue";
 
 const theme = ref<"light" | "dark">("dark");
 

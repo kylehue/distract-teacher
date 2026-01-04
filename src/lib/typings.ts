@@ -1,8 +1,16 @@
 export interface MonitorLog {
    id: string | number;
+   roomId: string | number;
    studentId: string | number;
    warningLevel: WarningLevel;
    createdAt: number;
+
+   integrityScore: number;
+   rfScoreAvg: number;
+   ifScoreAvg: number;
+
+   recordingPath: string;
+   recordingUrl: string;
 }
 
 export type WarningLevel = "low" | "moderate" | "severe";

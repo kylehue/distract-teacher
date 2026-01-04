@@ -1,20 +1,31 @@
 <template>
    <!-- Main -->
    <Layout title="Rooms">
+      <div class="flex justify-end gap-2 mb-4">
+         <InputSearch
+            :documents="roomsArray"
+            :fields="['title', 'code']"
+            label-field="title"
+            id-field="id"
+            placeholder="Search rooms..."
+            class="w-fit!"
+            @search="
+               (ids) => {
+                  table?.filters({ title: ids });
+               }
+            "
+         ></InputSearch>
+      </div>
       <NDataTable
+         ref="table"
          :columns="columns"
-         :data="rooms"
+         :data="roomsArray"
          :pagination="{ pageSize: 10 }"
          :single-line="false"
-         :loading="isLoadRoomsDataLoading"
+         :loading="store.isLoadRoomsLoading"
       />
       <template #header-extra>
          <div class="flex flex-row gap-2">
-            <NInput placeholder="Search Rooms">
-               <template #prefix>
-                  <PhMagnifyingGlass></PhMagnifyingGlass>
-               </template>
-            </NInput>
             <NButton @click="showCreateRoomModal = true">
                Create New Room
                <template #icon><PhPlus></PhPlus></template>
@@ -117,13 +128,24 @@ import {
    DataTableColumns,
    useMessage,
 } from "naive-ui";
-import { computed, h, onMounted, reactive, ref, watch } from "vue";
+import InputSearch from "@/app/components/input-search.vue";
+import CopyButton from "@/app/components/copy-button.vue";
+import {
+   computed,
+   h,
+   onMounted,
+   reactive,
+   ref,
+   useTemplateRef,
+   watch,
+} from "vue";
 import { RoomInfo } from "@/lib/typings";
 import { RouterLink } from "vue-router";
-import { useSocketEvent } from "@/app/composables/use-socket.event";
-import CopyButton from "@/app/components/copy-button.vue";
+import { useSocketEvent } from "@/app/composables/use-socket-event";
+import { useStore } from "@/app/composables/use-store";
 
 const message = useMessage();
+const store = useStore();
 const showCreateRoomModal = ref(false);
 const createRoomModalForm = reactive({
    title: "",
@@ -138,11 +160,21 @@ const createRoomModalForm = reactive({
    studentCapacityStatus: "success" as "success" | "error",
 });
 
+const table = useTemplateRef("table");
+
 const columns: DataTableColumns<RoomInfo> = [
    {
       title: "Title",
       key: "title",
       ellipsis: { tooltip: { placement: "bottom" } },
+      sorter: {
+         compare: (a, b) => a.title.localeCompare(b.title),
+         multiple: 1,
+      },
+      filterMultiple: true,
+      filter(value, row) {
+         return value === row.id;
+      },
    },
    {
       title: "Code",
@@ -164,6 +196,12 @@ const columns: DataTableColumns<RoomInfo> = [
       render(row) {
          return `${row.studentCount} / ${row.studentCapacity}`;
       },
+      sorter: {
+         compare(rowA, rowB) {
+            return rowA.studentCount - rowB.studentCount;
+         },
+         multiple: 2,
+      },
    },
    {
       title: "Status",
@@ -180,6 +218,25 @@ const columns: DataTableColumns<RoomInfo> = [
             }
          );
       },
+      filterOptions: [
+         { label: "Ongoing", value: "ongoing" },
+         { label: "Concluded", value: "concluded" },
+      ],
+      filter(value, row) {
+         if (value === "ongoing") {
+            return row.status !== "concluded";
+         } else {
+            return row.status === "concluded";
+         }
+      },
+      sorter: {
+         compare(rowA, rowB) {
+            const statusA = rowA.status !== "concluded" ? 1 : 0;
+            const statusB = rowB.status !== "concluded" ? 1 : 0;
+            return statusB - statusA;
+         },
+         multiple: 5,
+      },
    },
    {
       title: "Time Started",
@@ -191,6 +248,14 @@ const columns: DataTableColumns<RoomInfo> = [
             hour: "2-digit",
             minute: "2-digit",
          });
+      },
+      sorter: {
+         compare(rowA, rowB) {
+            const timeA = rowA.timeStarted || 0;
+            const timeB = rowB.timeStarted || 0;
+            return timeA - timeB;
+         },
+         multiple: 3,
       },
    },
    {
@@ -204,6 +269,14 @@ const columns: DataTableColumns<RoomInfo> = [
             minute: "2-digit",
          });
       },
+      sorter: {
+         compare(rowA, rowB) {
+            const timeA = rowA.timeEnded || 0;
+            const timeB = rowB.timeEnded || 0;
+            return timeA - timeB;
+         },
+         multiple: 3,
+      },
    },
    {
       title: "Date Created",
@@ -212,6 +285,13 @@ const columns: DataTableColumns<RoomInfo> = [
          const date = new Date(row.createdAt);
          return date.toLocaleDateString();
       },
+      sorter: {
+         compare(rowA, rowB) {
+            return rowA.createdAt - rowB.createdAt;
+         },
+         multiple: 4,
+      },
+      defaultSortOrder: "descend",
    },
    {
       title: "Actions",
@@ -238,7 +318,6 @@ const { execute: createRoom, isLoading: isCreateRoomLoading } = useSocketEvent({
       return true;
    },
    onSuccess(data) {
-      rooms.value.unshift(data.room);
       showCreateRoomModal.value = false;
       createRoomModalForm.title = "";
       createRoomModalForm.code = "";
@@ -270,23 +349,8 @@ const { execute: createRoom, isLoading: isCreateRoomLoading } = useSocketEvent({
    }),
 });
 
-const { data: loadRoomsData, isLoading: isLoadRoomsDataLoading } =
-   useSocketEvent<{
-      rooms: RoomInfo[];
-   }>({
-      successEvent: "teacher:load_rooms_success",
-      errorEvent: "teacher:load_rooms_error",
-      executeEvent: "teacher:load_rooms",
-      executeImmediately: true,
-   });
-
-const rooms = ref<RoomInfo[]>([]);
-
-watch(loadRoomsData, (newVal) => {
-   if (newVal) {
-      rooms.value = newVal.rooms.sort(
-         (a: RoomInfo, b: RoomInfo) => b.createdAt - a.createdAt
-      );
-   }
+const roomsArray = computed(() => Array.from(store.allRooms.values()));
+onMounted(() => {
+   store.loadRooms();
 });
 </script>
