@@ -1,9 +1,8 @@
-import { inject, onUnmounted, unref } from "vue";
+import { onUnmounted, unref } from "vue";
 import { getSocket } from "@/plugins/socket";
 
 export function useSocket() {
    const socket = getSocket();
-   const sessionToken = inject<string | null>("sessionToken");
 
    function on(
       event: string,
@@ -28,10 +27,6 @@ export function useSocket() {
    }
 
    function emit(event: string, data: Record<any, any> = {}) {
-      if (sessionToken) {
-         data["sessionToken"] = unref(sessionToken);
-      }
-
       socket.emit(event, unref(data));
 
       // dev logging

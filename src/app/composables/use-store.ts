@@ -1,9 +1,9 @@
-import { reactive, ref } from "vue";
+import { computed, reactive, ref, watch } from "vue";
 import type { MonitorLog, RoomInfo, RoomStudentInfo } from "@/lib/typings";
-import { useSocketEvent } from "@/app/composables/use-socket-event";
 import { useSocket } from "./use-socket";
 import { getWithDefault } from "@/lib/object";
 import { defineStore } from "pinia";
+import { useFetch } from "./use-fetch";
 
 export const useStore = defineStore("main-store", () => {
    const allRooms = reactive(new Map<string | number, RoomInfo>());
@@ -16,20 +16,20 @@ export const useStore = defineStore("main-store", () => {
       new Map<string | number, Map<string | number, MonitorLog>>()
    );
 
-   const { execute: _loadRoom, isLoading: isLoadRoomLoading } = useSocketEvent<
-      {
-         room: RoomInfo;
-         students: RoomStudentInfo[];
-         monitorLogs: MonitorLog[];
-      },
-      {
-         message: string;
-      }
-   >({
-      executeEvent: "teacher:load_room",
-      successEvent: "teacher:load_room_success",
-      autoClean: false,
-      onSuccess(data) {
+   const fetchRoom = useFetch<{
+      room: RoomInfo;
+      students: RoomStudentInfo[];
+      monitorLogs: MonitorLog[];
+      teacher: any;
+   }>("/api/rooms/:roomId");
+
+   async function loadRoom(roomId: string | number) {
+      try {
+         await fetchRoom.execute({ params: { roomId } });
+
+         const data = fetchRoom.data?.data;
+         if (!data) throw new Error("No data");
+
          allRooms.set(data.room.id, data.room);
          for (let student of data.students) {
             allStudents.set(student.id, student);
@@ -50,132 +50,156 @@ export const useStore = defineStore("main-store", () => {
                reactive(new Map())
             ).set(monitorLog.id, monitorLog);
          }
-      },
-   });
 
-   async function loadRoom(roomId: string | number) {
-      await _loadRoom({ roomId });
+         return data;
+      } catch {
+         // ignore fetch errors
+      }
    }
 
-   const { execute: _loadRooms, isLoading: isLoadRoomsLoading } =
-      useSocketEvent<{
-         rooms: RoomInfo[];
-      }>({
-         executeEvent: "teacher:load_rooms",
-         successEvent: "teacher:load_rooms_success",
-         autoClean: false,
-         onSuccess(data) {
-            for (let room of data.rooms) {
-               allRooms.set(room.id, room);
-            }
-         },
-      });
+   const fetchRooms = useFetch<{
+      rooms: RoomInfo[];
+   }>("/api/rooms");
 
    async function loadRooms() {
-      await _loadRooms();
+      try {
+         await fetchRooms.execute();
+
+         const data = fetchRooms.data?.data;
+         if (!data) throw new Error("No data");
+
+         for (let room of data.rooms) {
+            allRooms.set(room.id, room);
+         }
+
+         return data;
+      } catch {
+         // ignore fetch errors
+      }
    }
 
-   const { execute: _loadStudent, isLoading: isLoadStudentLoading } =
-      useSocketEvent<{
-         student: RoomStudentInfo;
-      }>({
-         executeEvent: "teacher:load_student",
-         successEvent: "teacher:load_student_success",
-         autoClean: false,
-         onSuccess(data) {
-            allStudents.set(data.student.id, data.student);
+   const fetchStudent = useFetch<{
+      student: RoomStudentInfo;
+   }>("/api/students/:studentId");
+
+   async function loadStudent(studentId: string | number) {
+      try {
+         await fetchStudent.execute({ params: { studentId } });
+
+         const data = fetchStudent.data?.data;
+         if (!data) throw new Error("No data");
+         allStudents.set(data.student.id, data.student);
+
+         getWithDefault(
+            studentsGroupedByRoomId,
+            data.student.roomId,
+            reactive(new Map())
+         ).set(data.student.id, data.student);
+
+         return data;
+      } catch {
+         // ignore fetch errors
+      }
+   }
+
+   const fetchRoomStudents = useFetch<{
+      students: RoomStudentInfo[];
+   }>("/api/rooms/:roomId/students");
+
+   async function loadStudents(roomId: string | number) {
+      try {
+         await fetchRoomStudents.execute({ params: { roomId } });
+
+         const data = fetchRoomStudents.data?.data;
+         if (!data) throw new Error("No data");
+         for (let student of data.students) {
+            allStudents.set(student.id, student);
 
             getWithDefault(
                studentsGroupedByRoomId,
-               data.student.roomId,
+               student.roomId,
                reactive(new Map())
-            ).set(data.student.id, data.student);
-         },
-      });
-
-   async function loadStudent(studentId: string | number) {
-      await _loadStudent({ studentId });
+            ).set(student.id, student);
+         }
+         return data;
+      } catch {
+         // ignore fetch errors
+      }
    }
 
-   const { execute: _loadStudents, isLoading: isLoadStudentsLoading } =
-      useSocketEvent<{
-         students: RoomStudentInfo[];
-      }>({
-         executeEvent: "teacher:load_students",
-         successEvent: "teacher:load_students_success",
-         autoClean: false,
-         onSuccess(data) {
-            for (let student of data.students) {
-               allStudents.set(student.id, student);
+   const fetchMonitorLog = useFetch<{
+      monitorLog: MonitorLog;
+      room: RoomInfo;
+      student: RoomStudentInfo;
+   }>("/api/monitor_logs/:monitorLogId");
 
-               getWithDefault(
-                  studentsGroupedByRoomId,
-                  student.roomId,
-                  reactive(new Map())
-               ).set(student.id, student);
-            }
-         },
-      });
+   async function loadMonitorLog(monitorLogId: string | number) {
+      try {
+         await fetchMonitorLog.execute({ params: { monitorLogId } });
 
-   async function loadStudents(roomId: string | number) {
-      await _loadStudents({ roomId });
+         const data = fetchMonitorLog.data?.data;
+         if (!data) throw new Error("No data");
+         allMonitorLogs.set(data.monitorLog.id, data.monitorLog);
+
+         getWithDefault(
+            monitorLogsGroupedByRoomId,
+            data.monitorLog.roomId,
+            reactive(new Map())
+         ).set(data.monitorLog.id, data.monitorLog);
+
+         allRooms.set(data.room.id, data.room);
+         allStudents.set(data.student.id, data.student);
+
+         getWithDefault(
+            studentsGroupedByRoomId,
+            data.monitorLog.roomId,
+            reactive(new Map())
+         ).set(data.student.id, data.student);
+
+         return data;
+      } catch {
+         // ignore fetch errors
+      }
    }
 
-   const { execute: _loadMonitorLog, isLoading: isLoadMonitorLogLoading } =
-      useSocketEvent<{
-         monitorLog: MonitorLog;
-      }>({
-         executeEvent: "teacher:load_monitor_log",
-         successEvent: "teacher:load_monitor_log_success",
-         autoClean: false,
-         onSuccess(data) {
-            allMonitorLogs.set(data.monitorLog.id, data.monitorLog);
+   const fetchRoomMonitorLogs = useFetch<{
+      monitorLogs: MonitorLog[];
+   }>("/api/rooms/:roomId/monitor_logs");
+
+   async function loadMonitorLogs(roomId: string | number) {
+      try {
+         await fetchRoomMonitorLogs.execute({
+            params: { roomId },
+         });
+
+         const data = fetchRoomMonitorLogs.data?.data;
+         if (!data) throw new Error("No data");
+
+         for (let monitorLog of data.monitorLogs) {
+            allMonitorLogs.set(monitorLog.id, monitorLog);
 
             getWithDefault(
                monitorLogsGroupedByRoomId,
-               data.monitorLog.roomId,
+               monitorLog.roomId,
                reactive(new Map())
-            ).set(data.monitorLog.id, data.monitorLog);
-         },
-      });
-
-   async function loadMonitorLog(monitorLogId: string | number) {
-      await _loadMonitorLog({ monitorLogId });
-   }
-
-   const { execute: _loadMonitorLogs, isLoading: isLoadMonitorLogsLoading } =
-      useSocketEvent<{
-         monitorLogs: MonitorLog[];
-      }>({
-         executeEvent: "teacher:load_monitor_logs",
-         successEvent: "teacher:load_monitor_logs_success",
-         autoClean: false,
-         onSuccess(data) {
-            for (let monitorLog of data.monitorLogs) {
-               allMonitorLogs.set(monitorLog.id, monitorLog);
-
-               getWithDefault(
-                  monitorLogsGroupedByRoomId,
-                  monitorLog.roomId,
-                  reactive(new Map())
-               ).set(monitorLog.id, monitorLog);
-            }
-         },
-      });
-
-   async function loadMonitorLogs(
-      roomId: string | number,
-      studentId?: string | number
-   ) {
-      await _loadMonitorLogs({ roomId, studentId });
+            ).set(monitorLog.id, monitorLog);
+         }
+         return data;
+      } catch {
+         // ignore fetch errors
+      }
    }
 
    // real-time updates
    const socket = useSocket();
-   socket.on("teacher:update_room", (data) => {
-      const room = data.room as RoomInfo;
-      allRooms.set(room.id, room);
-   }, { autoClean: false });
+   socket.on(
+      "teacher:update_room",
+      (data) => {
+         const room = data.room as RoomInfo;
+         allRooms.set(room.id, room);
+      },
+      { autoClean: false }
+   );
 
    socket.on(
       "teacher:create_student",
@@ -228,16 +252,16 @@ export const useStore = defineStore("main-store", () => {
       studentsGroupedByRoomId,
       monitorLogsGroupedByRoomId,
       loadRoom,
-      isLoadRoomLoading,
+      isLoadRoomLoading: computed(() => fetchRoom.isLoading),
       loadRooms,
-      isLoadRoomsLoading,
+      isLoadRoomsLoading: computed(() => fetchRooms.isLoading),
       loadStudent,
-      isLoadStudentLoading,
+      isLoadStudentLoading: computed(() => fetchStudent.isLoading),
       loadStudents,
-      isLoadStudentsLoading,
+      isLoadStudentsLoading: computed(() => fetchRoomStudents.isLoading),
       loadMonitorLog,
-      isLoadMonitorLogLoading,
+      isLoadMonitorLogLoading: computed(() => fetchMonitorLog.isLoading),
       loadMonitorLogs,
-      isLoadMonitorLogsLoading,
+      isLoadMonitorLogsLoading: computed(() => fetchRoomMonitorLogs.isLoading),
    };
 });

@@ -8,9 +8,10 @@
    >
       <NMessageProvider placement="bottom-left" closable keep-alive-on-hover>
          <RouterView />
+         <EvidenceProvider />
+         <CreateRoomProvider />
       </NMessageProvider>
       <NGlobalStyle />
-      <EvidenceProvider />
    </NConfigProvider>
 </template>
 
@@ -23,11 +24,15 @@ import {
    darkTheme,
    NMessageProvider,
 } from "naive-ui";
-import { KeepAlive, ref, watchEffect } from "vue";
-import { RouterView } from "vue-router";
+import { KeepAlive, onMounted, ref, watchEffect } from "vue";
+import { RouterView, useRouter } from "vue-router";
 import { darkThemeOverrides, lightThemeOverrides } from "@/lib/theme-overrides";
+import { useFetch } from "./composables/use-fetch";
 import EvidenceProvider from "./components/evidence-provider.vue";
+import CreateRoomProvider from "./components/create-room-provider.vue";
 
+const fetchValidateSession = useFetch("/api/validate_session");
+const router = useRouter();
 const theme = ref<"light" | "dark">("dark");
 
 watchEffect(() => {
@@ -35,6 +40,18 @@ watchEffect(() => {
       document.documentElement.classList.add("dark");
    } else {
       document.documentElement.classList.remove("dark");
+   }
+});
+
+// try auto login on mount
+onMounted(async () => {
+   try {
+      await fetchValidateSession.execute({ method: "POST" });
+      if (!router.currentRoute.value.path.startsWith("/dashboard")) {
+         router.push("/dashboard");
+      }
+   } catch {
+      // we don't care about errors here
    }
 });
 </script>

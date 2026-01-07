@@ -10,7 +10,7 @@
                <NInput
                   v-model:value="username"
                   placeholder="Enter your username"
-                  :disabled="isLoading"
+                  :disabled="fetch.isLoading"
                />
             </NFormItem>
 
@@ -23,7 +23,7 @@
                   v-model:value="password1"
                   type="password"
                   placeholder="Enter your password"
-                  :disabled="isLoading"
+                  :disabled="fetch.isLoading"
                />
             </NFormItem>
 
@@ -36,7 +36,7 @@
                   v-model:value="password2"
                   type="password"
                   placeholder="Enter your password again"
-                  :disabled="isLoading"
+                  :disabled="fetch.isLoading"
                />
             </NFormItem>
 
@@ -44,7 +44,7 @@
                <NButton
                   type="primary"
                   block
-                  :loading="isLoading"
+                  :loading="fetch.isLoading"
                   @click="register"
                >
                   Register
@@ -62,9 +62,10 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import { NCard, NForm, NFormItem, NInput, NButton } from "naive-ui";
+import { NCard, NForm, NFormItem, NInput, NButton, useMessage } from "naive-ui";
 import { useSocket } from "../composables/use-socket";
 import { useRouter, RouterLink } from "vue-router";
+import { useFetch } from "../composables/use-fetch";
 
 const socket = useSocket();
 const router = useRouter();
@@ -77,46 +78,54 @@ const password2Status = ref<"success" | "error">("success");
 const usernameFeedback = ref("");
 const password1Feedback = ref("");
 const password2Feedback = ref("");
-const isLoading = ref(false);
+const fetch = useFetch("/api/register");
+const message = useMessage();
 
-function register() {
-   isLoading.value = true;
+async function register() {
    usernameStatus.value = "success";
    password1Status.value = "success";
    password2Status.value = "success";
    usernameFeedback.value = "";
    password1Feedback.value = "";
    password2Feedback.value = "";
-   socket.emit("teacher:register", {
-      username: username.value,
-      password1: password1.value,
-      password2: password2.value,
-   });
+
+   try {
+      await fetch.execute({
+         method: "POST",
+         body: {
+            username: username.value,
+            password1: password1.value,
+            password2: password2.value,
+         },
+      });
+
+      message.success("Registration successful!");
+      router.push("/login");
+   } catch {
+      if (!fetch.error) {
+         return;
+      }
+
+      if (!fetch.error.fieldErrors) {
+         message.error(fetch.error.message);
+         return;
+      }
+
+      const fieldErrors = fetch.error.fieldErrors;
+      if (fieldErrors.username) {
+         usernameStatus.value = "error";
+         usernameFeedback.value = fieldErrors.username;
+      }
+      if (fieldErrors.password1) {
+         password1Status.value = "error";
+         password1Feedback.value = fieldErrors.password1;
+      }
+      if (fieldErrors.password2) {
+         password2Status.value = "error";
+         password2Feedback.value = fieldErrors.password2;
+      }
+   }
 }
-
-socket.on("teacher:register_success", () => {
-   isLoading.value = false;
-   alert("Registration successful!");
-   router.push("/login");
-});
-
-socket.on("teacher:register_error", (data) => {
-   isLoading.value = false;
-
-   const fieldErrors = data.fieldErrors;
-   if (fieldErrors.username) {
-      usernameStatus.value = "error";
-      usernameFeedback.value = fieldErrors.username;
-   }
-   if (fieldErrors.password1) {
-      password1Status.value = "error";
-      password1Feedback.value = fieldErrors.password1;
-   }
-   if (fieldErrors.password2) {
-      password2Status.value = "error";
-      password2Feedback.value = fieldErrors.password2;
-   }
-});
 </script>
 
 <style scoped></style>

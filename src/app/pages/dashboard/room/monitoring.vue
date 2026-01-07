@@ -7,7 +7,7 @@
             type="error"
             tertiary
             @click="stopMonitoring()"
-            :loading="isStopMonitoringLoading"
+            :loading="fetchStopMonitoring.isLoading"
          >
             Stop Monitoring
             <template #icon>
@@ -19,7 +19,7 @@
             type="success"
             secondary
             @click="startMonitoring()"
-            :loading="isStartMonitoringLoading"
+            :loading="fetchStartMonitoring.isLoading"
          >
             {{ !!room.timeStarted ? "Continue" : "Start" }} Monitoring
             <template #icon>
@@ -31,7 +31,7 @@
             type="warning"
             ghost
             @click="pauseMonitoring()"
-            :loading="isPauseMonitoringLoading"
+            :loading="fetchPauseMonitoring.isLoading"
          >
             Pause Monitoring
             <template #icon>
@@ -66,14 +66,12 @@ import { MonitorLog } from "@/lib/typings";
 import { PhPause, PhPlay, PhStop } from "@phosphor-icons/vue";
 import { RouterLink, useRoute } from "vue-router";
 import { renderIcon } from "@/lib/ui";
-import { useSocketEvent } from "@/app/composables/use-socket-event";
 import FilterMenuMultiselect from "@/app/components/filter-menu-multiselect.vue";
-import { useEvidence } from "@/app/composables/use-evidence";
 import { useStore } from "@/app/composables/use-store";
+import { useFetch } from "@/app/composables/use-fetch";
 
 const route = useRoute();
 const message = useMessage();
-const evidence = useEvidence();
 const store = useStore();
 const filteredStudentIds = ref<(string | number)[]>([]);
 const room = computed(() =>
@@ -203,20 +201,15 @@ const columns: DataTableColumns<MonitorLog> = [
    {
       title: "Actions",
       key: "actions",
-      render() {
+      render(row) {
          return h(
             RouterLink,
-            { to: { query: { monitorLogId: 1 } } },
+            { to: { query: { monitorLogId: row.id } } },
             {
                default: () =>
                   h(
                      NButton,
-                     {
-                        size: "small",
-                        onClick: () => {
-                           evidence.show(1);
-                        },
-                     },
+                     { size: "small" },
                      { default: () => "View Evidence" }
                   ),
             }
@@ -225,58 +218,63 @@ const columns: DataTableColumns<MonitorLog> = [
    },
 ];
 
-const { execute: startMonitoring, isLoading: isStartMonitoringLoading } =
-   useSocketEvent({
-      successEvent: "teacher:start_monitoring_success",
-      errorEvent: "teacher:start_monitoring_error",
-      executeEvent: "teacher:start_monitoring",
-      executePayload: { roomId: route.params.roomId },
-      onSuccess(data) {
-         message.success("Monitoring has started.", {
-            icon: renderIcon(PhPlay),
-         });
-      },
-      onError(errorData) {
-         message.error(errorData.message);
-      },
-   });
+const fetchStartMonitoring = useFetch("/api/start_monitoring/:roomId");
 
-const { execute: pauseMonitoring, isLoading: isPauseMonitoringLoading } =
-   useSocketEvent({
-      successEvent: "teacher:pause_monitoring_success",
-      errorEvent: "teacher:pause_monitoring_error",
-      executeEvent: "teacher:pause_monitoring",
-      executePayload: { roomId: route.params.roomId },
-      onSuccess(data) {
-         message.warning("Monitoring has been paused.", {
-            icon: renderIcon(PhPause),
-         });
-      },
-      onError(errorData) {
-         message.error(errorData.message);
-      },
-   });
+async function startMonitoring() {
+   try {
+      await fetchStartMonitoring.execute({
+         method: "PATCH",
+         params: { roomId: route.params.roomId },
+      });
 
-const { execute: stopMonitoring, isLoading: isStopMonitoringLoading } =
-   useSocketEvent({
-      successEvent: "teacher:stop_monitoring_success",
-      errorEvent: "teacher:stop_monitoring_error",
-      executeEvent: "teacher:stop_monitoring",
-      executePayload: { roomId: route.params.roomId },
-      onSuccess(data) {
-         message.error("Monitoring has been stopped.", {
-            icon: renderIcon(PhStop),
-         });
-      },
-      onError(errorData) {
-         message.error(errorData.message);
-      },
-      onBeforeExecute() {
-         return confirm(
-            "Are you sure you want to stop monitoring? This will conclude and archive the room session. This action cannot be undone."
-         );
-      },
-   });
+      message.success("Monitoring has started.", {
+         icon: renderIcon(PhPlay),
+      });
+   } catch (error: any) {
+      message.error(error.message);
+   }
+}
+
+const fetchPauseMonitoring = useFetch("/api/pause_monitoring/:roomId");
+
+async function pauseMonitoring() {
+   try {
+      await fetchPauseMonitoring.execute({
+         method: "PATCH",
+         params: { roomId: route.params.roomId },
+      });
+
+      message.warning("Monitoring has been paused.", {
+         icon: renderIcon(PhPause),
+      });
+   } catch (error: any) {
+      message.error(error.message);
+   }
+}
+
+const fetchStopMonitoring = useFetch("/api/stop_monitoring/:roomId");
+
+async function stopMonitoring() {
+   let confirmed = confirm(
+      "Are you sure you want to stop monitoring? This will conclude and archive the room session. This action cannot be undone."
+   );
+   if (!confirmed) {
+      return;
+   }
+
+   try {
+      await fetchStopMonitoring.execute({
+         method: "PATCH",
+         params: { roomId: route.params.roomId },
+      });
+
+      message.error("Monitoring has been stopped.", {
+         icon: renderIcon(PhStop),
+      });
+   } catch (error: any) {
+      message.error(error.message);
+   }
+}
 
 function filterByStudentIds(ids: (string | number)[]) {
    const studentNameColumn = columns.find(

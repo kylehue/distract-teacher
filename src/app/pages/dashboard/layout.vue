@@ -15,7 +15,7 @@
                class="mt-auto!"
                block
                @click="logout"
-               :loading="isLogoutLoading"
+               :loading="fetchLogout.isLoading"
             >
                Logout
             </NButton>
@@ -51,7 +51,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, h, onMounted, ref } from "vue";
+import { computed, h } from "vue";
 import { useRouter, useRoute, RouterLink } from "vue-router";
 import {
    NLayout,
@@ -61,12 +61,13 @@ import {
    NButton,
    NText,
    NDivider,
+   useMessage,
 } from "naive-ui";
 import { MenuMixedOption } from "naive-ui/es/menu/src/interface";
 import { PhChartBar, PhHouse, PhVideoConference } from "@phosphor-icons/vue";
 import { renderIcon } from "@/lib/ui";
-import { useSocket } from "@/app/composables/use-socket";
 import { isUrlRelatedToParent } from "@/lib/url";
+import { useFetch } from "@/app/composables/use-fetch";
 
 const props = defineProps<{
    title?: string;
@@ -75,8 +76,8 @@ const props = defineProps<{
 
 const router = useRouter();
 const route = useRoute();
-const socket = useSocket();
-const isLogoutLoading = ref(false);
+const fetchLogout = useFetch("/api/logout");
+const message = useMessage();
 
 const menuOptions: MenuMixedOption[] = [
    {
@@ -127,16 +128,14 @@ const activeKey = computed(() => {
    return path;
 });
 
-function logout() {
-   isLogoutLoading.value = true;
-   socket.emit("teacher:logout", {});
+async function logout() {
+   try {
+      await fetchLogout.execute({ method: "POST" });
+
+      router.push("/");
+      message.create("You have been logged out.");
+   } catch {
+      message.error(fetchLogout.error?.message || "Logout failed.");
+   }
 }
-
-socket.on("teacher:logout_success", () => {
-   isLogoutLoading.value = false;
-});
-
-onMounted(() => {
-   socket.emit("teacher:validate_session", { kickOnInvalid: true });
-});
 </script>

@@ -10,7 +10,7 @@
                <NInput
                   v-model:value="username"
                   placeholder="Enter your username"
-                  :disabled="isLoading"
+                  :disabled="fetch.isLoading"
                />
             </NFormItem>
 
@@ -23,7 +23,7 @@
                   v-model:value="password"
                   type="password"
                   placeholder="Enter your password"
-                  :disabled="isLoading"
+                  :disabled="fetch.isLoading"
                />
             </NFormItem>
 
@@ -31,7 +31,7 @@
                <NButton
                   type="primary"
                   block
-                  :loading="isLoading"
+                  :loading="fetch.isLoading"
                   @click="login"
                >
                   Login
@@ -49,11 +49,10 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import { NCard, NForm, NFormItem, NInput, NButton } from "naive-ui";
-import { useSocket } from "../composables/use-socket";
+import { NCard, NForm, NFormItem, NInput, NButton, useMessage } from "naive-ui";
 import { useRouter, RouterLink } from "vue-router";
+import { useFetch } from "../composables/use-fetch";
 
-const socket = useSocket();
 const router = useRouter();
 const username = ref("");
 const password = ref("");
@@ -61,37 +60,45 @@ const usernameStatus = ref<"error" | "success">("success");
 const passwordStatus = ref<"error" | "success">("success");
 const usernameFeedback = ref("");
 const passwordFeedback = ref("");
-const isLoading = ref(false);
+const fetch = useFetch("/api/login");
+const message = useMessage();
 
-function login() {
-   isLoading.value = true;
+async function login() {
    usernameStatus.value = "success";
    passwordStatus.value = "success";
    usernameFeedback.value = "";
    passwordFeedback.value = "";
-   socket.emit("teacher:login", {
-      username: username.value,
-      password: password.value,
-   });
+   try {
+      await fetch.execute({
+         method: "POST",
+         body: {
+            username: username.value,
+            password: password.value,
+         },
+      });
+
+      router.push("/dashboard");
+   } catch {
+      if (!fetch.error) {
+         return;
+      }
+
+      if (!fetch.error.fieldErrors) {
+         message.error(fetch.error.message);
+         return;
+      }
+
+      const fieldErrors = fetch.error.fieldErrors;
+      if (fieldErrors.username) {
+         usernameStatus.value = "error";
+         usernameFeedback.value = fieldErrors.username;
+      }
+      if (fieldErrors.password) {
+         passwordStatus.value = "error";
+         passwordFeedback.value = fieldErrors.password;
+      }
+   }
 }
-
-socket.on("teacher:login_success", () => {
-   isLoading.value = false;
-});
-
-socket.on("teacher:login_error", (data) => {
-   isLoading.value = false;
-
-   const fieldErrors = data.fieldErrors;
-   if (fieldErrors.username) {
-      usernameStatus.value = "error";
-      usernameFeedback.value = fieldErrors.username;
-   }
-   if (fieldErrors.password) {
-      passwordStatus.value = "error";
-      passwordFeedback.value = fieldErrors.password;
-   }
-});
 </script>
 
 <style scoped></style>
