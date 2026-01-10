@@ -52,16 +52,18 @@ import { ref } from "vue";
 import { NCard, NForm, NFormItem, NInput, NButton, useMessage } from "naive-ui";
 import { useRouter, RouterLink } from "vue-router";
 import { useFetch } from "../composables/use-fetch";
+import { useStore } from "../composables/use-store";
 
 const router = useRouter();
+const fetch = useFetch("/api/login", "POST");
+const message = useMessage();
+const store = useStore();
 const username = ref("");
 const password = ref("");
 const usernameStatus = ref<"error" | "success">("success");
 const passwordStatus = ref<"error" | "success">("success");
 const usernameFeedback = ref("");
 const passwordFeedback = ref("");
-const fetch = useFetch("/api/login");
-const message = useMessage();
 
 async function login() {
    usernameStatus.value = "success";
@@ -70,7 +72,6 @@ async function login() {
    passwordFeedback.value = "";
    try {
       await fetch.execute({
-         method: "POST",
          body: {
             username: username.value,
             password: password.value,
@@ -98,6 +99,8 @@ async function login() {
          passwordFeedback.value = fieldErrors.password;
       }
    }
+
+   store.clear();
 }
 </script>
 

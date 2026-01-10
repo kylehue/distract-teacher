@@ -188,6 +188,7 @@ const columns: DataTableColumns<MonitorLog> = [
          return date.toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
+            second: "2-digit",
          });
       },
       sorter: {
@@ -218,12 +219,11 @@ const columns: DataTableColumns<MonitorLog> = [
    },
 ];
 
-const fetchStartMonitoring = useFetch("/api/start_monitoring/:roomId");
+const fetchStartMonitoring = useFetch("/api/start_monitoring/:roomId", "PATCH");
 
 async function startMonitoring() {
    try {
       await fetchStartMonitoring.execute({
-         method: "PATCH",
          params: { roomId: route.params.roomId },
       });
 
@@ -235,12 +235,11 @@ async function startMonitoring() {
    }
 }
 
-const fetchPauseMonitoring = useFetch("/api/pause_monitoring/:roomId");
+const fetchPauseMonitoring = useFetch("/api/pause_monitoring/:roomId", "PATCH");
 
 async function pauseMonitoring() {
    try {
       await fetchPauseMonitoring.execute({
-         method: "PATCH",
          params: { roomId: route.params.roomId },
       });
 
@@ -252,7 +251,7 @@ async function pauseMonitoring() {
    }
 }
 
-const fetchStopMonitoring = useFetch("/api/stop_monitoring/:roomId");
+const fetchStopMonitoring = useFetch("/api/stop_monitoring/:roomId", "PATCH");
 
 async function stopMonitoring() {
    let confirmed = confirm(
@@ -264,7 +263,6 @@ async function stopMonitoring() {
 
    try {
       await fetchStopMonitoring.execute({
-         method: "PATCH",
          params: { roomId: route.params.roomId },
       });
 

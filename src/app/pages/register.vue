@@ -78,7 +78,7 @@ const password2Status = ref<"success" | "error">("success");
 const usernameFeedback = ref("");
 const password1Feedback = ref("");
 const password2Feedback = ref("");
-const fetch = useFetch("/api/register");
+const fetch = useFetch("/api/register", "POST");
 const message = useMessage();
 
 async function register() {
@@ -91,7 +91,6 @@ async function register() {
 
    try {
       await fetch.execute({
-         method: "POST",
          body: {
             username: username.value,
             password1: password1.value,

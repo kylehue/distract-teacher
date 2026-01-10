@@ -65,7 +65,7 @@ import {
 import { ref, watch } from "vue";
 import { useStore } from "../composables/use-store";
 import { MonitorLog, RoomInfo, RoomStudentInfo } from "@/lib/typings";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 
 const show = ref(false);
 const store = useStore();
@@ -73,6 +73,7 @@ const student = ref<RoomStudentInfo>();
 const room = ref<RoomInfo>();
 const monitorLog = ref<MonitorLog>();
 const route = useRoute();
+const router = useRouter();
 
 watch(() => route.query.monitorLogId, async (newId) => {
    if (newId) {
@@ -85,6 +86,13 @@ watch(() => route.query.monitorLogId, async (newId) => {
       monitorLog.value = data.monitorLog;
    } else {
       show.value = false;
+   }
+});
+
+watch(show, (show) => {
+   if (!show) {
+      const { monitorLogId, ...rest } = route.query;
+      router.replace({ query: rest });
    }
 });
 </script>

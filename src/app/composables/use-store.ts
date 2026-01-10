@@ -29,28 +29,9 @@ export const useStore = defineStore("main-store", () => {
 
          const data = fetchRoom.data?.data;
          if (!data) throw new Error("No data");
-
-         allRooms.set(data.room.id, data.room);
-         for (let student of data.students) {
-            allStudents.set(student.id, student);
-
-            getWithDefault(
-               studentsGroupedByRoomId,
-               data.room.id,
-               reactive(new Map())
-            ).set(student.id, student);
-         }
-
-         for (let monitorLog of data.monitorLogs) {
-            allMonitorLogs.set(monitorLog.id, monitorLog);
-
-            getWithDefault(
-               monitorLogsGroupedByRoomId,
-               data.room.id,
-               reactive(new Map())
-            ).set(monitorLog.id, monitorLog);
-         }
-
+         upsertRooms([data.room]);
+         upsertStudents(data.students);
+         upsertMonitorLogs(data.monitorLogs);
          return data;
       } catch {
          // ignore fetch errors
@@ -67,11 +48,7 @@ export const useStore = defineStore("main-store", () => {
 
          const data = fetchRooms.data?.data;
          if (!data) throw new Error("No data");
-
-         for (let room of data.rooms) {
-            allRooms.set(room.id, room);
-         }
-
+         upsertRooms(data.rooms);
          return data;
       } catch {
          // ignore fetch errors
@@ -88,14 +65,7 @@ export const useStore = defineStore("main-store", () => {
 
          const data = fetchStudent.data?.data;
          if (!data) throw new Error("No data");
-         allStudents.set(data.student.id, data.student);
-
-         getWithDefault(
-            studentsGroupedByRoomId,
-            data.student.roomId,
-            reactive(new Map())
-         ).set(data.student.id, data.student);
-
+         upsertStudents([data.student]);
          return data;
       } catch {
          // ignore fetch errors
@@ -112,15 +82,7 @@ export const useStore = defineStore("main-store", () => {
 
          const data = fetchRoomStudents.data?.data;
          if (!data) throw new Error("No data");
-         for (let student of data.students) {
-            allStudents.set(student.id, student);
-
-            getWithDefault(
-               studentsGroupedByRoomId,
-               student.roomId,
-               reactive(new Map())
-            ).set(student.id, student);
-         }
+         upsertStudents(data.students);
          return data;
       } catch {
          // ignore fetch errors
@@ -139,22 +101,9 @@ export const useStore = defineStore("main-store", () => {
 
          const data = fetchMonitorLog.data?.data;
          if (!data) throw new Error("No data");
-         allMonitorLogs.set(data.monitorLog.id, data.monitorLog);
-
-         getWithDefault(
-            monitorLogsGroupedByRoomId,
-            data.monitorLog.roomId,
-            reactive(new Map())
-         ).set(data.monitorLog.id, data.monitorLog);
-
-         allRooms.set(data.room.id, data.room);
-         allStudents.set(data.student.id, data.student);
-
-         getWithDefault(
-            studentsGroupedByRoomId,
-            data.monitorLog.roomId,
-            reactive(new Map())
-         ).set(data.student.id, data.student);
+         upsertRooms([data.room]);
+         upsertMonitorLogs([data.monitorLog]);
+         upsertStudents([data.student]);
 
          return data;
       } catch {
@@ -175,19 +124,48 @@ export const useStore = defineStore("main-store", () => {
          const data = fetchRoomMonitorLogs.data?.data;
          if (!data) throw new Error("No data");
 
-         for (let monitorLog of data.monitorLogs) {
-            allMonitorLogs.set(monitorLog.id, monitorLog);
-
-            getWithDefault(
-               monitorLogsGroupedByRoomId,
-               monitorLog.roomId,
-               reactive(new Map())
-            ).set(monitorLog.id, monitorLog);
-         }
+         upsertMonitorLogs(data.monitorLogs);
          return data;
       } catch {
          // ignore fetch errors
       }
+   }
+
+   function upsertRooms(rooms: RoomInfo[]) {
+      for (let room of rooms) {
+         allRooms.set(room.id, room);
+      }
+   }
+
+   function upsertStudents(students: RoomStudentInfo[]) {
+      for (let student of students) {
+         allStudents.set(student.id, student);
+
+         getWithDefault(
+            studentsGroupedByRoomId,
+            student.roomId,
+            reactive(new Map())
+         ).set(student.id, student);
+      }
+   }
+
+   function upsertMonitorLogs(monitorLogs: MonitorLog[]) {
+      for (let monitorLog of monitorLogs) {
+         allMonitorLogs.set(monitorLog.id, monitorLog);
+         getWithDefault(
+            monitorLogsGroupedByRoomId,
+            monitorLog.roomId,
+            reactive(new Map())
+         ).set(monitorLog.id, monitorLog);
+      }
+   }
+
+   function clear() {
+      allRooms.clear();
+      allStudents.clear();
+      allMonitorLogs.clear();
+      studentsGroupedByRoomId.clear();
+      monitorLogsGroupedByRoomId.clear();
    }
 
    // real-time updates
@@ -196,7 +174,7 @@ export const useStore = defineStore("main-store", () => {
       "teacher:update_room",
       (data) => {
          const room = data.room as RoomInfo;
-         allRooms.set(room.id, room);
+         upsertRooms([room]);
       },
       { autoClean: false }
    );
@@ -205,13 +183,7 @@ export const useStore = defineStore("main-store", () => {
       "teacher:create_student",
       (data) => {
          const student = data.student as RoomStudentInfo;
-         allStudents.set(student.id, student);
-
-         getWithDefault(
-            studentsGroupedByRoomId,
-            student.roomId,
-            reactive(new Map())
-         ).set(student.id, student);
+         upsertStudents([student]);
       },
       { autoClean: false }
    );
@@ -220,13 +192,7 @@ export const useStore = defineStore("main-store", () => {
       "teacher:update_student",
       (data) => {
          const student = data.student as RoomStudentInfo;
-         allStudents.set(student.id, student);
-
-         getWithDefault(
-            studentsGroupedByRoomId,
-            student.roomId,
-            reactive(new Map())
-         ).set(student.id, student);
+         upsertStudents([student]);
       },
       { autoClean: false }
    );
@@ -234,13 +200,8 @@ export const useStore = defineStore("main-store", () => {
    socket.on(
       "teacher:create_monitor_log",
       (data) => {
-         allMonitorLogs.set(data.monitorLog.id, data.monitorLog);
-
-         getWithDefault(
-            monitorLogsGroupedByRoomId,
-            data.monitorLog.roomId,
-            reactive(new Map())
-         ).set(data.monitorLog.id, data.monitorLog);
+         const monitorLog = data.monitorLog as MonitorLog;
+         upsertMonitorLogs([monitorLog]);
       },
       { autoClean: false }
    );
@@ -263,5 +224,9 @@ export const useStore = defineStore("main-store", () => {
       isLoadMonitorLogLoading: computed(() => fetchMonitorLog.isLoading),
       loadMonitorLogs,
       isLoadMonitorLogsLoading: computed(() => fetchRoomMonitorLogs.isLoading),
+      upsertRooms,
+      upsertStudents,
+      upsertMonitorLogs,
+      clear,
    };
 });

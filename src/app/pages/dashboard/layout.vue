@@ -76,7 +76,7 @@ const props = defineProps<{
 
 const router = useRouter();
 const route = useRoute();
-const fetchLogout = useFetch("/api/logout");
+const fetchLogout = useFetch("/api/logout", "POST");
 const message = useMessage();
 
 const menuOptions: MenuMixedOption[] = [
@@ -130,7 +130,7 @@ const activeKey = computed(() => {
 
 async function logout() {
    try {
-      await fetchLogout.execute({ method: "POST" });
+      await fetchLogout.execute();
 
       router.push("/");
       message.create("You have been logged out.");

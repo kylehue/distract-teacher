@@ -1,5 +1,6 @@
 import { onUnmounted, unref } from "vue";
 import { getSocket } from "@/plugins/socket";
+import { keysToCamel } from "@/lib/object";
 
 export function useSocket() {
    const socket = getSocket();
@@ -9,7 +10,7 @@ export function useSocket() {
       handler: (data: Record<any, any>) => void,
       { autoClean = true } = {}
    ) {
-      socket.on(event, handler);
+      socket.on(event, (data) => handler(keysToCamel(data)));
       if (autoClean) {
          onUnmounted(() => socket.off(event, handler));
       }

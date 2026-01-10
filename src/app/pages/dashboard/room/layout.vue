@@ -71,5 +71,6 @@ const activeKey = computed(() => route.path.split("/").pop() || "overview");
 
 onMounted(() => {
    store.loadRoom(route.params.roomId as string);
+   (window as any).$store = store;
 });
 </script>
