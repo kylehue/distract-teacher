@@ -42,8 +42,9 @@
             <video
                class="max-w-[calc(80vw-200px)] max-h-[70vh] min-w-[320px] min-h-[180px] rounded object-contain"
                controls
+               :src="monitorLog.recordingUrl"
+               type="video/webm"
             >
-               <source :src="monitorLog.recordingUrl" type="video/mp4" />
             </video>
          </div>
       </NCard>
