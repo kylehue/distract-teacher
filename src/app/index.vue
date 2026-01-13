@@ -31,7 +31,7 @@ import { useFetch } from "./composables/use-fetch";
 import EvidenceProvider from "./components/evidence-provider.vue";
 import CreateRoomProvider from "./components/create-room-provider.vue";
 
-const fetchValidateSession = useFetch("/api/validate_session", "POST");
+const postValidateSession = useFetch("/api/validate_session", "POST");
 const router = useRouter();
 const theme = ref<"light" | "dark">("dark");
 
@@ -46,7 +46,7 @@ watchEffect(() => {
 // try auto login on mount
 onMounted(async () => {
    try {
-      await fetchValidateSession.execute();
+      await postValidateSession.execute();
       if (!router.currentRoute.value.path.startsWith("/dashboard")) {
          router.push("/dashboard");
       }

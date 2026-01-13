@@ -48,7 +48,7 @@
 <script setup lang="ts">
 import { NButton, NTabs, NTab, NSpin, NText, NTag } from "naive-ui";
 import Layout from "../layout.vue";
-import { computed, onMounted } from "vue";
+import { computed, onMounted, provide } from "vue";
 import { useRouter, useRoute, RouterLink, RouterView } from "vue-router";
 import { renderIcon } from "@/lib/ui";
 import { PhGear, PhHouse, PhUserFocus, PhUsers } from "@phosphor-icons/vue";
@@ -71,6 +71,7 @@ const activeKey = computed(() => route.path.split("/").pop() || "overview");
 
 onMounted(() => {
    store.loadRoom(route.params.roomId as string);
-   (window as any).$store = store;
 });
+
+provide("room", room);
 </script>

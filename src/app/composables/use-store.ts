@@ -16,7 +16,7 @@ export const useStore = defineStore("main-store", () => {
       new Map<string | number, Map<string | number, MonitorLog>>()
    );
 
-   const fetchRoom = useFetch<{
+   const getRoom = useFetch<{
       room: RoomInfo;
       students: RoomStudentInfo[];
       monitorLogs: MonitorLog[];
@@ -25,9 +25,9 @@ export const useStore = defineStore("main-store", () => {
 
    async function loadRoom(roomId: string | number) {
       try {
-         await fetchRoom.execute({ params: { roomId } });
+         await getRoom.execute({ params: { roomId } });
 
-         const data = fetchRoom.data?.data;
+         const data = getRoom.data?.data;
          if (!data) throw new Error("No data");
          upsertRooms([data.room]);
          upsertStudents(data.students);
@@ -38,15 +38,15 @@ export const useStore = defineStore("main-store", () => {
       }
    }
 
-   const fetchRooms = useFetch<{
+   const getRooms = useFetch<{
       rooms: RoomInfo[];
    }>("/api/rooms");
 
    async function loadRooms() {
       try {
-         await fetchRooms.execute();
+         await getRooms.execute();
 
-         const data = fetchRooms.data?.data;
+         const data = getRooms.data?.data;
          if (!data) throw new Error("No data");
          upsertRooms(data.rooms);
          return data;
@@ -55,15 +55,15 @@ export const useStore = defineStore("main-store", () => {
       }
    }
 
-   const fetchStudent = useFetch<{
+   const getStudent = useFetch<{
       student: RoomStudentInfo;
    }>("/api/students/:studentId");
 
    async function loadStudent(studentId: string | number) {
       try {
-         await fetchStudent.execute({ params: { studentId } });
+         await getStudent.execute({ params: { studentId } });
 
-         const data = fetchStudent.data?.data;
+         const data = getStudent.data?.data;
          if (!data) throw new Error("No data");
          upsertStudents([data.student]);
          return data;
@@ -72,15 +72,15 @@ export const useStore = defineStore("main-store", () => {
       }
    }
 
-   const fetchRoomStudents = useFetch<{
+   const getRoomStudents = useFetch<{
       students: RoomStudentInfo[];
    }>("/api/rooms/:roomId/students");
 
    async function loadStudents(roomId: string | number) {
       try {
-         await fetchRoomStudents.execute({ params: { roomId } });
+         await getRoomStudents.execute({ params: { roomId } });
 
-         const data = fetchRoomStudents.data?.data;
+         const data = getRoomStudents.data?.data;
          if (!data) throw new Error("No data");
          upsertStudents(data.students);
          return data;
@@ -89,7 +89,7 @@ export const useStore = defineStore("main-store", () => {
       }
    }
 
-   const fetchMonitorLog = useFetch<{
+   const getMonitorLog = useFetch<{
       monitorLog: MonitorLog;
       room: RoomInfo;
       student: RoomStudentInfo;
@@ -97,9 +97,9 @@ export const useStore = defineStore("main-store", () => {
 
    async function loadMonitorLog(monitorLogId: string | number) {
       try {
-         await fetchMonitorLog.execute({ params: { monitorLogId } });
+         await getMonitorLog.execute({ params: { monitorLogId } });
 
-         const data = fetchMonitorLog.data?.data;
+         const data = getMonitorLog.data?.data;
          if (!data) throw new Error("No data");
          upsertRooms([data.room]);
          upsertMonitorLogs([data.monitorLog]);
@@ -111,17 +111,17 @@ export const useStore = defineStore("main-store", () => {
       }
    }
 
-   const fetchRoomMonitorLogs = useFetch<{
+   const getRoomMonitorLogs = useFetch<{
       monitorLogs: MonitorLog[];
    }>("/api/rooms/:roomId/monitor_logs");
 
    async function loadMonitorLogs(roomId: string | number) {
       try {
-         await fetchRoomMonitorLogs.execute({
+         await getRoomMonitorLogs.execute({
             params: { roomId },
          });
 
-         const data = fetchRoomMonitorLogs.data?.data;
+         const data = getRoomMonitorLogs.data?.data;
          if (!data) throw new Error("No data");
 
          upsertMonitorLogs(data.monitorLogs);
@@ -213,17 +213,17 @@ export const useStore = defineStore("main-store", () => {
       studentsGroupedByRoomId,
       monitorLogsGroupedByRoomId,
       loadRoom,
-      isLoadRoomLoading: computed(() => fetchRoom.isLoading),
+      isLoadRoomLoading: computed(() => getRoom.isLoading),
       loadRooms,
-      isLoadRoomsLoading: computed(() => fetchRooms.isLoading),
+      isLoadRoomsLoading: computed(() => getRooms.isLoading),
       loadStudent,
-      isLoadStudentLoading: computed(() => fetchStudent.isLoading),
+      isLoadStudentLoading: computed(() => getStudent.isLoading),
       loadStudents,
-      isLoadStudentsLoading: computed(() => fetchRoomStudents.isLoading),
+      isLoadStudentsLoading: computed(() => getRoomStudents.isLoading),
       loadMonitorLog,
-      isLoadMonitorLogLoading: computed(() => fetchMonitorLog.isLoading),
+      isLoadMonitorLogLoading: computed(() => getMonitorLog.isLoading),
       loadMonitorLogs,
-      isLoadMonitorLogsLoading: computed(() => fetchRoomMonitorLogs.isLoading),
+      isLoadMonitorLogsLoading: computed(() => getRoomMonitorLogs.isLoading),
       upsertRooms,
       upsertStudents,
       upsertMonitorLogs,

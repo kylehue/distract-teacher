@@ -25,6 +25,10 @@ export interface RoomInfo {
    status: "paused" | "monitoring" | "concluded";
    timeStarted?: number;
    timeEnded?: number;
+   evidenceWarningLevel: WarningLevel;
+   severeWarningPunishment: boolean;
+   allowLateStudents: boolean;
+   joinConfirmation: boolean;
    createdAt: number;
 }
 

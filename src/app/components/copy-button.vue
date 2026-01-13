@@ -3,7 +3,7 @@
       <template #icon>
          <PhCopy />
       </template>
-      <NText :class="props.textClass">
+      <NText v-if="!props.hideText" :class="props.textClass">
          {{ props.textToCopy }}
       </NText>
    </NButton>
@@ -16,6 +16,7 @@ import { ButtonProps, NButton, NText, useMessage } from "naive-ui";
 
 interface Props extends /* @vue-ignore */ ButtonProps {
    textToCopy: string;
+   hideText?: boolean;
    textClass?: string;
 }
 

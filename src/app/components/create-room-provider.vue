@@ -10,7 +10,7 @@
                <NInput
                   v-model:value="form.title"
                   placeholder="Enter the room title"
-                  :disabled="fetch.isLoading"
+                  :disabled="postRooms.isLoading"
                />
             </NFormItem>
 
@@ -23,13 +23,13 @@
                   <NInput
                      v-model:value="form.code"
                      placeholder="Enter the room code"
-                     :disabled="form.autoGenerateCode || fetch.isLoading"
+                     :disabled="form.autoGenerateCode || postRooms.isLoading"
                   />
                   <NCheckbox
                      class="w-fit"
                      v-model:checked="form.autoGenerateCode"
                      size="small"
-                     :disabled="fetch.isLoading"
+                     :disabled="postRooms.isLoading"
                   >
                      <NText depth="3" class="text-xs">
                         Auto-generate room code
@@ -47,7 +47,7 @@
                   v-model:value="form.studentCapacity"
                   placeholder="Enter the max number of students"
                   class="w-full"
-                  :disabled="fetch.isLoading"
+                  :disabled="postRooms.isLoading"
                   :min="0"
                />
             </NFormItem>
@@ -56,7 +56,7 @@
                type="primary"
                block
                class="mt-2!"
-               :loading="fetch.isLoading"
+               :loading="postRooms.isLoading"
                @click="createRoom()"
             >
                Create
@@ -86,7 +86,7 @@ import { useStore } from "../composables/use-store";
 import { RoomInfo } from "@/lib/typings";
 
 const message = useMessage();
-const fetch = useFetch<{
+const postRooms = useFetch<{
    room: RoomInfo;
 }>("/api/rooms", "POST");
 const { isShowing, hide } = useCreateRoom();
@@ -113,7 +113,7 @@ async function createRoom() {
    form.studentCapacityStatus = "success";
 
    try {
-      const { data } = await fetch.execute({
+      const { data } = await postRooms.execute({
          body: {
             title: form.title,
             code: form.code,
@@ -130,16 +130,16 @@ async function createRoom() {
       message.success("Room created successfully!");
       hide();
    } catch {
-      if (!fetch.error) {
+      if (!postRooms.error) {
          return;
       }
 
-      if (!fetch.error.fieldErrors) {
-         message.error(fetch.error.message);
+      if (!postRooms.error.fieldErrors) {
+         message.error(postRooms.error.message);
          return;
       }
 
-      const fieldErrors = fetch.error.fieldErrors;
+      const fieldErrors = postRooms.error.fieldErrors;
       if (fieldErrors.title) {
          form.titleStatus = "error";
          form.titleFeedback = fieldErrors.title;

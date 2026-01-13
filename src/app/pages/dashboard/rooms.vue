@@ -188,11 +188,22 @@ const columns: DataTableColumns<RoomInfo> = [
       defaultSortOrder: "descend",
    },
    {
-      title: "Actions",
+      title: "",
       key: "actions",
+      width: 120,
+      align: "center",
       render(row) {
-         return h(RouterLink, { to: "/dashboard/rooms/" + row.id }, () =>
-            h(NButton, { size: "small" }, { default: () => "View Room" })
+         return h(
+            RouterLink,
+            { to: "/dashboard/rooms/" + row.id },
+            {
+               default: () =>
+                  h(
+                     NButton,
+                     { size: "small", tertiary: true },
+                     { default: () => "View Room" }
+                  ),
+            }
          );
       },
    },

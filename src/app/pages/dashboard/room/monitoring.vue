@@ -7,7 +7,7 @@
             type="error"
             tertiary
             @click="stopMonitoring()"
-            :loading="fetchStopMonitoring.isLoading"
+            :loading="patchStopMonitoring.isLoading"
          >
             Stop Monitoring
             <template #icon>
@@ -19,7 +19,7 @@
             type="success"
             secondary
             @click="startMonitoring()"
-            :loading="fetchStartMonitoring.isLoading"
+            :loading="patchStartMonitoring.isLoading"
          >
             {{ !!room.timeStarted ? "Continue" : "Start" }} Monitoring
             <template #icon>
@@ -31,7 +31,7 @@
             type="warning"
             ghost
             @click="pauseMonitoring()"
-            :loading="fetchPauseMonitoring.isLoading"
+            :loading="patchPauseMonitoring.isLoading"
          >
             Pause Monitoring
             <template #icon>
@@ -61,8 +61,8 @@ import {
    NText,
    useMessage,
 } from "naive-ui";
-import { computed, h, onMounted, reactive, ref, watch } from "vue";
-import { MonitorLog } from "@/lib/typings";
+import { computed, h, inject, onMounted, reactive, Ref, ref, watch } from "vue";
+import { MonitorLog, RoomInfo } from "@/lib/typings";
 import { PhPause, PhPlay, PhStop } from "@phosphor-icons/vue";
 import { RouterLink, useRoute } from "vue-router";
 import { renderIcon } from "@/lib/ui";
@@ -74,12 +74,10 @@ const route = useRoute();
 const message = useMessage();
 const store = useStore();
 const filteredStudentIds = ref<(string | number)[]>([]);
-const room = computed(() =>
-   store.allRooms.get(Number(route.params.roomId as string))
-);
+const room = inject<Ref<RoomInfo>>("room")!;
 const students = computed(
    () =>
-      store.studentsGroupedByRoomId.get(room.value?.id || "") ||
+      store.studentsGroupedByRoomId.get(room.value.id || "") ||
       (new Map() as typeof store.allStudents)
 );
 const monitorLogs = computed(
@@ -200,8 +198,10 @@ const columns: DataTableColumns<MonitorLog> = [
       defaultSortOrder: "descend",
    },
    {
-      title: "Actions",
+      title: "",
       key: "actions",
+      width: 120,
+      align: "center",
       render(row) {
          return h(
             RouterLink,
@@ -210,7 +210,7 @@ const columns: DataTableColumns<MonitorLog> = [
                default: () =>
                   h(
                      NButton,
-                     { size: "small" },
+                     { size: "small", tertiary: true },
                      { default: () => "View Evidence" }
                   ),
             }
@@ -219,11 +219,11 @@ const columns: DataTableColumns<MonitorLog> = [
    },
 ];
 
-const fetchStartMonitoring = useFetch("/api/start_monitoring/:roomId", "PATCH");
+const patchStartMonitoring = useFetch("/api/start_monitoring/:roomId", "PATCH");
 
 async function startMonitoring() {
    try {
-      await fetchStartMonitoring.execute({
+      await patchStartMonitoring.execute({
          params: { roomId: route.params.roomId },
       });
 
@@ -235,11 +235,11 @@ async function startMonitoring() {
    }
 }
 
-const fetchPauseMonitoring = useFetch("/api/pause_monitoring/:roomId", "PATCH");
+const patchPauseMonitoring = useFetch("/api/pause_monitoring/:roomId", "PATCH");
 
 async function pauseMonitoring() {
    try {
-      await fetchPauseMonitoring.execute({
+      await patchPauseMonitoring.execute({
          params: { roomId: route.params.roomId },
       });
 
@@ -251,7 +251,7 @@ async function pauseMonitoring() {
    }
 }
 
-const fetchStopMonitoring = useFetch("/api/stop_monitoring/:roomId", "PATCH");
+const patchStopMonitoring = useFetch("/api/stop_monitoring/:roomId", "PATCH");
 
 async function stopMonitoring() {
    let confirmed = confirm(
@@ -262,7 +262,7 @@ async function stopMonitoring() {
    }
 
    try {
-      await fetchStopMonitoring.execute({
+      await patchStopMonitoring.execute({
          params: { roomId: route.params.roomId },
       });
 

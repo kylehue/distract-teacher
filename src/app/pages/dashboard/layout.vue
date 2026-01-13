@@ -15,7 +15,7 @@
                class="mt-auto!"
                block
                @click="logout"
-               :loading="fetchLogout.isLoading"
+               :loading="postLogout.isLoading"
             >
                Logout
             </NButton>
@@ -76,7 +76,7 @@ const props = defineProps<{
 
 const router = useRouter();
 const route = useRoute();
-const fetchLogout = useFetch("/api/logout", "POST");
+const postLogout = useFetch("/api/logout", "POST");
 const message = useMessage();
 
 const menuOptions: MenuMixedOption[] = [
@@ -102,7 +102,7 @@ const menuOptions: MenuMixedOption[] = [
             RouterLink,
             { to: "/dashboard/reports" },
             {
-               default: () => "Student Reports",
+               default: () => "Reports",
             }
          ),
       key: "/dashboard/reports",
@@ -130,12 +130,12 @@ const activeKey = computed(() => {
 
 async function logout() {
    try {
-      await fetchLogout.execute();
+      await postLogout.execute();
 
       router.push("/");
       message.create("You have been logged out.");
    } catch {
-      message.error(fetchLogout.error?.message || "Logout failed.");
+      message.error(postLogout.error?.message || "Logout failed.");
    }
 }
 </script>

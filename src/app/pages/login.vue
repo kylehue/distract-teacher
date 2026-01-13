@@ -10,7 +10,7 @@
                <NInput
                   v-model:value="username"
                   placeholder="Enter your username"
-                  :disabled="fetch.isLoading"
+                  :disabled="postLogin.isLoading"
                />
             </NFormItem>
 
@@ -23,7 +23,7 @@
                   v-model:value="password"
                   type="password"
                   placeholder="Enter your password"
-                  :disabled="fetch.isLoading"
+                  :disabled="postLogin.isLoading"
                />
             </NFormItem>
 
@@ -31,7 +31,7 @@
                <NButton
                   type="primary"
                   block
-                  :loading="fetch.isLoading"
+                  :loading="postLogin.isLoading"
                   @click="login"
                >
                   Login
@@ -55,7 +55,7 @@ import { useFetch } from "../composables/use-fetch";
 import { useStore } from "../composables/use-store";
 
 const router = useRouter();
-const fetch = useFetch("/api/login", "POST");
+const postLogin = useFetch("/api/login", "POST");
 const message = useMessage();
 const store = useStore();
 const username = ref("");
@@ -71,7 +71,7 @@ async function login() {
    usernameFeedback.value = "";
    passwordFeedback.value = "";
    try {
-      await fetch.execute({
+      await postLogin.execute({
          body: {
             username: username.value,
             password: password.value,
@@ -80,16 +80,16 @@ async function login() {
 
       router.push("/dashboard");
    } catch {
-      if (!fetch.error) {
+      if (!postLogin.error) {
          return;
       }
 
-      if (!fetch.error.fieldErrors) {
-         message.error(fetch.error.message);
+      if (!postLogin.error.fieldErrors) {
+         message.error(postLogin.error.message);
          return;
       }
 
-      const fieldErrors = fetch.error.fieldErrors;
+      const fieldErrors = postLogin.error.fieldErrors;
       if (fieldErrors.username) {
          usernameStatus.value = "error";
          usernameFeedback.value = fieldErrors.username;

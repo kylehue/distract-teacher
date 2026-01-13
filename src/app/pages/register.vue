@@ -10,7 +10,7 @@
                <NInput
                   v-model:value="username"
                   placeholder="Enter your username"
-                  :disabled="fetch.isLoading"
+                  :disabled="postRegister.isLoading"
                />
             </NFormItem>
 
@@ -23,7 +23,7 @@
                   v-model:value="password1"
                   type="password"
                   placeholder="Enter your password"
-                  :disabled="fetch.isLoading"
+                  :disabled="postRegister.isLoading"
                />
             </NFormItem>
 
@@ -36,7 +36,7 @@
                   v-model:value="password2"
                   type="password"
                   placeholder="Enter your password again"
-                  :disabled="fetch.isLoading"
+                  :disabled="postRegister.isLoading"
                />
             </NFormItem>
 
@@ -44,7 +44,7 @@
                <NButton
                   type="primary"
                   block
-                  :loading="fetch.isLoading"
+                  :loading="postRegister.isLoading"
                   @click="register"
                >
                   Register
@@ -78,7 +78,7 @@ const password2Status = ref<"success" | "error">("success");
 const usernameFeedback = ref("");
 const password1Feedback = ref("");
 const password2Feedback = ref("");
-const fetch = useFetch("/api/register", "POST");
+const postRegister = useFetch("/api/register", "POST");
 const message = useMessage();
 
 async function register() {
@@ -90,7 +90,7 @@ async function register() {
    password2Feedback.value = "";
 
    try {
-      await fetch.execute({
+      await postRegister.execute({
          body: {
             username: username.value,
             password1: password1.value,
@@ -101,16 +101,16 @@ async function register() {
       message.success("Registration successful!");
       router.push("/login");
    } catch {
-      if (!fetch.error) {
+      if (!postRegister.error) {
          return;
       }
 
-      if (!fetch.error.fieldErrors) {
-         message.error(fetch.error.message);
+      if (!postRegister.error.fieldErrors) {
+         message.error(postRegister.error.message);
          return;
       }
 
-      const fieldErrors = fetch.error.fieldErrors;
+      const fieldErrors = postRegister.error.fieldErrors;
       if (fieldErrors.username) {
          usernameStatus.value = "error";
          usernameFeedback.value = fieldErrors.username;
