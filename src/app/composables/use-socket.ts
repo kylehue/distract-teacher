@@ -20,7 +20,7 @@ export function useSocket() {
          const _test_handler_ = (args: any) => {
             console.log(`SERVER -> CLIENT (${event}):\n`, args);
          };
-         socket.on(event, _test_handler_);
+         socket.on(event, (data) => _test_handler_(keysToCamel(data)));
          if (autoClean) {
             onUnmounted(() => socket.off(event, _test_handler_));
          }

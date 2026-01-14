@@ -20,7 +20,6 @@ export interface RoomInfo {
    teacherId: string | number;
    title: string;
    code: string;
-   studentCount: number;
    studentCapacity: number;
    status: "paused" | "monitoring" | "concluded";
    timeStarted?: number;
@@ -32,14 +31,19 @@ export interface RoomInfo {
    createdAt: number;
 }
 
-export interface RoomStudentInfo {
+export interface StudentInfo {
    id: string | number;
    roomId: string | number;
-   studentUuid: string;
-   studentName: string;
-   totalLogs: number;
+   uuid: string;
+   name: string;
    timeJoined: number;
    timeLeft?: number;
    active: boolean;
+   createdAt: number;
+}
+
+export interface TeacherInfo {
+   id: string | number;
+   displayName: string;
    createdAt: number;
 }

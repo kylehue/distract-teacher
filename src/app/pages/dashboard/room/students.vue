@@ -3,14 +3,14 @@
       <div class="flex justify-end w-full gap-2">
          <InputSearch
             :documents="studentsArray"
-            :fields="['studentName']"
-            label-field="studentName"
+            :fields="['name']"
+            label-field="name"
             id-field="id"
             placeholder="Search students..."
             class="w-fit!"
             @search="
                (ids) => {
-                  table?.filters({ studentName: ids });
+                  table?.filters({ name: ids });
                }
             "
          ></InputSearch>
@@ -36,8 +36,8 @@ import {
    NText,
    useThemeVars,
 } from "naive-ui";
-import { computed, h, inject, Ref, ref, useTemplateRef } from "vue";
-import { RoomInfo, RoomStudentInfo } from "@/lib/typings";
+import { computed, h, inject, onMounted, Ref, ref, useTemplateRef } from "vue";
+import { RoomInfo, StudentInfo } from "@/lib/typings";
 import { RouterLink, useRoute, useRouter } from "vue-router";
 import InputSearch from "@/app/components/input-search.vue";
 import { getWithDefault } from "@/lib/object";
@@ -58,14 +58,14 @@ const students = computed(() =>
    )
 );
 const studentsArray = computed(() => Array.from(students.value.values()));
-const columns: DataTableColumns<RoomStudentInfo> = [
+const columns: DataTableColumns<StudentInfo> = [
    {
       title: "Student Name",
       key: "studentName",
       ellipsis: { tooltip: { placement: "bottom" } },
       render(row) {
          return h("div", { class: "flex flex-wrap items-center gap-1" }, [
-            h(NText, null, { default: () => row.studentName }),
+            h(NText, null, { default: () => row.name }),
             !row.active
                ? h(
                     NTag,
@@ -79,7 +79,7 @@ const columns: DataTableColumns<RoomStudentInfo> = [
          compare(rowA, rowB) {
             return (
                compareBoolean(rowB.active, rowA.active) ||
-               rowA.studentName.localeCompare(rowB.studentName)
+               rowA.name.localeCompare(rowB.name)
             );
          },
          multiple: 1,
@@ -97,13 +97,14 @@ const columns: DataTableColumns<RoomStudentInfo> = [
          compare(rowA, rowB) {
             return (
                compareBoolean(rowB.active, rowA.active) ||
-               rowA.totalLogs - rowB.totalLogs
+               store.countMonitorLogsOfStudent(rowA.id) -
+                  store.countMonitorLogsOfStudent(rowB.id)
             );
          },
          multiple: 2,
       },
       render(row) {
-         return store.getMonitorLogCountForStudent(row.id);
+         return store.countMonitorLogsOfStudent(row.id);
       },
    },
    {
@@ -206,4 +207,8 @@ function compareBoolean(a: boolean, b: boolean) {
    if (a === b) return 0;
    return a ? 1 : -1;
 }
+
+onMounted(() => {
+   (window as any).$store = store;
+})
 </script>

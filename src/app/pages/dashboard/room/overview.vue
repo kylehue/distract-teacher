@@ -49,7 +49,7 @@ const stats = reactive([
    },
    {
       label: "Number of Students",
-      value: computed(() => store.getStudentCountForRoom(room.value.id)),
+      value: computed(() => store.countStudentsOfRoom(room.value.id)),
       icon: renderIcon(PhUsers),
    },
    {

@@ -51,13 +51,7 @@
                         form.title === room.title) ||
                      patchRoom.isLoading
                   "
-                  @click="
-                     () => {
-                        form.title = room.title;
-                        form.code = room.code;
-                        form.studentCapacity = room.studentCapacity;
-                     }
-                  "
+                  @click="resetGeneralSettings()"
                >
                   Reset All
                </NButton>
@@ -123,13 +117,7 @@
                            room.severeWarningPunishment) ||
                      patchRoom.isLoading
                   "
-                  @click="
-                     () => {
-                        form.evidenceWarningLevel = room.evidenceWarningLevel;
-                        form.severeWarningPunishment =
-                           room.severeWarningPunishment;
-                     }
-                  "
+                  @click="resetMonitoringSettings()"
                >
                   Reset All
                </NButton>
@@ -190,12 +178,7 @@
                         form.joinConfirmation === room.joinConfirmation) ||
                      patchRoom.isLoading
                   "
-                  @click="
-                     () => {
-                        form.allowLateStudents = room.allowLateStudents;
-                        form.joinConfirmation = room.joinConfirmation;
-                     }
-                  "
+                  @click="resetJoiningPermissionSettings()"
                >
                   Reset All
                </NButton>
@@ -243,7 +226,6 @@ import {
    NText,
    useMessage,
 } from "naive-ui";
-import Layout from "./layout.vue";
 import { RoomInfo } from "@/lib/typings";
 import { inject, reactive, Ref } from "vue";
 import { useFetch } from "@/app/composables/use-fetch";
@@ -328,6 +310,18 @@ async function saveGeneralSettings() {
    }
 }
 
+function resetGeneralSettings() {
+   form.title = room.value.title;
+   form.code = room.value.code;
+   form.studentCapacity = room.value.studentCapacity;
+   form.titleStatus = "success";
+   form.codeStatus = "success";
+   form.studentCapacityStatus = "success";
+   form.titleFeedback = "";
+   form.codeFeedback = "";
+   form.studentCapacityFeedback = "";
+}
+
 async function saveMonitoringSettings() {
    form.evidenceWarningLevelFeedback = "";
    form.severeWarningPunishmentFeedback = "";
@@ -368,6 +362,15 @@ async function saveMonitoringSettings() {
    }
 }
 
+function resetMonitoringSettings() {
+   form.evidenceWarningLevel = room.value.evidenceWarningLevel;
+   form.severeWarningPunishment = room.value.severeWarningPunishment;
+   form.evidenceWarningLevelStatus = "success";
+   form.severeWarningPunishmentStatus = "success";
+   form.evidenceWarningLevelFeedback = "";
+   form.severeWarningPunishmentFeedback = "";
+}
+
 async function saveJoiningPermissionSettings() {
    form.allowLateStudentsFeedback = "";
    form.joinConfirmationFeedback = "";
@@ -405,5 +408,14 @@ async function saveJoiningPermissionSettings() {
          form.joinConfirmationFeedback = fieldErrors.joinConfirmation;
       }
    }
+}
+
+function resetJoiningPermissionSettings() {
+   form.allowLateStudents = room.value.allowLateStudents;
+   form.joinConfirmation = room.value.joinConfirmation;
+   form.allowLateStudentsStatus = "success";
+   form.joinConfirmationStatus = "success";
+   form.allowLateStudentsFeedback = "";
+   form.joinConfirmationFeedback = "";
 }
 </script>

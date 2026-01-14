@@ -94,7 +94,7 @@ const columns: DataTableColumns<MonitorLog> = [
          let student = students.value.get(row.studentId);
          return h("div", { class: "flex flex-wrap items-center gap-1" }, [
             h(NText, null, {
-               default: () => student?.studentName || "<Unnamed>",
+               default: () => student?.name || "<Unnamed>",
             }),
             !student?.active
                ? h(
@@ -112,7 +112,7 @@ const columns: DataTableColumns<MonitorLog> = [
             placeholder: "Filter students",
             placement: "right-start",
             options: Array.from(students.value.values()).map((s) => ({
-               label: s.studentName,
+               label: s.name,
                value: s.id,
             })),
             value: filteredStudentIds.value,
@@ -134,7 +134,7 @@ const columns: DataTableColumns<MonitorLog> = [
             const studentA = students.value.get(rowA.studentId);
             const studentB = students.value.get(rowB.studentId);
             if (!studentA || !studentB) return 0;
-            return studentA.studentName.localeCompare(studentB.studentName);
+            return studentA.name.localeCompare(studentB.name);
          },
          multiple: 1,
       },

@@ -1,5 +1,5 @@
 import { computed, reactive, ref, watch } from "vue";
-import type { MonitorLog, RoomInfo, RoomStudentInfo } from "@/lib/typings";
+import type { MonitorLog, RoomInfo, StudentInfo } from "@/lib/typings";
 import { useSocket } from "./use-socket";
 import { getWithDefault } from "@/lib/object";
 import { defineStore } from "pinia";
@@ -7,10 +7,10 @@ import { useFetch } from "./use-fetch";
 
 export const useStore = defineStore("main-store", () => {
    const allRooms = reactive(new Map<string | number, RoomInfo>());
-   const allStudents = reactive(new Map<string | number, RoomStudentInfo>());
+   const allStudents = reactive(new Map<string | number, StudentInfo>());
    const allMonitorLogs = reactive(new Map<string | number, MonitorLog>());
    const studentsGroupedByRoomId = reactive(
-      new Map<string | number, Map<string | number, RoomStudentInfo>>()
+      new Map<string | number, Map<string | number, StudentInfo>>()
    );
    const monitorLogsGroupedByRoomId = reactive(
       new Map<string | number, Map<string | number, MonitorLog>>()
@@ -18,7 +18,7 @@ export const useStore = defineStore("main-store", () => {
 
    const getRoom = useFetch<{
       room: RoomInfo;
-      students: RoomStudentInfo[];
+      students: StudentInfo[];
       monitorLogs: MonitorLog[];
       teacher: any;
    }>("/api/rooms/:roomId");
@@ -56,7 +56,7 @@ export const useStore = defineStore("main-store", () => {
    }
 
    const getStudent = useFetch<{
-      student: RoomStudentInfo;
+      student: StudentInfo;
    }>("/api/students/:studentId");
 
    async function loadStudent(studentId: string | number) {
@@ -73,7 +73,7 @@ export const useStore = defineStore("main-store", () => {
    }
 
    const getRoomStudents = useFetch<{
-      students: RoomStudentInfo[];
+      students: StudentInfo[];
    }>("/api/rooms/:roomId/students");
 
    async function loadStudents(roomId: string | number) {
@@ -92,7 +92,7 @@ export const useStore = defineStore("main-store", () => {
    const getMonitorLog = useFetch<{
       monitorLog: MonitorLog;
       room: RoomInfo;
-      student: RoomStudentInfo;
+      student: StudentInfo;
    }>("/api/monitor_logs/:monitorLogId");
 
    async function loadMonitorLog(monitorLogId: string | number) {
@@ -137,7 +137,7 @@ export const useStore = defineStore("main-store", () => {
       }
    }
 
-   function upsertStudents(students: RoomStudentInfo[]) {
+   function upsertStudents(students: StudentInfo[]) {
       for (let student of students) {
          allStudents.set(student.id, student);
 
@@ -168,6 +168,25 @@ export const useStore = defineStore("main-store", () => {
       monitorLogsGroupedByRoomId.clear();
    }
 
+   function countStudentsOfRoom(roomId: string | number) {
+      return studentsGroupedByRoomId.get(roomId)?.size ?? 0;
+   }
+
+   function countMonitorLogsOfStudent(studentId: string | number) {
+      let count = 0;
+      let student = allStudents.get(studentId);
+      if (!student) return count;
+      let roomId = student.roomId;
+      let monitorLogs = monitorLogsGroupedByRoomId.get(roomId);
+      if (!monitorLogs) return count;
+      for (let [_, monitorLog] of monitorLogs) {
+         if (monitorLog.studentId !== studentId) continue;
+         count++;
+      }
+
+      return count;
+   }
+
    // real-time updates
    const socket = useSocket();
    socket.on(
@@ -182,7 +201,7 @@ export const useStore = defineStore("main-store", () => {
    socket.on(
       "teacher:create_student",
       (data) => {
-         const student = data.student as RoomStudentInfo;
+         const student = data.student as StudentInfo;
          upsertStudents([student]);
       },
       { autoClean: false }
@@ -191,7 +210,7 @@ export const useStore = defineStore("main-store", () => {
    socket.on(
       "teacher:update_student",
       (data) => {
-         const student = data.student as RoomStudentInfo;
+         const student = data.student as StudentInfo;
          upsertStudents([student]);
       },
       { autoClean: false }
@@ -228,5 +247,7 @@ export const useStore = defineStore("main-store", () => {
       upsertStudents,
       upsertMonitorLogs,
       clear,
+      countStudentsOfRoom,
+      countMonitorLogsOfStudent,
    };
 });

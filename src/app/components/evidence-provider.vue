@@ -20,7 +20,7 @@
                <NDescriptions label-placement="top" class="w-full" :column="1">
                   <NDescriptionsItem label="Student Name">
                      <NText class="block max-w-[200px]">
-                        {{ student?.studentName || "<unknown>" }}
+                        {{ student?.name || "<unknown>" }}
                      </NText>
                   </NDescriptionsItem>
                   <NDescriptionsItem label="Room">
@@ -65,12 +65,12 @@ import {
 } from "naive-ui";
 import { ref, watch } from "vue";
 import { useStore } from "../composables/use-store";
-import { MonitorLog, RoomInfo, RoomStudentInfo } from "@/lib/typings";
+import { MonitorLog, RoomInfo, StudentInfo } from "@/lib/typings";
 import { useRoute, useRouter } from "vue-router";
 
 const show = ref(false);
 const store = useStore();
-const student = ref<RoomStudentInfo>();
+const student = ref<StudentInfo>();
 const room = ref<RoomInfo>();
 const monitorLog = ref<MonitorLog>();
 const route = useRoute();

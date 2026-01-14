@@ -88,11 +88,14 @@ const columns: DataTableColumns<RoomInfo> = [
       title: "Students",
       key: "students",
       render(row) {
-         return `${row.studentCount} / ${row.studentCapacity}`;
+         return `${store.countStudentsOfRoom(row.id)} / ${row.studentCapacity}`;
       },
       sorter: {
          compare(rowA, rowB) {
-            return rowA.studentCount - rowB.studentCount;
+            return (
+               store.countStudentsOfRoom(rowA.id) -
+               store.countStudentsOfRoom(rowB.id)
+            );
          },
          multiple: 2,
       },
