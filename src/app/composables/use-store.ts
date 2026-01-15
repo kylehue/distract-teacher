@@ -225,6 +225,15 @@ export const useStore = defineStore("main-store", () => {
       { autoClean: false }
    );
 
+   socket.on(
+      "teacher:update_monitor_log",
+      (data) => {
+         const monitorLog = data.monitorLog as MonitorLog;
+         upsertMonitorLogs([monitorLog]);
+      },
+      { autoClean: false }
+   );
+
    return {
       allRooms,
       allStudents,

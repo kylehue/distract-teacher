@@ -14,8 +14,12 @@
                store.isLoadRoomLoading
             "
          />
-         <NEmpty v-else-if="!monitorLog" description="Not found" />
-         <div v-else class="flex w-full h-full gap-8">
+         <NEmpty
+            v-else-if="!monitorLog"
+            description="Not found"
+            size="huge"
+         />
+         <div v-else class="flex items-center w-full h-full gap-8">
             <div class="flex">
                <NDescriptions label-placement="top" class="w-full" :column="1">
                   <NDescriptionsItem label="Student Name">
@@ -39,7 +43,17 @@
                   </NDescriptionsItem>
                </NDescriptions>
             </div>
+            <NEmpty
+               v-if="!monitorLog.recordingUrl"
+               description="Recording is either still being processed or unavailable. Please try again later."
+               align="center"
+               class="max-w-[300px]"
+               size="huge"
+            >
+               <template #icon><PhVideoCameraSlash/></template>
+            </NEmpty>
             <video
+               v-else
                class="max-w-[calc(80vw-200px)] max-h-[70vh] min-w-[320px] min-h-[180px] rounded object-contain"
                controls
                :src="monitorLog.recordingUrl"
@@ -67,6 +81,8 @@ import { ref, watch } from "vue";
 import { useStore } from "../composables/use-store";
 import { MonitorLog, RoomInfo, StudentInfo } from "@/lib/typings";
 import { useRoute, useRouter } from "vue-router";
+import { PhVideoCameraSlash } from "@phosphor-icons/vue";
+import { renderIcon } from "@/lib/ui";
 
 const show = ref(false);
 const store = useStore();
