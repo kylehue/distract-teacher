@@ -32,6 +32,7 @@ import CopyButton from "@/app/components/copy-button.vue";
 import { computed, h, inject, reactive, Ref } from "vue";
 import { useStore } from "@/app/composables/use-store";
 import { RoomInfo } from "@/lib/typings";
+import { timestampToDateString, timestampToTimeString } from "@/lib/datetime";
 const store = useStore();
 const room = inject<Ref<RoomInfo>>("room")!;
 const stats = reactive([
@@ -54,26 +55,20 @@ const stats = reactive([
    },
    {
       label: "Date Created",
-      value: new Date(room.value.createdAt).toLocaleDateString(),
+      value: timestampToDateString(room.value.createdAt),
       icon: renderIcon(PhCalendar),
    },
    {
       label: "Time Started",
       value: room.value.timeStarted
-         ? new Date(room.value.timeStarted).toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-           })
+         ? timestampToTimeString(room.value.timeStarted)
          : "N/A",
       icon: renderIcon(PhTimer),
    },
    {
       label: "Time Ended",
       value: room.value.timeEnded
-         ? new Date(room.value.timeEnded).toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-           })
+         ? timestampToTimeString(room.value.timeEnded)
          : "N/A",
       icon: renderIcon(PhTimer),
    },

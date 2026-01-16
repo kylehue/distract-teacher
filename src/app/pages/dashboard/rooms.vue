@@ -51,6 +51,7 @@ import { RoomInfo } from "@/lib/typings";
 import { RouterLink } from "vue-router";
 import { useStore } from "@/app/composables/use-store";
 import { useCreateRoom } from "@/app/composables/use-create-room";
+import { compareTimestamps, timestampToDateString, timestampToTimeString } from "@/lib/datetime";
 
 const store = useStore();
 const createRoom = useCreateRoom();
@@ -140,17 +141,11 @@ const columns: DataTableColumns<RoomInfo> = [
       key: "timeStarted",
       render(row) {
          if (!row.timeStarted) return "N/A";
-         const date = new Date(row.timeStarted);
-         return date.toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-         });
+         return timestampToTimeString(row.timeStarted);
       },
       sorter: {
          compare(rowA, rowB) {
-            const timeA = rowA.timeStarted || 0;
-            const timeB = rowB.timeStarted || 0;
-            return timeA - timeB;
+            return compareTimestamps(rowA.timeStarted, rowB.timeStarted);
          },
          multiple: 3,
       },
@@ -160,17 +155,11 @@ const columns: DataTableColumns<RoomInfo> = [
       key: "timeEnded",
       render(row) {
          if (!row.timeEnded) return "N/A";
-         const date = new Date(row.timeEnded);
-         return date.toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-         });
+         return timestampToTimeString(row.timeEnded);
       },
       sorter: {
          compare(rowA, rowB) {
-            const timeA = rowA.timeEnded || 0;
-            const timeB = rowB.timeEnded || 0;
-            return timeA - timeB;
+            return compareTimestamps(rowA.timeEnded, rowB.timeEnded);
          },
          multiple: 3,
       },
@@ -179,12 +168,11 @@ const columns: DataTableColumns<RoomInfo> = [
       title: "Date Created",
       key: "dateCreated",
       render(row) {
-         const date = new Date(row.createdAt);
-         return date.toLocaleDateString();
+         return timestampToDateString(row.createdAt);
       },
       sorter: {
          compare(rowA, rowB) {
-            return rowA.createdAt - rowB.createdAt;
+            return compareTimestamps(rowA.createdAt, rowB.createdAt);
          },
          multiple: 4,
       },

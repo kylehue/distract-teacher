@@ -69,6 +69,7 @@ import { renderIcon } from "@/lib/ui";
 import FilterMenuMultiselect from "@/app/components/filter-menu-multiselect.vue";
 import { useStore } from "@/app/composables/use-store";
 import { useFetch } from "@/app/composables/use-fetch";
+import { compareTimestamps, timestampToTimeString } from "@/lib/datetime";
 
 const route = useRoute();
 const message = useMessage();
@@ -182,16 +183,11 @@ const columns: DataTableColumns<MonitorLog> = [
       title: "Time",
       key: "time",
       render(row) {
-         const date = new Date(row.createdAt);
-         return date.toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-         });
+         return timestampToTimeString(row.createdAt, false, true);
       },
       sorter: {
          compare(rowA, rowB) {
-            return rowA.createdAt - rowB.createdAt;
+            return compareTimestamps(rowA.createdAt, rowB.createdAt);
          },
          multiple: 2,
       },

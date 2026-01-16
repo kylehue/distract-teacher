@@ -44,6 +44,7 @@ import { getWithDefault } from "@/lib/object";
 import { useStore } from "@/app/composables/use-store";
 import { renderIcon } from "@/lib/ui";
 import { PhDotsThreeVertical } from "@phosphor-icons/vue";
+import { compareTimestamps, timestampToTimeString } from "@/lib/datetime";
 
 const table = useTemplateRef("table");
 const route = useRoute();
@@ -111,17 +112,14 @@ const columns: DataTableColumns<StudentInfo> = [
       title: "Time Joined",
       key: "timeJoined",
       render(row) {
-         const date = new Date(row.timeJoined);
-         return date.toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-         });
+         return timestampToTimeString(row.timeJoined);
       },
       sorter: {
          compare(rowA, rowB) {
-            const timeA = rowA.timeJoined || 0;
-            const timeB = rowB.timeJoined || 0;
-            return compareBoolean(rowB.active, rowA.active) || timeA - timeB;
+            return (
+               compareBoolean(rowB.active, rowA.active) ||
+               compareTimestamps(rowA.timeJoined, rowB.timeJoined)
+            );
          },
          multiple: 3,
       },
@@ -131,17 +129,14 @@ const columns: DataTableColumns<StudentInfo> = [
       key: "timeLeft",
       render(row) {
          if (!row.timeLeft) return "N/A";
-         const date = new Date(row.timeLeft);
-         return date.toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-         });
+         return timestampToTimeString(row.timeLeft);
       },
       sorter: {
          compare(rowA, rowB) {
-            const timeA = rowA.timeLeft || 0;
-            const timeB = rowB.timeLeft || 0;
-            return compareBoolean(rowB.active, rowA.active) || timeA - timeB;
+            return (
+               compareBoolean(rowB.active, rowA.active) ||
+               compareTimestamps(rowA.timeLeft, rowB.timeLeft)
+            );
          },
          multiple: 3,
       },
@@ -210,5 +205,5 @@ function compareBoolean(a: boolean, b: boolean) {
 
 onMounted(() => {
    (window as any).$store = store;
-})
+});
 </script>

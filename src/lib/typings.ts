@@ -3,7 +3,7 @@ export interface MonitorLog {
    roomId: string | number;
    studentId: string | number;
    warningLevel: WarningLevel;
-   createdAt: number;
+   createdAt: string;
 
    integrityScore: number;
    rfScoreAvg: number;
@@ -22,13 +22,13 @@ export interface RoomInfo {
    code: string;
    studentCapacity: number;
    status: "paused" | "monitoring" | "concluded";
-   timeStarted?: number;
-   timeEnded?: number;
+   timeStarted?: string;
+   timeEnded?: string;
    evidenceWarningLevel: WarningLevel;
    severeWarningPunishment: boolean;
    allowLateStudents: boolean;
    joinConfirmation: boolean;
-   createdAt: number;
+   createdAt: string;
 }
 
 export interface StudentInfo {
@@ -36,14 +36,14 @@ export interface StudentInfo {
    roomId: string | number;
    uuid: string;
    name: string;
-   timeJoined: number;
-   timeLeft?: number;
+   timeJoined: string;
+   timeLeft?: string;
    active: boolean;
-   createdAt: number;
+   createdAt: string;
 }
 
 export interface TeacherInfo {
    id: string | number;
    displayName: string;
-   createdAt: number;
+   createdAt: string;
 }
