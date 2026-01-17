@@ -1,7 +1,0 @@
-<template>
-   <Layout title="Overview">empty</Layout>
-</template>
-
-<script setup lang="ts">
-import Layout from "./layout.vue";
-</script>

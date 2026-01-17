@@ -26,7 +26,7 @@
       <template #header-extra>
          <div class="flex flex-row gap-2">
             <NButton @click="createRoom.show()">
-               Create New Room
+               Create Room
                <template #icon><PhPlus></PhPlus></template>
             </NButton>
          </div>

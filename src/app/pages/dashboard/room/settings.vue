@@ -1,5 +1,6 @@
 <template>
-   <div class="flex flex-col gap-4">
+   <template v-if="!room">Nothing</template>
+   <div v-else class="flex flex-col gap-4">
       <NCard>
          <template #header>General</template>
          <NForm class="flex flex-col gap-2 items-start justify-start">
@@ -247,36 +248,37 @@ import { useFetch } from "@/app/composables/use-fetch";
 import { useStore } from "@/app/composables/use-store";
 import { PhTrash } from "@phosphor-icons/vue";
 import { useRouter } from "vue-router";
+import { ROOM_INJECTION_KEY } from "@/lib/injection-keys";
 
-const room = inject<Ref<RoomInfo>>("room")!;
+const room = inject(ROOM_INJECTION_KEY)!;
 const store = useStore();
 
 const form = reactive({
-   title: room.value.title,
+   title: room.value!.title,
    titleStatus: "success" as "success" | "error",
    titleFeedback: "",
-   code: room.value.code,
+   code: room.value!.code,
    codeStatus: "success" as "success" | "error",
    codeFeedback: "",
-   studentCapacity: room.value.studentCapacity,
+   studentCapacity: room.value!.studentCapacity,
    studentCapacityStatus: "success" as "success" | "error",
    studentCapacityFeedback: "",
-   evidenceWarningLevel: room.value.evidenceWarningLevel,
+   evidenceWarningLevel: room.value!.evidenceWarningLevel,
    evidenceWarningLevelStatus: "success" as "success" | "error",
    evidenceWarningLevelFeedback: "",
-   severeWarningPunishment: room.value.severeWarningPunishment,
+   severeWarningPunishment: room.value!.severeWarningPunishment,
    severeWarningPunishmentStatus: "success" as "success" | "error",
    severeWarningPunishmentFeedback: "",
-   allowLateStudents: room.value.allowLateStudents,
+   allowLateStudents: room.value!.allowLateStudents,
    allowLateStudentsStatus: "success" as "success" | "error",
    allowLateStudentsFeedback: "",
-   joinConfirmation: room.value.joinConfirmation,
+   joinConfirmation: room.value!.joinConfirmation,
    joinConfirmationStatus: "success" as "success" | "error",
    joinConfirmationFeedback: "",
 });
 const message = useMessage();
 const patchRoom = useFetch<{ room: RoomInfo }>(
-   `/api/rooms/${room.value.id}`,
+   `/api/rooms/${room.value!.id}`,
    "PATCH"
 );
 
@@ -328,9 +330,9 @@ async function saveGeneralSettings() {
 }
 
 function resetGeneralSettings() {
-   form.title = room.value.title;
-   form.code = room.value.code;
-   form.studentCapacity = room.value.studentCapacity;
+   form.title = room.value!.title;
+   form.code = room.value!.code;
+   form.studentCapacity = room.value!.studentCapacity;
    form.titleStatus = "success";
    form.codeStatus = "success";
    form.studentCapacityStatus = "success";
@@ -380,8 +382,8 @@ async function saveMonitoringSettings() {
 }
 
 function resetMonitoringSettings() {
-   form.evidenceWarningLevel = room.value.evidenceWarningLevel;
-   form.severeWarningPunishment = room.value.severeWarningPunishment;
+   form.evidenceWarningLevel = room.value!.evidenceWarningLevel;
+   form.severeWarningPunishment = room.value!.severeWarningPunishment;
    form.evidenceWarningLevelStatus = "success";
    form.severeWarningPunishmentStatus = "success";
    form.evidenceWarningLevelFeedback = "";
@@ -428,8 +430,8 @@ async function saveJoiningPermissionSettings() {
 }
 
 function resetJoiningPermissionSettings() {
-   form.allowLateStudents = room.value.allowLateStudents;
-   form.joinConfirmation = room.value.joinConfirmation;
+   form.allowLateStudents = room.value!.allowLateStudents;
+   form.joinConfirmation = room.value!.joinConfirmation;
    form.allowLateStudentsStatus = "success";
    form.joinConfirmationStatus = "success";
    form.allowLateStudentsFeedback = "";
@@ -437,13 +439,13 @@ function resetJoiningPermissionSettings() {
 }
 
 const dialog = useDialog();
-const deleteRoom = useFetch(`/api/rooms/${room.value.id}`, "DELETE");
+const deleteRoom = useFetch(`/api/rooms/${room.value!.id}`, "DELETE");
 const router = useRouter();
 function handleDeleteRoom() {
    let value = ref("");
    let feedback = ref("");
-   let roomCode = room.value.code;
-   let roomId = room.value.id;
+   let roomCode = room.value!.code;
+   let roomId = room.value!.id;
    let _dialog = dialog.error({
       title: "Confirm Delete",
       content: () => {

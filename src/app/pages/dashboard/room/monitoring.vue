@@ -70,20 +70,21 @@ import FilterMenuMultiselect from "@/app/components/filter-menu-multiselect.vue"
 import { useStore } from "@/app/composables/use-store";
 import { useFetch } from "@/app/composables/use-fetch";
 import { compareTimestamps, timestampToTimeString } from "@/lib/datetime";
+import { ROOM_INJECTION_KEY } from "@/lib/injection-keys";
 
 const route = useRoute();
 const message = useMessage();
 const store = useStore();
 const filteredStudentIds = ref<(string | number)[]>([]);
-const room = inject<Ref<RoomInfo>>("room")!;
+const room = inject(ROOM_INJECTION_KEY)!;
 const students = computed(
    () =>
-      store.studentsGroupedByRoomId.get(room.value.id || "") ||
+      store.studentsGroupedByRoomId.get(room.value!.id || "") ||
       (new Map() as typeof store.allStudents)
 );
 const monitorLogs = computed(
    () =>
-      store.monitorLogsGroupedByRoomId.get(room.value?.id || "") ||
+      store.monitorLogsGroupedByRoomId.get(room.value!.id || "") ||
       (new Map() as typeof store.allMonitorLogs)
 );
 

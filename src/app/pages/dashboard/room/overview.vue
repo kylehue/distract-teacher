@@ -33,16 +33,17 @@ import { computed, h, inject, reactive, Ref } from "vue";
 import { useStore } from "@/app/composables/use-store";
 import { RoomInfo } from "@/lib/typings";
 import { timestampToDateString, timestampToTimeString } from "@/lib/datetime";
+import { ROOM_INJECTION_KEY } from "@/lib/injection-keys";
 const store = useStore();
-const room = inject<Ref<RoomInfo>>("room")!;
+const room = inject(ROOM_INJECTION_KEY)!;
 const stats = reactive([
    {
       label: "Room Code",
-      value: room.value.code,
+      value: room.value!.code,
       icon: renderIcon(PhPassword),
       suffix: () =>
          h(CopyButton, {
-            textToCopy: room.value.code,
+            textToCopy: room.value!.code,
             hideText: true,
             circle: true,
             quaternary: true,
@@ -50,25 +51,25 @@ const stats = reactive([
    },
    {
       label: "Number of Students",
-      value: computed(() => store.countStudentsOfRoom(room.value.id)),
+      value: computed(() => store.countStudentsOfRoom(room.value!.id)),
       icon: renderIcon(PhUsers),
    },
    {
       label: "Date Created",
-      value: timestampToDateString(room.value.createdAt),
+      value: timestampToDateString(room.value!.createdAt),
       icon: renderIcon(PhCalendar),
    },
    {
       label: "Time Started",
-      value: room.value.timeStarted
-         ? timestampToTimeString(room.value.timeStarted)
+      value: room.value!.timeStarted
+         ? timestampToTimeString(room.value!.timeStarted)
          : "N/A",
       icon: renderIcon(PhTimer),
    },
    {
       label: "Time Ended",
-      value: room.value.timeEnded
-         ? timestampToTimeString(room.value.timeEnded)
+      value: room.value!.timeEnded
+         ? timestampToTimeString(room.value!.timeEnded)
          : "N/A",
       icon: renderIcon(PhTimer),
    },

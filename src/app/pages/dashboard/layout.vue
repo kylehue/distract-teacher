@@ -1,141 +1,31 @@
 <template>
-   <NLayout has-sider class="w-screen h-screen">
-      <!-- Sidebar Navigation -->
-      <NLayoutSider :collapsed="false" :width="240">
-         <div class="flex flex-col p-2 h-full">
-            <NMenu
-               :options="menuOptions"
-               :value="activeKey"
-               @update:value="router.push"
-               :accordion="true"
-            />
-
-            <NButton
-               type="tertiary"
-               class="mt-auto!"
-               block
-               @click="logout"
-               :loading="postLogout.isLoading"
-            >
-               Logout
-            </NButton>
+   <NLayout class="w-full h-full">
+      <NLayoutContent class="w-full h-full" content-class="flex flex-col p-8">
+         <div class="flex flex-row items-center justify-between mb-8">
+            <div class="flex items-center">
+               <NText v-if="!!title" strong class="text-lg">
+                  {{ title }}
+               </NText>
+               <slot name="header"></slot>
+            </div>
+            <div class="flex items-center">
+               <slot name="header-extra"></slot>
+            </div>
          </div>
-      </NLayoutSider>
-
-      <!-- Main Content Area -->
-      <NLayout>
-         <NLayoutContent
-            class="w-full h-full"
-            content-class="flex flex-col p-8"
-         >
-            <div class="flex flex-row items-center justify-between mb-8">
-               <div class="flex items-center">
-                  <NText v-if="!!title" strong class="text-lg">
-                     {{ title }}
-                  </NText>
-                  <slot name="header"></slot>
-               </div>
-               <div class="flex items-center">
-                  <slot name="header-extra"></slot>
-               </div>
-            </div>
-            <NDivider v-if="!noDivider" class="m-0!" />
-            <div class="flex flex-col h-full">
-               <div class="w-full h-4 flex-none"></div>
-               <slot></slot>
-               <div class="w-full h-8 flex-none"></div>
-            </div>
-         </NLayoutContent>
-      </NLayout>
+         <NDivider v-if="!noDivider" class="m-0!" />
+         <div class="flex flex-col h-full">
+            <div class="w-full h-4 flex-none"></div>
+            <slot></slot>
+            <div class="w-full h-8 flex-none"></div>
+         </div>
+      </NLayoutContent>
    </NLayout>
 </template>
 
 <script setup lang="ts">
-import { computed, h } from "vue";
-import { useRouter, useRoute, RouterLink } from "vue-router";
-import {
-   NLayout,
-   NLayoutSider,
-   NLayoutContent,
-   NMenu,
-   NButton,
-   NText,
-   NDivider,
-   useMessage,
-} from "naive-ui";
-import { MenuMixedOption } from "naive-ui/es/menu/src/interface";
-import { PhChartBar, PhHouse, PhVideoConference } from "@phosphor-icons/vue";
-import { renderIcon } from "@/lib/ui";
-import { isUrlRelatedToParent } from "@/lib/url";
-import { useFetch } from "@/app/composables/use-fetch";
-
+import { NLayout, NLayoutContent, NText, NDivider } from "naive-ui";
 const props = defineProps<{
    title?: string;
    noDivider?: boolean;
 }>();
-
-const router = useRouter();
-const route = useRoute();
-const postLogout = useFetch("/api/logout", "POST");
-const message = useMessage();
-
-const menuOptions: MenuMixedOption[] = [
-   {
-      label: () =>
-         h(
-            RouterLink,
-            { to: "/dashboard/overview" },
-            { default: () => "Overview" }
-         ),
-      key: "/dashboard/overview",
-      icon: renderIcon(PhHouse),
-   },
-   {
-      label: () =>
-         h(RouterLink, { to: "/dashboard/rooms" }, { default: () => "Rooms" }),
-      key: "/dashboard/rooms",
-      icon: renderIcon(PhVideoConference),
-   },
-   {
-      label: () =>
-         h(
-            RouterLink,
-            { to: "/dashboard/reports" },
-            {
-               default: () => "Reports",
-            }
-         ),
-      key: "/dashboard/reports",
-      icon: renderIcon(PhChartBar),
-   },
-];
-
-const activeKey = computed(() => {
-   const path = route.path;
-
-   if (isUrlRelatedToParent(path, "/dashboard/rooms")) {
-      return "/dashboard/rooms";
-   }
-
-   if (isUrlRelatedToParent(path, "/dashboard/reports")) {
-      return "/dashboard/reports";
-   }
-
-   if (isUrlRelatedToParent(path, "/dashboard/overview")) {
-      return "/dashboard/overview";
-   }
-
-   return path;
-});
-
-async function logout() {
-   try {
-      await postLogout.execute();
-
-      router.push("/");
-      message.create("You have been logged out.");
-   } catch {
-      message.error(postLogout.error?.message || "Logout failed.");
-   }
-}
 </script>

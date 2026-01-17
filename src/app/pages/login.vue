@@ -1,5 +1,5 @@
 <template>
-   <div class="flex items-center justify-center h-screen">
+   <div class="flex items-center justify-center mt-20">
       <NCard class="flex w-[420px]!" title="Login">
          <NForm>
             <NFormItem
@@ -48,14 +48,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { inject, ref } from "vue";
 import { NCard, NForm, NFormItem, NInput, NButton, useMessage } from "naive-ui";
 import { useRouter, RouterLink } from "vue-router";
 import { useFetch } from "../composables/use-fetch";
 import { useStore } from "../composables/use-store";
+import { TEACHER_INJECTION_KEY } from "@/lib/injection-keys";
+import { TeacherInfo } from "@/lib/typings";
 
 const router = useRouter();
-const postLogin = useFetch("/api/login", "POST");
+const postLogin = useFetch<{ teacher: TeacherInfo }>("/api/login", "POST");
 const message = useMessage();
 const store = useStore();
 const username = ref("");
@@ -64,6 +66,7 @@ const usernameStatus = ref<"error" | "success">("success");
 const passwordStatus = ref<"error" | "success">("success");
 const usernameFeedback = ref("");
 const passwordFeedback = ref("");
+const teacher = inject(TEACHER_INJECTION_KEY);
 
 async function login() {
    usernameStatus.value = "success";
@@ -71,12 +74,16 @@ async function login() {
    usernameFeedback.value = "";
    passwordFeedback.value = "";
    try {
-      await postLogin.execute({
+      const result = await postLogin.execute({
          body: {
             username: username.value,
             password: password.value,
          },
       });
+
+      if (teacher) {
+         teacher.value = result.data?.teacher ?? null;
+      }
 
       router.push("/dashboard");
    } catch {

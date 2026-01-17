@@ -45,16 +45,17 @@ import { useStore } from "@/app/composables/use-store";
 import { renderIcon } from "@/lib/ui";
 import { PhDotsThreeVertical } from "@phosphor-icons/vue";
 import { compareTimestamps, timestampToTimeString } from "@/lib/datetime";
+import { ROOM_INJECTION_KEY } from "@/lib/injection-keys";
 
 const table = useTemplateRef("table");
 const route = useRoute();
 const store = useStore();
 const theme = useThemeVars();
-const room = inject<Ref<RoomInfo>>("room")!;
+const room = inject(ROOM_INJECTION_KEY)!;
 const students = computed(() =>
    getWithDefault(
       store.studentsGroupedByRoomId,
-      room.value.id,
+      room.value!.id,
       new Map() as typeof store.allStudents
    )
 );

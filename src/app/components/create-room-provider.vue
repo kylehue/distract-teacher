@@ -1,6 +1,6 @@
 <template>
    <NModal v-model:show="isShowing" closable>
-      <NCard title="Create New Room" closable @close="hide" class="w-[420px]!">
+      <NCard title="Create Room" closable @close="hide" class="w-[420px]!">
          <NForm>
             <NFormItem
                label="Room Title"

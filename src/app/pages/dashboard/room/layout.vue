@@ -53,13 +53,14 @@ import { useRouter, useRoute, RouterLink, RouterView } from "vue-router";
 import { renderIcon } from "@/lib/ui";
 import { PhGear, PhHouse, PhUserFocus, PhUsers } from "@phosphor-icons/vue";
 import { useStore } from "@/app/composables/use-store";
+import { ROOM_INJECTION_KEY } from "@/lib/injection-keys";
 
 const router = useRouter();
 const route = useRoute();
 const store = useStore();
 
-const room = computed(() =>
-   store.allRooms.get(Number(route.params.roomId as string))
+const room = computed(
+   () => store.allRooms.get(Number(route.params.roomId as string)) ?? null,
 );
 const tabs = [
    { name: "Overview", key: "overview", icon: renderIcon(PhHouse) },
@@ -73,5 +74,5 @@ onMounted(() => {
    store.loadRoom(route.params.roomId as string);
 });
 
-provide("room", room);
+provide(ROOM_INJECTION_KEY, room);
 </script>
