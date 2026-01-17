@@ -6,11 +6,13 @@
          theme === 'light' ? lightThemeOverrides : darkThemeOverrides
       "
    >
-      <NMessageProvider placement="bottom-left" closable keep-alive-on-hover>
-         <RouterView />
-         <EvidenceProvider />
-         <CreateRoomProvider />
-      </NMessageProvider>
+      <NDialogProvider>
+         <NMessageProvider placement="bottom-left" closable keep-alive-on-hover>
+            <RouterView />
+            <EvidenceProvider />
+            <CreateRoomProvider />
+         </NMessageProvider>
+      </NDialogProvider>
       <NGlobalStyle />
    </NConfigProvider>
 </template>
@@ -23,6 +25,7 @@ import {
    lightTheme,
    darkTheme,
    NMessageProvider,
+   NDialogProvider,
 } from "naive-ui";
 import { KeepAlive, onMounted, ref, watchEffect } from "vue";
 import { RouterView, useRouter } from "vue-router";

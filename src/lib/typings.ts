@@ -1,3 +1,23 @@
+const FEATURE_COLUMNS = [
+   "faceX",
+   "faceY",
+   "faceW",
+   "faceH",
+   "faceConf",
+   "eyeGazeX",
+   "eyeGazeY",
+   "headYaw",
+   "headPitch",
+   "headRoll",
+   "wristLeftX",
+   "wristLeftY",
+   "wristRightX",
+   "wristRightY",
+   "faceCount",
+   "handCount",
+   "facePresent",
+] as const;
+
 export interface MonitorLog {
    id: string | number;
    roomId: string | number;
@@ -6,8 +26,9 @@ export interface MonitorLog {
    createdAt: string;
 
    integrityScore: number;
-   rfScoreAvg: number;
-   ifScoreAvg: number;
+   rfScore: number;
+   ifScore: number;
+   featureImpacts: Record<(typeof FEATURE_COLUMNS)[number], number>;
 
    recordingPath: string;
    recordingUrl: string;

@@ -19,8 +19,8 @@
             description="Not found"
             size="huge"
          />
-         <div v-else class="flex items-center w-full h-full gap-8">
-            <div class="flex">
+         <div v-else class="flex w-full h-full gap-8">
+            <div class="flex min-w-[140px]">
                <NDescriptions label-placement="top" class="w-full" :column="1">
                   <NDescriptionsItem label="Student Name">
                      <NText class="block max-w-[200px]">
@@ -33,25 +33,29 @@
                      </NText>
                   </NDescriptionsItem>
                   <NDescriptionsItem label="Date">
-                     {{ new Date(monitorLog.createdAt).toLocaleDateString() }}
+                     {{ timestampToDateString(monitorLog.createdAt) }}
                   </NDescriptionsItem>
                   <NDescriptionsItem label="Time">
-                     {{ new Date(monitorLog.createdAt).toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"}) }}
+                     {{ timestampToTimeString(monitorLog.createdAt, false, true) }}
                   </NDescriptionsItem>
                   <NDescriptionsItem label="Warning Level">
                      <NTag type="warning" round>Moderate</NTag>
                   </NDescriptionsItem>
                </NDescriptions>
             </div>
-            <NEmpty
+            <div
                v-if="!monitorLog.recordingUrl"
-               description="Recording is either still being processed or unavailable. Please try again later."
-               align="center"
-               class="max-w-[300px]"
-               size="huge"
+               class="flex items-center justify-center"
             >
-               <template #icon><PhVideoCameraSlash/></template>
-            </NEmpty>
+               <NEmpty
+                  description="Recording is either still being processed or unavailable. Please try again later."
+                  align="center"
+                  class="max-w-[300px]"
+                  size="huge"
+               >
+                  <template #icon><PhVideoCameraSlash/></template>
+               </NEmpty>
+            </div>
             <video
                v-else
                class="max-w-[calc(80vw-200px)] max-h-[70vh] min-w-[320px] min-h-[180px] rounded object-contain"
@@ -82,7 +86,7 @@ import { useStore } from "../composables/use-store";
 import { MonitorLog, RoomInfo, StudentInfo } from "@/lib/typings";
 import { useRoute, useRouter } from "vue-router";
 import { PhVideoCameraSlash } from "@phosphor-icons/vue";
-import { renderIcon } from "@/lib/ui";
+import { timestampToDateString, timestampToTimeString } from "@/lib/datetime";
 
 const show = ref(false);
 const store = useStore();

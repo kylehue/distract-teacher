@@ -203,9 +203,22 @@
                content-class="flex items-start gap-2"
                feedback="Once you delete a room, there is no going back. Please be certain."
             >
-               <NButton type="error" secondary :disabled="patchRoom.isLoading">
-                  Delete Room
-               </NButton>
+               <NPopconfirm
+                  @positive-click="handleDeleteRoom()"
+                  :positive-button-props="{ type: 'error' }"
+                  :show-icon="false"
+               >
+                  <template #trigger>
+                     <NButton
+                        type="error"
+                        secondary
+                        :disabled="patchRoom.isLoading"
+                     >
+                        Delete Room
+                     </NButton>
+                  </template>
+                  Are you sure you want to delete this room?
+               </NPopconfirm>
             </NFormItem>
          </NForm>
       </NCard>
@@ -221,15 +234,19 @@ import {
    NFormItem,
    NInput,
    NInputNumber,
+   NPopconfirm,
    NSelect,
    NSwitch,
    NText,
+   useDialog,
    useMessage,
 } from "naive-ui";
 import { RoomInfo } from "@/lib/typings";
-import { inject, reactive, Ref } from "vue";
+import { computed, h, inject, nextTick, reactive, ref, Ref } from "vue";
 import { useFetch } from "@/app/composables/use-fetch";
 import { useStore } from "@/app/composables/use-store";
+import { PhTrash } from "@phosphor-icons/vue";
+import { useRouter } from "vue-router";
 
 const room = inject<Ref<RoomInfo>>("room")!;
 const store = useStore();
@@ -281,7 +298,7 @@ async function saveGeneralSettings() {
 
       store.upsertRooms([data!.room]);
 
-      message.success("General settings updated successfully!");
+      message.success("General settings has been updated.");
    } catch {
       if (!patchRoom.error) {
          return;
@@ -337,7 +354,7 @@ async function saveMonitoringSettings() {
 
       store.upsertRooms([data!.room]);
 
-      message.success("Monitoring settings updated successfully!");
+      message.success("Monitoring settings has been updated.");
    } catch {
       if (!patchRoom.error) {
          return;
@@ -386,7 +403,7 @@ async function saveJoiningPermissionSettings() {
 
       store.upsertRooms([data!.room]);
 
-      message.success("Joining permission settings updated successfully!");
+      message.success("Join permission settings has been updated.");
    } catch {
       if (!patchRoom.error) {
          return;
@@ -417,5 +434,80 @@ function resetJoiningPermissionSettings() {
    form.joinConfirmationStatus = "success";
    form.allowLateStudentsFeedback = "";
    form.joinConfirmationFeedback = "";
+}
+
+const dialog = useDialog();
+const deleteRoom = useFetch(`/api/rooms/${room.value.id}`, "DELETE");
+const router = useRouter();
+function handleDeleteRoom() {
+   let value = ref("");
+   let feedback = ref("");
+   let roomCode = room.value.code;
+   let roomId = room.value.id;
+   let _dialog = dialog.error({
+      title: "Confirm Delete",
+      content: () => {
+         return h("div", { class: "flex flex-col gap-2" }, [
+            h(
+               NText,
+               { depth: 3, class: "text-xs" },
+               {
+                  default: () =>
+                     "Please note that this action is IRREVERSIBLE. It will delete all associated data with this room such as monitor logs, evidences, and student records.",
+               }
+            ),
+            h(NForm, null, {
+               default: () => {
+                  return h(
+                     NFormItem,
+                     {
+                        label: `Please type '${roomCode}' to confirm:`,
+                        validationStatus: feedback.value ? "error" : "success",
+                        feedback: feedback.value,
+                     },
+                     {
+                        default: () => {
+                           return h(NInput, {
+                              type: "text",
+                              placeholder: `Type ${roomCode} to confirm`,
+                              onUpdateValue(v) {
+                                 value.value = v;
+                              },
+                           });
+                        },
+                     }
+                  );
+               },
+            }),
+         ]);
+      },
+      positiveText: "Delete",
+      showIcon: false,
+      onPositiveClick: async () => {
+         feedback.value = "";
+         if (value.value !== roomCode) {
+            feedback.value = "Room code does not match.";
+            return false;
+         }
+
+         // delete
+         try {
+            await deleteRoom.execute();
+            _dialog.destroy();
+            message.success("Room has been deleted.");
+            router.push("/dashboard/rooms");
+            nextTick(() => {
+               store.deleteRoom(roomId);
+            });
+         } catch {
+            if (!deleteRoom.error) {
+               message.error("Failed to delete the room.");
+               return;
+            }
+
+            message.error(deleteRoom.error.message);
+         }
+      },
+   });
 }
 </script>

@@ -160,6 +160,12 @@ export const useStore = defineStore("main-store", () => {
       }
    }
 
+   function deleteRoom(roomId: string | number) {
+      allRooms.delete(roomId);
+      studentsGroupedByRoomId.delete(roomId);
+      monitorLogsGroupedByRoomId.delete(roomId);
+   }
+
    function clear() {
       allRooms.clear();
       allStudents.clear();
@@ -255,6 +261,7 @@ export const useStore = defineStore("main-store", () => {
       upsertRooms,
       upsertStudents,
       upsertMonitorLogs,
+      deleteRoom,
       clear,
       countStudentsOfRoom,
       countMonitorLogsOfStudent,

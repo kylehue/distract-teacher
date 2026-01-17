@@ -102,8 +102,8 @@ export function useFetch<T = any>(url: string, method: string = "GET") {
          if (!res.ok) {
             // server-controlled error shape
             const apiError: ApiError = {
-               message: json?.message ?? "Request failed",
-               fieldErrors: json?.fieldErrors,
+               message: json?.detail?.message ?? "Request failed",
+               fieldErrors: json?.detail?.fieldErrors,
             };
             throw apiError;
          }
