@@ -31,8 +31,8 @@ const warningLevels = computed(() => {
    ];
 
    monitorLogs.value.forEach((log) => {
-      if (log.integrityScore >= 0.7) levels[0].count += 1;
-      else if (log.integrityScore >= 0.4) levels[1].count += 1;
+      if (log.warningLevel === "low") levels[0].count += 1;
+      else if (log.warningLevel === "moderate") levels[1].count += 1;
       else levels[2].count += 1;
    });
 
