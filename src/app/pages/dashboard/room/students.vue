@@ -56,8 +56,8 @@ const students = computed(() =>
    getWithDefault(
       store.studentsGroupedByRoomId,
       room.value!.id,
-      new Map() as typeof store.allStudents
-   )
+      new Map() as typeof store.allStudents,
+   ),
 );
 const studentsArray = computed(() => Array.from(students.value.values()));
 const columns: DataTableColumns<StudentInfo> = [
@@ -72,7 +72,7 @@ const columns: DataTableColumns<StudentInfo> = [
                ? h(
                     NTag,
                     { type: "default", round: true, size: "small" },
-                    { default: () => "Inactive" }
+                    { default: () => "Inactive" },
                  )
                : "",
          ]);
@@ -156,7 +156,11 @@ const columns: DataTableColumns<StudentInfo> = [
                      value: "reports",
                      label: "View Reports",
                      render({ node }: any) {
-                        return h(RouterLink, { to: "" }, () => node);
+                        return h(
+                           RouterLink,
+                           { to: `/dashboard/student-reports/${row.id}` },
+                           () => node,
+                        );
                      },
                   },
                   {
@@ -171,7 +175,7 @@ const columns: DataTableColumns<StudentInfo> = [
                                  query: { filterByStudent: row.id },
                               },
                            },
-                           () => node
+                           () => node,
                         );
                      },
                   },
@@ -191,9 +195,9 @@ const columns: DataTableColumns<StudentInfo> = [
                   h(
                      NButton,
                      { size: "small", circle: true, tertiary: true },
-                     { default: renderIcon(PhDotsThreeVertical) }
+                     { default: renderIcon(PhDotsThreeVertical) },
                   ),
-            }
+            },
          );
       },
    },

@@ -1,3 +1,4 @@
+import type { ApexOptions } from "apexcharts";
 import type { GlobalThemeOverrides } from "naive-ui";
 
 const baseThemeOverrides: GlobalThemeOverrides = {
@@ -42,4 +43,26 @@ export const darkThemeOverrides: GlobalThemeOverrides = {
       primaryColorPressed: "#9b61ff",
       primaryColorSuppl: "rgb(94, 67, 161)",
    },
+};
+
+export const apexChartOverrides: ApexOptions = {
+   chart: {
+      fontFamily: "Inter, sans-serif",
+      background: "transparent",
+   },
+   xaxis: {
+      labels: { style: { fontFamily: "Inter, sans-serif" } },
+      title: {
+         style: { fontFamily: "Inter, sans-serif", fontWeight: 500 },
+      },
+   },
+   yaxis: {
+      labels: { style: { fontFamily: "Inter, sans-serif" } },
+      title: {
+         style: { fontFamily: "Inter, sans-serif", fontWeight: 500 },
+      },
+   },
+   colors: ["#8661ff"],
+   tooltip: { style: { fontFamily: "Inter, sans-serif" } },
+   legend: { fontFamily: "Inter, sans-serif" },
 };

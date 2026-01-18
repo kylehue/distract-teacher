@@ -9,7 +9,7 @@ import RoomStudentsPage from "@/app/pages/dashboard/room/students.vue";
 import RoomMonitoringPage from "@/app/pages/dashboard/room/monitoring.vue";
 import UnauthorizedPage from "@/app/pages/unauthorized.vue";
 import RoomLayout from "@/app/pages/dashboard/room/layout.vue";
-import StudentReportsPage from "@/app/pages/dashboard/student-reports.vue";
+import StudentReportsPage from "@/app/pages/dashboard/student-reports/index.vue";
 import MainLayout from "@/app/pages/layout.vue";
 
 const routes: RouteRecordRaw[] = [

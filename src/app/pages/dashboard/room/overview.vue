@@ -4,6 +4,7 @@
          v-for="stat in stats"
          :key="stat.label"
          class="flex-1 min-w-[280px]!"
+         :bordered="false"
       >
          <NStatistic :label="stat.label" :value="stat.value">
             <template #prefix>

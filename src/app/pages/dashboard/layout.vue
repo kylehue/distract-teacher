@@ -1,6 +1,10 @@
 <template>
-   <NLayout class="w-full h-full">
-      <NLayoutContent class="w-full h-full" content-class="flex flex-col p-8">
+   <NLayout class="w-full h-full" embedded>
+      <NLayoutContent
+         class="w-full h-full"
+         content-class="flex flex-col p-8"
+         embedded
+      >
          <div class="flex flex-row items-center justify-between mb-8">
             <div class="flex items-center">
                <NText v-if="!!title" strong class="text-lg">

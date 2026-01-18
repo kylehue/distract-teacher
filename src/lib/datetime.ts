@@ -1,6 +1,6 @@
 export function compareTimestamps(
    timestampA: string | undefined,
-   timestampB: string | undefined
+   timestampB: string | undefined,
 ): number {
    if (!timestampA && !timestampB) return 0;
    if (!timestampA) return -1;
@@ -41,7 +41,7 @@ export function timestampToTimeString(
 
 export function timestampToDateString(
    timestamp: string,
-   relative?: boolean
+   relative?: boolean,
 ): string {
    const date = new Date(timestamp);
    const now = new Date();
@@ -65,4 +65,25 @@ export function timestampToDateString(
       month: "2-digit",
       day: "2-digit",
    });
+}
+
+export function totalTime(start: string, end?: string): string {
+   const startDate = new Date(start);
+   const endDate = end ? new Date(end) : new Date();
+
+   let totalSeconds = Math.floor(
+      (endDate.getTime() - startDate.getTime()) / 1000,
+   );
+
+   const hours = Math.floor(totalSeconds / 3600);
+   totalSeconds %= 3600;
+   const minutes = Math.floor(totalSeconds / 60);
+   const seconds = totalSeconds % 60;
+
+   const parts: string[] = [];
+   if (hours > 0) parts.push(`${hours}h`);
+   if (minutes > 0) parts.push(`${minutes}m`);
+   if (seconds > 0 && hours === 0) parts.push(`${seconds}s`); // show seconds only if less than 1 hour
+
+   return parts.join(" ") || "0s";
 }

@@ -10,10 +10,13 @@ export const useStore = defineStore("main-store", () => {
    const allStudents = reactive(new Map<string | number, StudentInfo>());
    const allMonitorLogs = reactive(new Map<string | number, MonitorLog>());
    const studentsGroupedByRoomId = reactive(
-      new Map<string | number, Map<string | number, StudentInfo>>()
+      new Map<string | number, Map<string | number, StudentInfo>>(),
    );
    const monitorLogsGroupedByRoomId = reactive(
-      new Map<string | number, Map<string | number, MonitorLog>>()
+      new Map<string | number, Map<string | number, MonitorLog>>(),
+   );
+   const monitorLogsGroupedByStudentId = reactive(
+      new Map<string | number, Map<string | number, MonitorLog>>(),
    );
 
    const getRoom = useFetch<{
@@ -57,6 +60,8 @@ export const useStore = defineStore("main-store", () => {
 
    const getStudent = useFetch<{
       student: StudentInfo;
+      monitorLogs: MonitorLog[];
+      room: RoomInfo;
    }>("/api/students/:studentId");
 
    async function loadStudent(studentId: string | number) {
@@ -66,6 +71,8 @@ export const useStore = defineStore("main-store", () => {
          const data = getStudent.data?.data;
          if (!data) throw new Error("No data");
          upsertStudents([data.student]);
+         upsertMonitorLogs(data.monitorLogs);
+         upsertRooms([data.room]);
          return data;
       } catch {
          // ignore fetch errors
@@ -144,7 +151,7 @@ export const useStore = defineStore("main-store", () => {
          getWithDefault(
             studentsGroupedByRoomId,
             student.roomId,
-            reactive(new Map())
+            reactive(new Map()),
          ).set(student.id, student);
       }
    }
@@ -155,7 +162,12 @@ export const useStore = defineStore("main-store", () => {
          getWithDefault(
             monitorLogsGroupedByRoomId,
             monitorLog.roomId,
-            reactive(new Map())
+            reactive(new Map()),
+         ).set(monitorLog.id, monitorLog);
+         getWithDefault(
+            monitorLogsGroupedByStudentId,
+            monitorLog.studentId,
+            reactive(new Map()),
          ).set(monitorLog.id, monitorLog);
       }
    }
@@ -201,7 +213,7 @@ export const useStore = defineStore("main-store", () => {
          const room = data.room as RoomInfo;
          upsertRooms([room]);
       },
-      { autoClean: false }
+      { autoClean: false },
    );
 
    socket.on(
@@ -210,7 +222,7 @@ export const useStore = defineStore("main-store", () => {
          const student = data.student as StudentInfo;
          upsertStudents([student]);
       },
-      { autoClean: false }
+      { autoClean: false },
    );
 
    socket.on(
@@ -219,7 +231,7 @@ export const useStore = defineStore("main-store", () => {
          const student = data.student as StudentInfo;
          upsertStudents([student]);
       },
-      { autoClean: false }
+      { autoClean: false },
    );
 
    socket.on(
@@ -228,7 +240,7 @@ export const useStore = defineStore("main-store", () => {
          const monitorLog = data.monitorLog as MonitorLog;
          upsertMonitorLogs([monitorLog]);
       },
-      { autoClean: false }
+      { autoClean: false },
    );
 
    socket.on(
@@ -237,7 +249,7 @@ export const useStore = defineStore("main-store", () => {
          const monitorLog = data.monitorLog as MonitorLog;
          upsertMonitorLogs([monitorLog]);
       },
-      { autoClean: false }
+      { autoClean: false },
    );
 
    return {
@@ -246,6 +258,7 @@ export const useStore = defineStore("main-store", () => {
       allMonitorLogs,
       studentsGroupedByRoomId,
       monitorLogsGroupedByRoomId,
+      monitorLogsGroupedByStudentId,
       loadRoom,
       isLoadRoomLoading: computed(() => getRoom.isLoading),
       loadRooms,

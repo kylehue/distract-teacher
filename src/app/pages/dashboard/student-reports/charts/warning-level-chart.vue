@@ -1,0 +1,80 @@
+<template>
+   <ApexChart
+      ref="chart"
+      type="bar"
+      :height="300"
+      :options="warningLevelDistributionChartOptions"
+      :series="warningLevelDistributionSeries"
+   ></ApexChart>
+</template>
+
+<script setup lang="ts">
+import { useThemeVars } from "naive-ui";
+import { computed, inject, useTemplateRef } from "vue";
+import ApexChart from "vue3-apexcharts";
+import { deepMerge } from "@/lib/object";
+import { apexChartOverrides } from "@/lib/theme-overrides";
+import { MONITOR_LOGS_INJECTION_KEY } from "@/lib/injection-keys";
+
+const props = defineProps<{
+   theme: "light" | "dark";
+   static?: boolean;
+}>();
+const chart = useTemplateRef("chart");
+const themeVars = useThemeVars();
+const monitorLogs = inject(MONITOR_LOGS_INJECTION_KEY)!;
+const warningLevels = computed(() => {
+   const levels = [
+      { name: "Low", count: 0, color: themeVars.value.successColorSuppl },
+      { name: "Moderate", count: 0, color: themeVars.value.warningColorSuppl },
+      { name: "Severe", count: 0, color: themeVars.value.errorColorSuppl },
+   ];
+
+   monitorLogs.value.forEach((log) => {
+      if (log.integrityScore >= 0.7) levels[0].count += 1;
+      else if (log.integrityScore >= 0.4) levels[1].count += 1;
+      else levels[2].count += 1;
+   });
+
+   return levels;
+});
+
+const warningLevelDistributionSeries = computed(() => [
+   {
+      name: "Warnings",
+      data: warningLevels.value.map((l) => l.count),
+   },
+]);
+
+const warningLevelDistributionChartOptions = computed(() =>
+   deepMerge(apexChartOverrides, {
+      chart: {
+         id: "warning-level-distribution-chart",
+         type: "bar",
+         toolbar: { show: props.static ? false : true },
+         zoom: { allowMouseWheelZoom: false },
+         animations: {
+            enabled: props.static ? false : true,
+         },
+      },
+      plotOptions: {
+         bar: {
+            horizontal: false,
+            distributed: true,
+            columnWidth: "50%",
+         },
+      },
+      colors: warningLevels.value.map((l) => l.color),
+      xaxis: {
+         categories: warningLevels.value.map((l) => l.name),
+         title: { text: "Warning Level" },
+      },
+      yaxis: {
+         title: { text: "Warning Count" },
+      },
+      dataLabels: { enabled: true },
+      theme: { mode: props.theme },
+   } as ApexCharts.ApexOptions),
+);
+defineExpose({ chart });
+</script>
