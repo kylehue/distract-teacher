@@ -80,12 +80,12 @@ const room = inject(ROOM_INJECTION_KEY)!;
 const students = computed(
    () =>
       store.studentsGroupedByRoomId.get(room.value!.id || "") ||
-      (new Map() as typeof store.allStudents)
+      (new Map() as typeof store.allStudents),
 );
 const monitorLogs = computed(
    () =>
       store.monitorLogsGroupedByRoomId.get(room.value!.id || "") ||
-      (new Map() as typeof store.allMonitorLogs)
+      (new Map() as typeof store.allMonitorLogs),
 );
 
 const columns: DataTableColumns<MonitorLog> = [
@@ -101,8 +101,8 @@ const columns: DataTableColumns<MonitorLog> = [
             !student?.active
                ? h(
                     NTag,
-                    { type: "error", round: true, size: "small" },
-                    { default: () => "Out of room" }
+                    { type: "default", round: true, size: "small" },
+                    { default: () => "Inactive" },
                  )
                : "",
          ]);
@@ -151,7 +151,7 @@ const columns: DataTableColumns<MonitorLog> = [
          return h(
             NTag,
             { type: color, round: true },
-            { default: () => row.warningLevel }
+            { default: () => row.warningLevel },
          );
       },
       filterOptions: [
@@ -208,9 +208,9 @@ const columns: DataTableColumns<MonitorLog> = [
                   h(
                      NButton,
                      { size: "small", tertiary: true },
-                     { default: () => "View Evidence" }
+                     { default: () => "View Evidence" },
                   ),
-            }
+            },
          );
       },
    },
@@ -252,7 +252,7 @@ const patchStopMonitoring = useFetch("/api/stop_monitoring/:roomId", "PATCH");
 
 async function stopMonitoring() {
    let confirmed = confirm(
-      "Are you sure you want to stop monitoring? This will conclude and archive the room session. This action cannot be undone."
+      "Are you sure you want to stop monitoring? This will conclude and archive the room session. This action cannot be undone.",
    );
    if (!confirmed) {
       return;
@@ -273,7 +273,7 @@ async function stopMonitoring() {
 
 function filterByStudentIds(ids: (string | number)[]) {
    const studentNameColumn = columns.find(
-      (col) => (col as any).key === "studentName"
+      (col) => (col as any).key === "studentName",
    ) as DataTableBaseColumn<MonitorLog>;
    filteredStudentIds.value = ids;
    studentNameColumn.filterOptionValues = ids;

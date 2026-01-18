@@ -117,7 +117,7 @@ const featureImpactChartOptions = computed(() =>
       tooltip: {
          shared: true,
          y: {
-            formatter: (val: number) => val.toFixed(3),
+            formatter: (val: number) => (val * 100).toFixed(2) + "%",
          },
       },
       fill: {
