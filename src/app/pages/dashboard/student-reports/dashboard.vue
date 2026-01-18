@@ -10,8 +10,8 @@
             <NStatistic label="Student Name">
                {{ student.name }}
             </NStatistic>
-            <NStatistic label="Room">
-               {{ room.title }}
+            <NStatistic label="Room Code">
+               {{ room.code }}
                <template #suffix>
                   <RouterLink
                      :to="`/dashboard/rooms/${room.id}`"
