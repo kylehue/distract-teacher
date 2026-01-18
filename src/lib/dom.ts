@@ -21,6 +21,7 @@ export async function printElement(
       height?: string;
       /** If true, ignores page breaks and fits everything on one page */
       fitToSinglePage?: boolean;
+      showButtons?: boolean;
    },
 ) {
    const originalStyle = el.getAttribute("style") || "";
@@ -30,6 +31,16 @@ export async function printElement(
    el.style.zIndex = "-9999";
    el.style.pointerEvents = "none";
    el.style.paddingBottom = "16px";
+
+   const origButtonVisibilities = new WeakMap<HTMLElement, string>();
+   const buttons = el.querySelectorAll<HTMLElement>("button");
+   if (!options?.showButtons) {
+      buttons.forEach((btn) => {
+         origButtonVisibilities.set(btn, btn.style.visibility);
+         btn.style.visibility = "hidden";
+      });
+   }
+
    if (options?.width && !options?.fitToSinglePage) {
       el.style.width = options.width;
    }
@@ -140,6 +151,16 @@ export async function printElement(
 
    // Restore original styles
    el.setAttribute("style", originalStyle);
+   if (!options?.showButtons) {
+      buttons.forEach((btn) => {
+         const origVisibility = origButtonVisibilities.get(btn);
+         if (origVisibility !== undefined) {
+            btn.style.visibility = origVisibility;
+         } else {
+            btn.style.removeProperty("visibility");
+         }
+      });
+   }
 
    return pdf;
 }
