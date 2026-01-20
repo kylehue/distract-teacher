@@ -3,12 +3,33 @@
       <NText class="text-xl font-medium mt-4">General Information</NText>
       <div class="grid grid-cols-2 gap-4">
          <NCard
-            title="Student Information"
+            title=""
             content-class="flex flex-wrap gap-x-16 gap-y-8"
             :bordered="false"
          >
             <NStatistic label="Student Name">
                {{ student.name }}
+            </NStatistic>
+         </NCard>
+         <NCard
+            title=""
+            content-class="flex flex-wrap gap-x-16 gap-y-8"
+            :bordered="false"
+         >
+            <NStatistic label="Teacher Name">
+               {{ teacher.displayName }}
+            </NStatistic>
+         </NCard>
+      </div>
+      <div class="flex flex-wrap gap-4">
+         <NCard
+            title="Room / Session"
+            class="lg:flex-1"
+            content-class="flex flex-wrap gap-x-16 gap-y-8"
+            :bordered="false"
+         >
+            <NStatistic label="Room Title">
+               {{ room.title }}
             </NStatistic>
             <NStatistic label="Room Code">
                {{ room.code }}
@@ -22,6 +43,9 @@
                      </NButton>
                   </RouterLink>
                </template>
+            </NStatistic>
+            <NStatistic label="Date">
+               {{ timestampToDateString(room.createdAt) }}
             </NStatistic>
             <NStatistic label="Time Joined">
                {{ timestampToTimeString(student.timeJoined) }}
@@ -37,7 +61,7 @@
                {{ totalTime(student.timeJoined, student.timeLeft) }}
             </NStatistic>
          </NCard>
-         <div class="grid grid-cols-2 grid-rows-2 gap-4">
+         <div class="flex-1 grid grid-cols-2 grid-rows-2 gap-4">
             <NCard :bordered="false">
                <NStatistic label="Total Number of Warnings">
                   {{ monitorLogs.length }}
@@ -102,7 +126,11 @@ import { PhArrowSquareOut } from "@phosphor-icons/vue";
 import { NButton, NText, NStatistic, NCard } from "naive-ui";
 import { computed, useTemplateRef } from "vue";
 import { RouterLink } from "vue-router";
-import { timestampToTimeString, totalTime } from "@/lib/datetime";
+import {
+   timestampToDateString,
+   timestampToTimeString,
+   totalTime,
+} from "@/lib/datetime";
 import {
    computeStdDev,
    explainIntegrity,
@@ -112,12 +140,13 @@ import {
 import IntegrityScoreChart from "./charts/integrity-score-chart.vue";
 import FeatureImpactChart from "./charts/feature-impact-chart.vue";
 import WarningLevelChart from "./charts/warning-level-chart.vue";
-import { MonitorLog, RoomInfo, StudentInfo } from "@/lib/typings";
+import { MonitorLog, RoomInfo, StudentInfo, TeacherInfo } from "@/lib/typings";
 
 const props = defineProps<{
    student: StudentInfo;
    room: RoomInfo;
    monitorLogs: MonitorLog[];
+   teacher: TeacherInfo;
    theme: "light" | "dark";
    static?: boolean;
 }>();

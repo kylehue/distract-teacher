@@ -65,7 +65,7 @@ import { computed, h, inject, onMounted, reactive, Ref, ref, watch } from "vue";
 import { MonitorLog, RoomInfo } from "@/lib/typings";
 import { PhPause, PhPlay, PhStop } from "@phosphor-icons/vue";
 import { RouterLink, useRoute } from "vue-router";
-import { renderIcon } from "@/lib/ui";
+import { renderIcon, warningLevelToComponentType } from "@/lib/ui";
 import FilterMenuMultiselect from "@/app/components/filter-menu-multiselect.vue";
 import { useStore } from "@/app/composables/use-store";
 import { useFetch } from "@/app/composables/use-fetch";
@@ -145,12 +145,9 @@ const columns: DataTableColumns<MonitorLog> = [
       title: "Warning Level",
       key: "warningLevel",
       render(row) {
-         let color: "default" | "warning" | "error" = "default";
-         if (row.warningLevel === "moderate") color = "warning";
-         else if (row.warningLevel === "severe") color = "error";
          return h(
             NTag,
-            { type: color, round: true },
+            { type: warningLevelToComponentType(row.warningLevel), round: true },
             { default: () => row.warningLevel },
          );
       },

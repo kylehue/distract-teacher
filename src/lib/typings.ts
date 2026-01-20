@@ -38,7 +38,7 @@ export type WarningLevel = "low" | "moderate" | "severe";
 
 export interface RoomInfo {
    id: string | number;
-   teacherId: string | number;
+   teacherAccountId: string | number;
    title: string;
    code: string;
    studentCapacity: number;

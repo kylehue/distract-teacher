@@ -1,6 +1,14 @@
 import { NIcon } from "naive-ui";
 import { Component, h } from "vue";
+import { WarningLevel } from "./typings";
 
 export function renderIcon(icon: Component, size = 20) {
    return () => h(NIcon, { size }, { default: () => h(icon) });
+}
+
+export function warningLevelToComponentType(level: WarningLevel) {
+   let color: "default" | "warning" | "error" = "default";
+   if (level === "moderate") color = "warning";
+   else if (level === "severe") color = "error";
+   return color;
 }

@@ -39,7 +39,12 @@
                      {{ timestampToTimeString(monitorLog.createdAt, false, true) }}
                   </NDescriptionsItem>
                   <NDescriptionsItem label="Warning Level">
-                     <NTag type="warning" round>Moderate</NTag>
+                     <NTag
+                        :type="warningLevelToComponentType(monitorLog.warningLevel)"
+                        round
+                     >
+                        {{ monitorLog.warningLevel }}
+                     </NTag>
                   </NDescriptionsItem>
                </NDescriptions>
             </div>
@@ -87,6 +92,7 @@ import { MonitorLog, RoomInfo, StudentInfo } from "@/lib/typings";
 import { useRoute, useRouter } from "vue-router";
 import { PhVideoCameraSlash } from "@phosphor-icons/vue";
 import { timestampToDateString, timestampToTimeString } from "@/lib/datetime";
+import { warningLevelToComponentType } from "@/lib/ui";
 
 const show = ref(false);
 const store = useStore();

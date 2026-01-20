@@ -1,11 +1,12 @@
 import { computed, reactive, ref, watch } from "vue";
-import type { MonitorLog, RoomInfo, StudentInfo } from "@/lib/typings";
+import type { MonitorLog, RoomInfo, StudentInfo, TeacherInfo } from "@/lib/typings";
 import { useSocket } from "./use-socket";
 import { getWithDefault } from "@/lib/object";
 import { defineStore } from "pinia";
 import { useFetch } from "./use-fetch";
 
 export const useStore = defineStore("main-store", () => {
+   // --- cache ---
    const allRooms = reactive(new Map<string | number, RoomInfo>());
    const allStudents = reactive(new Map<string | number, StudentInfo>());
    const allMonitorLogs = reactive(new Map<string | number, MonitorLog>());
@@ -18,7 +19,9 @@ export const useStore = defineStore("main-store", () => {
    const monitorLogsGroupedByStudentId = reactive(
       new Map<string | number, Map<string | number, MonitorLog>>(),
    );
+   const allTeachers = reactive(new Map<string | number, TeacherInfo>());
 
+   // --- data loaders ---
    const getRoom = useFetch<{
       room: RoomInfo;
       students: StudentInfo[];
@@ -35,6 +38,7 @@ export const useStore = defineStore("main-store", () => {
          upsertRooms([data.room]);
          upsertStudents(data.students);
          upsertMonitorLogs(data.monitorLogs);
+         upsertTeachers([data.teacher]);
          return data;
       } catch {
          // ignore fetch errors
@@ -62,6 +66,7 @@ export const useStore = defineStore("main-store", () => {
       student: StudentInfo;
       monitorLogs: MonitorLog[];
       room: RoomInfo;
+      teacher: TeacherInfo;
    }>("/api/students/:studentId");
 
    async function loadStudent(studentId: string | number) {
@@ -73,6 +78,7 @@ export const useStore = defineStore("main-store", () => {
          upsertStudents([data.student]);
          upsertMonitorLogs(data.monitorLogs);
          upsertRooms([data.room]);
+         upsertTeachers([data.teacher]);
          return data;
       } catch {
          // ignore fetch errors
@@ -100,6 +106,7 @@ export const useStore = defineStore("main-store", () => {
       monitorLog: MonitorLog;
       room: RoomInfo;
       student: StudentInfo;
+      teacher: TeacherInfo;
    }>("/api/monitor_logs/:monitorLogId");
 
    async function loadMonitorLog(monitorLogId: string | number) {
@@ -111,7 +118,7 @@ export const useStore = defineStore("main-store", () => {
          upsertRooms([data.room]);
          upsertMonitorLogs([data.monitorLog]);
          upsertStudents([data.student]);
-
+         upsertTeachers([data.teacher]);
          return data;
       } catch {
          // ignore fetch errors
@@ -169,6 +176,12 @@ export const useStore = defineStore("main-store", () => {
             monitorLog.studentId,
             reactive(new Map()),
          ).set(monitorLog.id, monitorLog);
+      }
+   }
+
+   function upsertTeachers(teachers: TeacherInfo[]) {
+      for (let teacher of teachers) {
+         allTeachers.set(teacher.id, teacher);
       }
    }
 
@@ -256,6 +269,7 @@ export const useStore = defineStore("main-store", () => {
       allRooms,
       allStudents,
       allMonitorLogs,
+      allTeachers,
       studentsGroupedByRoomId,
       monitorLogsGroupedByRoomId,
       monitorLogsGroupedByStudentId,
@@ -274,6 +288,7 @@ export const useStore = defineStore("main-store", () => {
       upsertRooms,
       upsertStudents,
       upsertMonitorLogs,
+      upsertTeachers,
       deleteRoom,
       clear,
       countStudentsOfRoom,

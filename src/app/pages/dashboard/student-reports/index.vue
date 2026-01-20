@@ -29,13 +29,17 @@
          <NSpin />
          <NText>Loading student report...</NText>
       </div>
-      <NEmpty v-else-if="!student || !room" description="Student not found." />
+      <NEmpty
+         v-else-if="!student || !room || !teacher"
+         description="Data not found."
+      />
       <template v-else>
          <Dashboard
             :theme="theme"
             :student="student"
             :room="room"
             :monitorLogs="monitorLogs"
+            :teacher="teacher"
          />
          <NConfigProvider
             v-if="isPrintLoading"
@@ -48,6 +52,7 @@
                :student="student"
                :room="room"
                :monitorLogs="monitorLogs"
+               :teacher="teacher"
                static
             />
          </NConfigProvider>
@@ -82,8 +87,6 @@ import {
    MONITOR_LOGS_INJECTION_KEY,
    THEME_INJECTION_KEY,
 } from "@/lib/injection-keys";
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
 import Dashboard from "./dashboard.vue";
 import { lightThemeOverrides } from "@/lib/theme-overrides";
 import { printElement, waitForSvg } from "@/lib/dom";
@@ -94,6 +97,8 @@ const printDashboard = useTemplateRef("printDashboard");
 const theme = inject(THEME_INJECTION_KEY)!;
 const isLoading = computed(() => store.isLoadStudentLoading);
 const isPrintLoading = ref(false);
+
+// reports data
 const student = computed(() =>
    store.allStudents.get(Number(route.params.studentId as string)),
 );
@@ -104,6 +109,9 @@ const monitorLogs = computed(() =>
          .get(student.value?.id || -1)
          ?.values() ?? [],
    ).sort((a, b) => compareTimestamps(a.createdAt, b.createdAt)),
+);
+const teacher = computed(() =>
+   store.allTeachers.get(room.value?.teacherAccountId || -1),
 );
 
 async function print() {
