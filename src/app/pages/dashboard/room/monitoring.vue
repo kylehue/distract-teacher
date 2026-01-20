@@ -41,7 +41,7 @@
       </div>
       <NDataTable
          :columns="columns"
-         :data="Array.from(monitorLogs?.values() ?? [])"
+         :data="monitorLogs"
          :pagination="{ pageSize: 10 }"
          :single-line="false"
          :row-class-name="
@@ -67,26 +67,20 @@ import { PhPause, PhPlay, PhStop } from "@phosphor-icons/vue";
 import { RouterLink, useRoute } from "vue-router";
 import { renderIcon, warningLevelToComponentType } from "@/lib/ui";
 import FilterMenuMultiselect from "@/app/components/filter-menu-multiselect.vue";
-import { useStore } from "@/app/composables/use-store";
 import { useFetch } from "@/app/composables/use-fetch";
 import { compareTimestamps, timestampToTimeString } from "@/lib/datetime";
-import { ROOM_INJECTION_KEY } from "@/lib/injection-keys";
+import {
+   MONITOR_LOGS_INJECTION_KEY,
+   ROOM_INJECTION_KEY,
+   STUDENTS_MAP_INJECTION_KEY,
+} from "@/lib/injection-keys";
 
 const route = useRoute();
 const message = useMessage();
-const store = useStore();
 const filteredStudentIds = ref<(string | number)[]>([]);
 const room = inject(ROOM_INJECTION_KEY)!;
-const students = computed(
-   () =>
-      store.studentsGroupedByRoomId.get(room.value!.id || "") ||
-      (new Map() as typeof store.allStudents),
-);
-const monitorLogs = computed(
-   () =>
-      store.monitorLogsGroupedByRoomId.get(room.value!.id || "") ||
-      (new Map() as typeof store.allMonitorLogs),
-);
+const students = inject(STUDENTS_MAP_INJECTION_KEY)!;
+const monitorLogs = inject(MONITOR_LOGS_INJECTION_KEY)!;
 
 const columns: DataTableColumns<MonitorLog> = [
    reactive({
@@ -147,7 +141,10 @@ const columns: DataTableColumns<MonitorLog> = [
       render(row) {
          return h(
             NTag,
-            { type: warningLevelToComponentType(row.warningLevel), round: true },
+            {
+               type: warningLevelToComponentType(row.warningLevel),
+               round: true,
+            },
             { default: () => row.warningLevel },
          );
       },

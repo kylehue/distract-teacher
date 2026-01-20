@@ -1,11 +1,16 @@
 <template>
-   <ApexChart
-      ref="chart"
-      type="line"
-      :height="400"
-      :options="integrityOverTimeChartOptions"
-      :series="integrityOverTimeSeries"
-   ></ApexChart>
+   <div class="flex flex-col">
+      <ApexChart
+         ref="chart"
+         type="line"
+         :height="400"
+         :options="integrityOverTimeChartOptions"
+         :series="integrityOverTimeSeries"
+      ></ApexChart>
+      <NText :depth="3" class="text-xs">
+         Tip: Hold <kbd>CTRL</kbd> and click on a point to view.
+      </NText>
+   </div>
 </template>
 
 <script setup lang="ts">
@@ -15,11 +20,14 @@ import { deepMerge } from "@/lib/object";
 import { apexChartOverrides } from "@/lib/theme-overrides";
 import { MONITOR_LOGS_INJECTION_KEY } from "@/lib/injection-keys";
 import { timestampToTimeString } from "@/lib/datetime";
+import { useRouter } from "vue-router";
+import { NText } from "naive-ui";
 
 const props = defineProps<{
    theme: "light" | "dark";
    static?: boolean;
 }>();
+const router = useRouter();
 const chart = useTemplateRef("chart");
 const monitorLogs = inject(MONITOR_LOGS_INJECTION_KEY)!;
 const integrityOverTimeSeries = computed(() => [
@@ -38,6 +46,20 @@ const integrityOverTimeChartOptions = computed(() => {
          toolbar: { show: props.static ? false : true },
          animations: {
             enabled: props.static ? false : true,
+         },
+         events: {
+            markerClick: (
+               event: MouseEvent,
+               chartContext,
+               { seriesIndex, dataPointIndex, config },
+            ) => {
+               const log = monitorLogs.value[dataPointIndex];
+               if (event.ctrlKey) {
+                  router.replace({
+                     query: { monitorLogId: log.id },
+                  });
+               }
+            },
          },
       },
       xaxis: {

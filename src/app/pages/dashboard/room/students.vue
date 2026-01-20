@@ -45,21 +45,13 @@ import { useStore } from "@/app/composables/use-store";
 import { renderIcon } from "@/lib/ui";
 import { PhDotsThreeVertical } from "@phosphor-icons/vue";
 import { compareTimestamps, timestampToTimeString } from "@/lib/datetime";
-import { ROOM_INJECTION_KEY } from "@/lib/injection-keys";
+import { STUDENTS_INJECTION_KEY } from "@/lib/injection-keys";
 
 const table = useTemplateRef("table");
 const route = useRoute();
 const store = useStore();
 const theme = useThemeVars();
-const room = inject(ROOM_INJECTION_KEY)!;
-const students = computed(() =>
-   getWithDefault(
-      store.studentsGroupedByRoomId,
-      room.value!.id,
-      new Map() as typeof store.allStudents,
-   ),
-);
-const studentsArray = computed(() => Array.from(students.value.values()));
+const studentsArray = inject(STUDENTS_INJECTION_KEY)!;
 const columns: DataTableColumns<StudentInfo> = [
    {
       title: "Student Name",
@@ -80,7 +72,7 @@ const columns: DataTableColumns<StudentInfo> = [
       sorter: {
          compare(rowA, rowB) {
             return (
-               compareBoolean(rowB.active, rowA.active) ||
+               Number(rowB.active) - Number(rowA.active) ||
                rowA.name.localeCompare(rowB.name)
             );
          },
@@ -93,12 +85,12 @@ const columns: DataTableColumns<StudentInfo> = [
       },
    },
    {
-      title: "Total Logs",
+      title: "Number of Warnings",
       key: "totalLogs",
       sorter: {
          compare(rowA, rowB) {
             return (
-               compareBoolean(rowB.active, rowA.active) ||
+               Number(rowB.active) - Number(rowA.active) ||
                store.countMonitorLogsOfStudent(rowA.id) -
                   store.countMonitorLogsOfStudent(rowB.id)
             );
@@ -118,7 +110,7 @@ const columns: DataTableColumns<StudentInfo> = [
       sorter: {
          compare(rowA, rowB) {
             return (
-               compareBoolean(rowB.active, rowA.active) ||
+               Number(rowB.active) - Number(rowA.active) ||
                compareTimestamps(rowA.timeJoined, rowB.timeJoined)
             );
          },
@@ -135,7 +127,7 @@ const columns: DataTableColumns<StudentInfo> = [
       sorter: {
          compare(rowA, rowB) {
             return (
-               compareBoolean(rowB.active, rowA.active) ||
+               Number(rowB.active) - Number(rowA.active) ||
                compareTimestamps(rowA.timeLeft, rowB.timeLeft)
             );
          },
@@ -202,11 +194,6 @@ const columns: DataTableColumns<StudentInfo> = [
       },
    },
 ];
-
-function compareBoolean(a: boolean, b: boolean) {
-   if (a === b) return 0;
-   return a ? 1 : -1;
-}
 
 onMounted(() => {
    (window as any).$store = store;

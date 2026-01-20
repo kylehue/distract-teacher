@@ -1,36 +1,37 @@
 <template>
-   <ApexChart
-      ref="chart"
-      type="area"
-      :height="500"
-      :options="featureImpactChartOptions"
-      :series="featureImpactSeries"
-   />
+   <div class="flex flex-col">
+      <ApexChart
+         ref="chart"
+         type="area"
+         :height="500"
+         :options="featureImpactChartOptions"
+         :series="featureImpactSeries"
+      />
+      <NText :depth="3" class="text-xs">
+         Tip: Hold <kbd>CTRL</kbd> and click on a point to view.
+      </NText>
+   </div>
 </template>
 
 <script setup lang="ts">
-import { useThemeVars } from "naive-ui";
-import {
-   computed,
-   inject,
-   onBeforeUnmount,
-   onMounted,
-   ref,
-   useTemplateRef,
-} from "vue";
+import { useThemeVars, NText } from "naive-ui";
+import { computed, inject, useTemplateRef } from "vue";
 import ApexChart from "vue3-apexcharts";
 import { deepMerge } from "@/lib/object";
 import { apexChartOverrides } from "@/lib/theme-overrides";
 import { MONITOR_LOGS_INJECTION_KEY } from "@/lib/injection-keys";
 import { MonitorLog } from "@/lib/typings";
 import { timestampToTimeString } from "@/lib/datetime";
+import { useRouter } from "vue-router";
 
 const props = defineProps<{
    theme: "light" | "dark";
    static?: boolean;
 }>();
+
 const chart = useTemplateRef("chart");
 const themeVars = useThemeVars();
+const router = useRouter();
 const monitorLogs = inject(MONITOR_LOGS_INJECTION_KEY)!;
 const featureGroups: Record<keyof MonitorLog["featureImpacts"], string> = {
    faceX: "Face Position",
@@ -98,6 +99,21 @@ const featureImpactChartOptions = computed(() =>
          zoom: { allowMouseWheelZoom: false },
          animations: {
             enabled: props.static ? false : true,
+         },
+
+         events: {
+            markerClick: (
+               event: MouseEvent,
+               chartContext,
+               { seriesIndex, dataPointIndex, config },
+            ) => {
+               const log = monitorLogs.value[dataPointIndex];
+               if (event.ctrlKey) {
+                  router.replace({
+                     query: { monitorLogId: log.id },
+                  });
+               }
+            },
          },
       },
       xaxis: {

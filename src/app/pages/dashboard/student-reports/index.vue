@@ -2,27 +2,10 @@
    <Layout>
       <template #header>
          <div class="flex items-center gap-2">
-            <RouterLink :to="`/dashboard/rooms/${room?.id}/students`">
-               <NButton circle quaternary>
-                  <template #icon><PhArrowLeft /></template>
-               </NButton>
-            </RouterLink>
-            <NText strong class="text-lg"> Student Report </NText>
-         </div>
-      </template>
-      <template #header-extra>
-         <div class="flex items-center gap-4">
-            <NButton
-               quaternary
-               @click="print()"
-               :disabled="isLoading"
-               :loading="isPrintLoading"
-            >
-               Print Report
-               <template #icon>
-                  <PhPrinter />
-               </template>
+            <NButton @click="$router.back()" circle quaternary>
+               <template #icon><PhArrowLeft /></template>
             </NButton>
+            <NText strong class="text-lg"> Student Report </NText>
          </div>
       </template>
       <div v-if="isLoading" class="flex items-center gap-2">
@@ -34,28 +17,27 @@
          description="Data not found."
       />
       <template v-else>
-         <Dashboard
-            :theme="theme"
-            :student="student"
-            :room="room"
-            :monitorLogs="monitorLogs"
-            :teacher="teacher"
-         />
+         <Dashboard :theme="theme" />
          <NConfigProvider
             v-if="isPrintLoading"
             :theme="lightTheme"
             :theme-overrides="lightThemeOverrides"
          >
-            <Dashboard
-               ref="printDashboard"
-               :theme="'light'"
-               :student="student"
-               :room="room"
-               :monitorLogs="monitorLogs"
-               :teacher="teacher"
-               static
-            />
+            <Dashboard ref="printDashboard" :theme="'light'" static />
          </NConfigProvider>
+         <div class="flex w-full justify-start mt-8 gap-4">
+            <NButton
+               secondary
+               @click="print()"
+               :disabled="isLoading"
+               :loading="isPrintLoading"
+            >
+               Print Report
+               <template #icon>
+                  <PhPrinter />
+               </template>
+            </NButton>
+         </div>
       </template>
    </Layout>
 </template>
@@ -85,6 +67,9 @@ import { useStore } from "@/app/composables/use-store";
 import { compareTimestamps } from "@/lib/datetime";
 import {
    MONITOR_LOGS_INJECTION_KEY,
+   ROOM_INJECTION_KEY,
+   STUDENT_INJECTION_KEY,
+   TEACHER_INJECTION_KEY,
    THEME_INJECTION_KEY,
 } from "@/lib/injection-keys";
 import Dashboard from "./dashboard.vue";
@@ -99,19 +84,22 @@ const isLoading = computed(() => store.isLoadStudentLoading);
 const isPrintLoading = ref(false);
 
 // reports data
-const student = computed(() =>
-   store.allStudents.get(Number(route.params.studentId as string)),
+const student = computed(
+   () =>
+      store.allStudents.get(Number(route.params.studentId as string)) ?? null,
 );
-const room = computed(() => store.allRooms.get(student.value?.roomId || -1));
+const room = computed(
+   () => store.allRooms.get(student.value?.roomId || -1) ?? null,
+);
+const teacher = computed(
+   () => store.allTeachers.get(room.value?.teacherAccountId || -1) ?? null,
+);
 const monitorLogs = computed(() =>
    Array.from(
       store.monitorLogsGroupedByStudentId
          .get(student.value?.id || -1)
          ?.values() ?? [],
    ).sort((a, b) => compareTimestamps(a.createdAt, b.createdAt)),
-);
-const teacher = computed(() =>
-   store.allTeachers.get(room.value?.teacherAccountId || -1),
 );
 
 async function print() {
@@ -131,5 +119,8 @@ onMounted(async () => {
    await store.loadStudent(Number(route.params.studentId as string));
 });
 
+provide(STUDENT_INJECTION_KEY, student);
+provide(ROOM_INJECTION_KEY, room);
+provide(TEACHER_INJECTION_KEY, teacher);
 provide(MONITOR_LOGS_INJECTION_KEY, monitorLogs);
 </script>

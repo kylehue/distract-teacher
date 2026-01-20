@@ -19,7 +19,6 @@ export async function printElement(
       margin?: number;
       width?: string;
       height?: string;
-      /** If true, ignores page breaks and fits everything on one page */
       fitToSinglePage?: boolean;
       showButtons?: boolean;
    },
@@ -41,12 +40,10 @@ export async function printElement(
       });
    }
 
-   if (options?.width && !options?.fitToSinglePage) {
+   if (options?.width && !options?.fitToSinglePage)
       el.style.width = options.width;
-   }
-   if (options?.height && !options?.fitToSinglePage) {
+   if (options?.height && !options?.fitToSinglePage)
       el.style.height = options.height;
-   }
 
    await waitForSvg(el);
    await document.fonts.ready;
@@ -56,97 +53,106 @@ export async function printElement(
    const pdfWidth = pdf.internal.pageSize.getWidth() - 2 * margin;
    const pdfHeight = pdf.internal.pageSize.getHeight() - 2 * margin;
 
-   if (options?.fitToSinglePage) {
-      // Render everything on a single page, ignoring page breaks
-      const canvas = await html2canvas(el, {
+   const pageElements = Array.from(
+      el.querySelectorAll<HTMLElement>("[data-print-new-page]"),
+   );
+
+   // Helper to slice canvas vertically if it overflows
+   const addCanvasToPdf = (canvas: HTMLCanvasElement) => {
+      const scale = pdfWidth / canvas.width;
+      const totalHeight = canvas.height * scale;
+
+      if (totalHeight <= pdfHeight) {
+         pdf.addImage(
+            canvas.toDataURL("image/jpeg"),
+            "JPEG",
+            margin,
+            margin,
+            pdfWidth,
+            totalHeight,
+         );
+      } else {
+         let renderedHeight = 0;
+         while (renderedHeight < canvas.height) {
+            const pageCanvas = document.createElement("canvas");
+            const pageScale = pdfWidth / canvas.width;
+            const pageHeightPx = pdfHeight / pageScale;
+            pageCanvas.width = canvas.width;
+            pageCanvas.height = Math.min(
+               pageHeightPx,
+               canvas.height - renderedHeight,
+            );
+
+            const ctx = pageCanvas.getContext("2d")!;
+            ctx.drawImage(
+               canvas,
+               0,
+               renderedHeight,
+               canvas.width,
+               pageCanvas.height,
+               0,
+               0,
+               canvas.width,
+               pageCanvas.height,
+            );
+
+            if (renderedHeight > 0) pdf.addPage();
+            pdf.addImage(
+               pageCanvas.toDataURL("image/jpeg"),
+               "JPEG",
+               margin,
+               margin,
+               pdfWidth,
+               (pageCanvas.height * pdfWidth) / pageCanvas.width,
+            );
+
+            renderedHeight += pageCanvas.height;
+         }
+      }
+   };
+
+   // Render everything before the first page break
+   let lastOffset = 0;
+   if (pageElements.length > 0) {
+      const firstBreak = pageElements[0];
+      const preCanvas = await html2canvas(el, {
+         scale: 2,
+         useCORS: true,
+         backgroundColor: "#fff",
+         y: 0,
+         height: firstBreak.offsetTop,
+      });
+      addCanvasToPdf(preCanvas);
+      lastOffset = firstBreak.offsetTop;
+   } else {
+      // No manual page breaks, render entire element as one chunk
+      const fullCanvas = await html2canvas(el, {
          scale: 2,
          useCORS: true,
          backgroundColor: "#fff",
       });
-      const scale = pdfWidth / canvas.width;
-      const imgWidth = pdfWidth;
-      const imgHeight = canvas.height * scale;
-      const yOffset = (pdfHeight - imgHeight) / 2 + margin;
+      addCanvasToPdf(fullCanvas);
+      lastOffset = el.scrollHeight;
+   }
 
-      pdf.addImage(
-         canvas.toDataURL("image/png"),
-         "PNG",
-         margin,
-         yOffset,
-         imgWidth,
-         imgHeight,
-      );
-   } else {
-      // Split pages at elements with `[data-print-new-page]`
-      const pageElements = Array.from(
-         el.querySelectorAll<HTMLElement>("[data-print-new-page]"),
-      );
+   // Render each chunk starting at a `[data-print-new-page]`
+   for (let i = 0; i < pageElements.length; i++) {
+      const current = pageElements[i];
+      const next = pageElements[i + 1];
+      const yStart = current.offsetTop;
+      const yEnd = next ? next.offsetTop : el.scrollHeight;
 
-      // If no page breaks, render the whole element as a single page
-      if (pageElements.length === 0) {
-         const canvas = await html2canvas(el, {
-            scale: 2,
-            useCORS: true,
-            backgroundColor: "#fff",
-         });
-         const scale = pdfWidth / canvas.width;
-         const imgWidth = pdfWidth;
-         const imgHeight = canvas.height * scale;
-         const yOffset = (pdfHeight - imgHeight) / 2 + margin;
+      const chunkCanvas = await html2canvas(el, {
+         scale: 2,
+         useCORS: true,
+         backgroundColor: "#fff",
+         y: yStart,
+         height: yEnd - yStart,
+      });
 
-         pdf.addImage(
-            canvas.toDataURL("image/png"),
-            "PNG",
-            margin,
-            yOffset,
-            imgWidth,
-            imgHeight,
-         );
-      } else {
-         // Render first chunk: everything before the first page break
-         const first = pageElements[0];
-         const preCanvas = await html2canvas(el, {
-            scale: 2,
-            useCORS: true,
-            backgroundColor: "#fff",
-            y: 0,
-            height: first.offsetTop,
-         });
-         pdf.addImage(
-            preCanvas.toDataURL("image/png"),
-            "PNG",
-            margin,
-            margin,
-            pdfWidth,
-            (preCanvas.height * pdfWidth) / preCanvas.width,
-         );
-
-         // Render each page break element separately
-         for (let i = 0; i < pageElements.length; i++) {
-            const chunk = pageElements[i];
-            const next = pageElements[i + 1];
-            const yStart = chunk.offsetTop;
-            const yEnd = next ? next.offsetTop : el.scrollHeight;
-
-            const chunkCanvas = await html2canvas(el, {
-               scale: 2,
-               useCORS: true,
-               backgroundColor: "#fff",
-               y: yStart,
-               height: yEnd - yStart,
-            });
-
-            pdf.addPage();
-            pdf.addImage(
-               chunkCanvas.toDataURL("image/png"),
-               "PNG",
-               margin,
-               margin,
-               pdfWidth,
-               (chunkCanvas.height * pdfWidth) / chunkCanvas.width,
-            );
-         }
-      }
+      pdf.addPage();
+      addCanvasToPdf(chunkCanvas);
+      lastOffset = yEnd;
    }
 
    // Restore original styles
@@ -154,11 +160,9 @@ export async function printElement(
    if (!options?.showButtons) {
       buttons.forEach((btn) => {
          const origVisibility = origButtonVisibilities.get(btn);
-         if (origVisibility !== undefined) {
+         if (origVisibility !== undefined)
             btn.style.visibility = origVisibility;
-         } else {
-            btn.style.removeProperty("visibility");
-         }
+         else btn.style.removeProperty("visibility");
       });
    }
 

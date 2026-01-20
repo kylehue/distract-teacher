@@ -3,7 +3,7 @@ import HomePage from "@/app/pages/home.vue";
 import LoginPage from "@/app/pages/login.vue";
 import RegisterPage from "@/app/pages/register.vue";
 import DashboardRoomsPage from "@/app/pages/dashboard/rooms.vue";
-import RoomOverviewPage from "@/app/pages/dashboard/room/overview.vue";
+import RoomOverviewPage from "@/app/pages/dashboard/room/overview/index.vue";
 import RoomSettingsPage from "@/app/pages/dashboard/room/settings.vue";
 import RoomStudentsPage from "@/app/pages/dashboard/room/students.vue";
 import RoomMonitoringPage from "@/app/pages/dashboard/room/monitoring.vue";

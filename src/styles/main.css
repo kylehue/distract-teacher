@@ -14,3 +14,9 @@ html.dark {
 body {
    /* overflow: hidden; */
 }
+
+/* For print CSS */
+.page-break {
+   page-break-after: always;
+   page-break-before: always;
+}
