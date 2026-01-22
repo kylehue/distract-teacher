@@ -1,6 +1,6 @@
 <template>
    <div class="flex items-center justify-center mt-20">
-      <NCard class="flex w-[420px]!" title="Register">
+      <NCard class="flex w-[420px]!" title="Register" :bordered="false">
          <NForm>
             <NFormItem
                label="Username"

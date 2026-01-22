@@ -1,5 +1,5 @@
 <template>
-   <NLayout class="w-full h-full" embedded>
+   <NLayout class="w-screen h-screen" embedded>
       <NLayoutHeader bordered>
          <div class="container mx-auto py-4 flex items-center justify-between">
             <RouterLink to="/">
@@ -39,7 +39,7 @@
       </NLayoutHeader>
       <NLayoutContent
          class="container mx-auto"
-         content-class="flex flex-col"
+         content-class="flex w-full h-full flex-col"
          embedded
       >
          <RouterView></RouterView>
