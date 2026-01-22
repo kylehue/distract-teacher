@@ -15,6 +15,18 @@
             <RoomStatusTag :room="room" />
          </div>
       </template>
+      <template v-if="!!room" #header-extra>
+         <NTooltip>
+            <template #trigger>
+               <NButton circle @click="announcement.show(room)">
+                  <template #icon>
+                     <PhMegaphoneSimple />
+                  </template>
+               </NButton>
+            </template>
+            Announce to students
+         </NTooltip>
+      </template>
       <div v-if="!room" class="flex items-center justify-center w-full h-full">
          <div v-if="store.isLoadRoomLoading" class="flex gap-2 items-center">
             <NSpin></NSpin>
@@ -43,7 +55,7 @@
 </template>
 
 <script setup lang="ts">
-import { NButton, NTabs, NTab, NSpin, NText, NTag } from "naive-ui";
+import { NButton, NTabs, NTab, NSpin, NText, NTag, NTooltip } from "naive-ui";
 import Layout from "../layout.vue";
 import { computed, onMounted, provide } from "vue";
 import { useRouter, useRoute, RouterLink, RouterView } from "vue-router";
@@ -52,6 +64,7 @@ import {
    PhArrowLeft,
    PhGear,
    PhHouse,
+   PhMegaphoneSimple,
    PhUserFocus,
    PhUsers,
 } from "@phosphor-icons/vue";
@@ -66,10 +79,12 @@ import {
 } from "@/lib/injection-keys";
 import RoomStatusTag from "@/app/components/room-status-tag.vue";
 import { getWithDefault } from "@/lib/object";
+import { useAnnouncement } from "@/app/composables/use-announcement";
 
 const router = useRouter();
 const route = useRoute();
 const store = useStore();
+const announcement = useAnnouncement();
 
 const room = computed(
    () => store.allRooms.get(Number(route.params.roomId as string)) ?? null,

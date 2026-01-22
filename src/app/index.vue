@@ -16,6 +16,7 @@
             <RouterView />
             <EvidenceProvider />
             <CreateRoomProvider />
+            <AnnouncementProvider />
          </NMessageProvider>
       </NDialogProvider>
       <NGlobalStyle />
@@ -48,6 +49,7 @@ import { darkThemeOverrides, lightThemeOverrides } from "@/lib/theme-overrides";
 import { useFetch } from "./composables/use-fetch";
 import EvidenceProvider from "./components/evidence-provider.vue";
 import CreateRoomProvider from "./components/create-room-provider.vue";
+import AnnouncementProvider from "./components/announcement-provider.vue";
 import { TeacherInfo } from "@/lib/typings";
 import {
    LOGOUT_INJECTION_KEY,

@@ -186,7 +186,7 @@ const columns: DataTableColumns<StudentInfo> = [
                default: () =>
                   h(
                      NButton,
-                     { size: "small", circle: true, tertiary: true },
+                     { size: "small", circle: true, quaternary: true },
                      { default: renderIcon(PhDotsThreeVertical) },
                   ),
             },

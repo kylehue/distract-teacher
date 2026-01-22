@@ -168,7 +168,7 @@ const columns: DataTableColumns<MonitorLog> = [
       },
       sorter: {
          compare(rowA, rowB) {
-            const levels = { low: 1, moderate: 2, severe: 3 };
+            const levels = { none: 0, low: 1, moderate: 2, severe: 3 };
             return levels[rowA.warningLevel] - levels[rowB.warningLevel];
          },
          multiple: 3,

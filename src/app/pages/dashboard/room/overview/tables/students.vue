@@ -5,7 +5,6 @@
       :data="studentsArray"
       :pagination="static ? false : { pageSize: 10 }"
       :single-line="false"
-      :row-class-name="(row) => (!row.active ? 'opacity-50' : '')"
    />
 </template>
 
@@ -37,9 +36,7 @@ const props = defineProps<{
 const themeVars = useThemeVars();
 const store = useStore();
 const students = inject(STUDENTS_MAP_INJECTION_KEY)!;
-const studentsArray = computed(() =>
-   Array.from(students.value.values()).filter((s) => s.active),
-);
+const studentsArray = computed(() => Array.from(students.value.values()));
 
 const columns: DataTableColumns<StudentInfo> = [
    {
@@ -197,11 +194,6 @@ if (!props.static) {
                         );
                      },
                   },
-                  {
-                     value: "ban",
-                     label: "Ban",
-                     style: { color: themeVars.value.errorColor },
-                  },
                ],
                trigger: "click",
                onUpdateValue(v) {
@@ -212,7 +204,7 @@ if (!props.static) {
                default: () =>
                   h(
                      NButton,
-                     { size: "small", circle: true, tertiary: true },
+                     { size: "small", circle: true, quaternary: true },
                      { default: renderIcon(PhDotsThreeVertical) },
                   ),
             },

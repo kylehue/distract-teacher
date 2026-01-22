@@ -34,7 +34,7 @@ export interface MonitorLog {
    recordingUrl: string;
 }
 
-export type WarningLevel = "low" | "moderate" | "severe";
+export type WarningLevel = "none" | "low" | "moderate" | "severe";
 
 export interface RoomInfo {
    id: string | number;
