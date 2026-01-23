@@ -58,14 +58,19 @@ export const useAuthStore = defineStore("auth-store", () => {
    const postLogout = useFetch("/api/logout", "POST");
    async function logout() {
       isLoading.value = true;
+      const safePaths = new Set(["/", "/home", "/login", "/register"]);
       try {
          await postLogout.execute();
-         router.push("/login");
+         if (!safePaths.has(router.currentRoute.value.path)) {
+            router.push("/login");
+         }
          teacher.value = null;
          isAuthenticated.value = false;
          store.clear();
       } catch {
-         router.push("/login");
+         if (!safePaths.has(router.currentRoute.value.path)) {
+            router.push("/login");
+         }
          teacher.value = null;
          isAuthenticated.value = false;
          store.clear();
