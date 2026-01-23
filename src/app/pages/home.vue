@@ -6,28 +6,44 @@
          Supporting academic integrity through behavioral analysis.
       </NText>
       <NText class="text-2xl" :depth="3">
-         <span>Distract</span> helps institutions evaluate
-         assessment conduct with transparency.
+         <span>Distract</span> helps institutions evaluate assessment conduct
+         with transparency.
       </NText>
 
       <div class="flex items-center gap-2">
          <RouterLink to="/register">
-            <NButton type="primary" size="large">
-               Get Started
-            </NButton>
+            <NButton type="primary" size="large"> Get Started </NButton>
          </RouterLink>
-         <NButton size="large">
-            <template #icon>
-               <PhDownloadSimple />
-            </template>
-            Download Student Client
-         </NButton>
+         <a v-if="typeof latestExeUrl === 'string'" :href="latestExeUrl">
+            <NButton size="large">
+               <template #icon>
+                  <PhDownloadSimple />
+               </template>
+               Download Student Client
+            </NButton>
+         </a>
       </div>
    </div>
 </template>
 
 <script setup lang="ts">
-import { PhDownload, PhDownloadSimple } from "@phosphor-icons/vue";
+import { PhDownloadSimple } from "@phosphor-icons/vue";
 import { NButton, NText } from "naive-ui";
+import { onMounted, ref } from "vue";
 import { RouterLink } from "vue-router";
+
+async function getLatestExeUrl(): Promise<string | null> {
+   const res = await fetch(
+      "https://api.github.com/repos/kylehue/distract/releases/latest",
+   );
+   const release = await res.json();
+   const exeAsset = release.assets.find((a: any) => a.name.endsWith(".exe"));
+   return exeAsset?.browser_download_url || null;
+}
+
+const latestExeUrl = ref<string | null>(null);
+
+onMounted(async () => {
+   latestExeUrl.value = await getLatestExeUrl();
+});
 </script>

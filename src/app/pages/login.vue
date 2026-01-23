@@ -66,7 +66,7 @@ const usernameStatus = ref<"error" | "success">("success");
 const passwordStatus = ref<"error" | "success">("success");
 const usernameFeedback = ref("");
 const passwordFeedback = ref("");
-const teacher = inject(TEACHER_INJECTION_KEY);
+const teacher = inject(TEACHER_INJECTION_KEY)!;
 
 async function login() {
    usernameStatus.value = "success";
@@ -81,9 +81,7 @@ async function login() {
          },
       });
 
-      if (teacher) {
-         teacher.value = result.data?.teacher ?? null;
-      }
+      teacher.value = result.data?.teacher ?? null;
 
       router.push("/dashboard");
    } catch {

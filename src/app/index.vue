@@ -102,9 +102,6 @@ onMounted(async () => {
    try {
       const result = await postValidateSession.execute();
       teacher.value = result.data?.teacher ?? null;
-      if (!router.currentRoute.value.path.startsWith("/dashboard")) {
-         router.push("/dashboard");
-      }
    } catch {
       // we don't care about errors here
    }

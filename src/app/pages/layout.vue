@@ -1,7 +1,7 @@
 <template>
    <NLayout class="w-screen h-screen" embedded>
       <NLayoutHeader bordered>
-         <div class="container mx-auto py-4 flex items-center justify-between">
+         <div class="container mx-auto h-16 flex items-center justify-between">
             <RouterLink to="/">
                <NText>Distract</NText>
             </RouterLink>
