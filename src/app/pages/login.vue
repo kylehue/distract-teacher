@@ -1,5 +1,5 @@
 <template>
-   <div class="flex items-center justify-center mt-20">
+   <div class="flex items-center justify-center w-full h-full">
       <NCard class="flex w-[420px]!" title="Login" :bordered="false">
          <NForm>
             <NFormItem
@@ -10,7 +10,7 @@
                <NInput
                   v-model:value="username"
                   placeholder="Enter your username"
-                  :disabled="postLogin.isLoading"
+                  :disabled="auth.isLoading"
                />
             </NFormItem>
 
@@ -23,7 +23,7 @@
                   v-model:value="password"
                   type="password"
                   placeholder="Enter your password"
-                  :disabled="postLogin.isLoading"
+                  :disabled="auth.isLoading"
                />
             </NFormItem>
 
@@ -31,7 +31,7 @@
                <NButton
                   type="primary"
                   block
-                  :loading="postLogin.isLoading"
+                  :loading="auth.isLoading"
                   @click="login"
                >
                   Login
@@ -48,16 +48,13 @@
 </template>
 
 <script setup lang="ts">
-import { inject, ref } from "vue";
+import { ref } from "vue";
 import { NCard, NForm, NFormItem, NInput, NButton, useMessage } from "naive-ui";
-import { useRouter, RouterLink } from "vue-router";
-import { useFetch } from "../composables/use-fetch";
+import { RouterLink } from "vue-router";
 import { useStore } from "../composables/use-store";
-import { TEACHER_INJECTION_KEY } from "@/lib/injection-keys";
-import { TeacherInfo } from "@/lib/typings";
+import { useAuthStore } from "../composables/use-auth-store";
 
-const router = useRouter();
-const postLogin = useFetch<{ teacher: TeacherInfo }>("/api/login", "POST");
+const auth = useAuthStore();
 const message = useMessage();
 const store = useStore();
 const username = ref("");
@@ -66,7 +63,6 @@ const usernameStatus = ref<"error" | "success">("success");
 const passwordStatus = ref<"error" | "success">("success");
 const usernameFeedback = ref("");
 const passwordFeedback = ref("");
-const teacher = inject(TEACHER_INJECTION_KEY)!;
 
 async function login() {
    usernameStatus.value = "success";
@@ -74,27 +70,19 @@ async function login() {
    usernameFeedback.value = "";
    passwordFeedback.value = "";
    try {
-      const result = await postLogin.execute({
-         body: {
-            username: username.value,
-            password: password.value,
-         },
-      });
-
-      teacher.value = result.data?.teacher ?? null;
-
-      router.push("/dashboard");
+      await auth.loginWithCredentials(username.value, password.value);
    } catch {
-      if (!postLogin.error) {
+      if (!auth.postLogin.error) {
+         message.error("An unknown error occurred during login.");
          return;
       }
 
-      if (!postLogin.error.fieldErrors) {
-         message.error(postLogin.error.message);
+      if (!auth.postLogin.error.fieldErrors) {
+         message.error(auth.postLogin.error.message);
          return;
       }
 
-      const fieldErrors = postLogin.error.fieldErrors;
+      const fieldErrors = auth.postLogin.error.fieldErrors;
       if (fieldErrors.username) {
          usernameStatus.value = "error";
          usernameFeedback.value = fieldErrors.username;

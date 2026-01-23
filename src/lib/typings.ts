@@ -66,5 +66,6 @@ export interface StudentInfo {
 export interface TeacherInfo {
    id: string | number;
    displayName: string;
+   username: string;
    createdAt: string;
 }

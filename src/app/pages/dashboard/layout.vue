@@ -28,6 +28,7 @@
 
 <script setup lang="ts">
 import { NLayout, NLayoutContent, NText, NDivider } from "naive-ui";
+import { onMounted } from "vue";
 const props = defineProps<{
    title?: string;
    noDivider?: boolean;

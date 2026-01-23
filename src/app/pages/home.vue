@@ -1,6 +1,6 @@
 <template>
    <div
-      class="flex flex-col items-start justify-center w-full h-full mt-42 gap-4"
+      class="flex flex-col items-start justify-center w-full h-full gap-4"
    >
       <NText class="text-7xl font-bold">
          Supporting academic integrity through behavioral analysis.

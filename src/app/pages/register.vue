@@ -1,5 +1,5 @@
 <template>
-   <div class="flex items-center justify-center mt-20">
+   <div class="flex items-center justify-center w-full h-full">
       <NCard class="flex w-[420px]!" title="Register" :bordered="false">
          <NForm>
             <NFormItem
@@ -10,7 +10,7 @@
                <NInput
                   v-model:value="username"
                   placeholder="Enter your username"
-                  :disabled="postRegister.isLoading"
+                  :disabled="postAccount.isLoading"
                />
             </NFormItem>
 
@@ -23,7 +23,7 @@
                   v-model:value="password1"
                   type="password"
                   placeholder="Enter your password"
-                  :disabled="postRegister.isLoading"
+                  :disabled="postAccount.isLoading"
                />
             </NFormItem>
 
@@ -36,7 +36,7 @@
                   v-model:value="password2"
                   type="password"
                   placeholder="Enter your password again"
-                  :disabled="postRegister.isLoading"
+                  :disabled="postAccount.isLoading"
                />
             </NFormItem>
 
@@ -44,7 +44,7 @@
                <NButton
                   type="primary"
                   block
-                  :loading="postRegister.isLoading"
+                  :loading="postAccount.isLoading"
                   @click="register"
                >
                   Register
@@ -78,7 +78,7 @@ const password2Status = ref<"success" | "error">("success");
 const usernameFeedback = ref("");
 const password1Feedback = ref("");
 const password2Feedback = ref("");
-const postRegister = useFetch("/api/register", "POST");
+const postAccount = useFetch("/api/account", "POST");
 const message = useMessage();
 
 async function register() {
@@ -90,7 +90,7 @@ async function register() {
    password2Feedback.value = "";
 
    try {
-      await postRegister.execute({
+      await postAccount.execute({
          body: {
             username: username.value,
             password1: password1.value,
@@ -101,16 +101,16 @@ async function register() {
       message.success("Registration successful!");
       router.push("/login");
    } catch {
-      if (!postRegister.error) {
+      if (!postAccount.error) {
          return;
       }
 
-      if (!postRegister.error.fieldErrors) {
-         message.error(postRegister.error.message);
+      if (!postAccount.error.fieldErrors) {
+         message.error(postAccount.error.message);
          return;
       }
 
-      const fieldErrors = postRegister.error.fieldErrors;
+      const fieldErrors = postAccount.error.fieldErrors;
       if (fieldErrors.username) {
          usernameStatus.value = "error";
          usernameFeedback.value = fieldErrors.username;

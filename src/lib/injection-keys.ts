@@ -33,8 +33,3 @@ export const STUDENTS_MAP_INJECTION_KEY: InjectionKey<
 
 export const THEME_INJECTION_KEY: InjectionKey<Ref<"light" | "dark">> =
    Symbol("theme-mode");
-
-export const LOGOUT_INJECTION_KEY: InjectionKey<{
-   execute: () => Promise<void>;
-   isLoading: Ref<boolean>;
-}> = Symbol("logout-function");
