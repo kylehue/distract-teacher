@@ -26,6 +26,9 @@
                   v-model:value="form.message"
                   placeholder="Enter the message"
                   :disabled="postAnnouncement.isLoading"
+                  :maxlength="256"
+                  :autosize="{ minRows: 3, maxRows: 9 }"
+                  show-count
                />
             </NFormItem>
             <NButton
@@ -78,8 +81,6 @@ async function sendAnnoucement() {
 
    form.messageFeedback = "";
    form.messageStatus = "success";
-
-   console.log(room.value.code);
 
    try {
       await postAnnouncement.execute({
