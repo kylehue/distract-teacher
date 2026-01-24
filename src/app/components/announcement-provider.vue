@@ -58,13 +58,12 @@ import {
 } from "naive-ui";
 import { reactive } from "vue";
 import { useAnnouncement } from "../composables/use-announcement";
-import { useSocket } from "../composables/use-socket";
 import { useFetch } from "../composables/use-fetch";
 
 const { isShowing, hide, room } = useAnnouncement();
 const postAnnouncement = useFetch<{
    success: boolean;
-}>("/api/rooms/announcement", "POST");
+}>("/api/rooms/:roomId/announcement", "POST");
 const form = reactive({
    message: "",
    messageFeedback: "",
@@ -85,8 +84,10 @@ async function sendAnnoucement() {
    try {
       await postAnnouncement.execute({
          body: {
-            roomCode: room.value.code,
             message: form.message.trim(),
+         },
+         params: {
+            roomId: room.value.id,
          },
       });
 
