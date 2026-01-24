@@ -8,11 +8,12 @@ export function useSocket() {
    function on(
       event: string,
       handler: (data: Record<any, any>) => void,
-      { autoClean = true } = {}
+      { autoClean = true } = {},
    ) {
-      socket.on(event, (data) => handler(keysToCamel(data)));
+      const wrappedHandler = (data: any) => handler(keysToCamel(data));
+      socket.on(event, wrappedHandler);
       if (autoClean) {
-         onUnmounted(() => socket.off(event, handler));
+         onUnmounted(() => socket.off(event, wrappedHandler));
       }
 
       // dev logging

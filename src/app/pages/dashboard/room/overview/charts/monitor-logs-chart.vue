@@ -13,7 +13,10 @@ import { computed, inject, useTemplateRef } from "vue";
 import ApexChart from "vue3-apexcharts";
 import { deepMerge } from "@/lib/object";
 import { apexChartOverrides } from "@/lib/theme-overrides";
-import { MONITOR_LOGS_INJECTION_KEY } from "@/lib/injection-keys";
+import {
+   MONITOR_LOGS_INJECTION_KEY,
+   STUDENTS_MAP_INJECTION_KEY,
+} from "@/lib/injection-keys";
 
 const props = defineProps<{
    theme: "light" | "dark";
@@ -22,6 +25,7 @@ const props = defineProps<{
 
 const chart = useTemplateRef("chart");
 const monitorLogs = inject(MONITOR_LOGS_INJECTION_KEY)!;
+const students = inject(STUDENTS_MAP_INJECTION_KEY)!;
 
 /**
  * Scatter series: x = timestamp, y = integrity score
@@ -29,10 +33,12 @@ const monitorLogs = inject(MONITOR_LOGS_INJECTION_KEY)!;
 const scatterSeries = computed(() => [
    {
       name: "Integrity Score",
-      data: monitorLogs.value.map((log) => ({
-         x: new Date(log.createdAt).getTime(),
-         y: log.integrityScore,
-      })),
+      data: monitorLogs.value
+         .filter((log) => students.value.get(log.studentId)?.permitted)
+         .map((log) => ({
+            x: new Date(log.createdAt).getTime(),
+            y: log.integrityScore,
+         })),
    },
 ]);
 

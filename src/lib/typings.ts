@@ -60,6 +60,7 @@ export interface StudentInfo {
    timeJoined: string;
    timeLeft?: string;
    active: boolean;
+   permitted: boolean;
    createdAt: string;
 }
 

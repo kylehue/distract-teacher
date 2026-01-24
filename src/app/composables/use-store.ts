@@ -1,5 +1,10 @@
 import { computed, reactive, ref, watch } from "vue";
-import type { MonitorLog, RoomInfo, StudentInfo, TeacherInfo } from "@/lib/typings";
+import type {
+   MonitorLog,
+   RoomInfo,
+   StudentInfo,
+   TeacherInfo,
+} from "@/lib/typings";
 import { useSocket } from "./use-socket";
 import { getWithDefault } from "@/lib/object";
 import { defineStore } from "pinia";
@@ -191,6 +196,43 @@ export const useStore = defineStore("main-store", () => {
       monitorLogsGroupedByRoomId.delete(roomId);
    }
 
+   function deleteStudent(studentId: string | number) {
+      // remove from studentsGroupedByRoomId
+      for (let [roomId, studentsMap] of studentsGroupedByRoomId) {
+         if (studentsMap.has(studentId)) {
+            studentsMap.delete(studentId);
+            break;
+         }
+      }
+
+      // remove from monitorLogsGroupedByStudentId
+      monitorLogsGroupedByStudentId.delete(studentId);
+
+      // remove from monitorLogsGroupedByRoomId
+      let student = allStudents.get(studentId);
+      if (student) {
+         let roomId = student.roomId;
+         let monitorLogsMap = monitorLogsGroupedByRoomId.get(roomId);
+         if (monitorLogsMap) {
+            for (let [monitorLogId, monitorLog] of monitorLogsMap) {
+               if (monitorLog.studentId === studentId) {
+                  monitorLogsMap.delete(monitorLogId);
+               }
+            }
+         }
+      }
+
+      // remove from allMonitorLogs
+      for (let [monitorLogId, monitorLog] of allMonitorLogs) {
+         if (monitorLog.studentId === studentId) {
+            allMonitorLogs.delete(monitorLogId);
+         }
+      }
+
+      // remove from allStudents
+      allStudents.delete(studentId);
+   }
+
    function clear() {
       allRooms.clear();
       allStudents.clear();
@@ -200,7 +242,12 @@ export const useStore = defineStore("main-store", () => {
    }
 
    function countStudentsOfRoom(roomId: string | number) {
-      return studentsGroupedByRoomId.get(roomId)?.size ?? 0;
+      const students = studentsGroupedByRoomId.get(roomId);
+      let count = 0;
+      for (let [_, student] of students ?? []) {
+         if (student.active && student.permitted) count++;
+      }
+      return count;
    }
 
    function countMonitorLogsOfStudent(studentId: string | number) {
@@ -248,6 +295,15 @@ export const useStore = defineStore("main-store", () => {
    );
 
    socket.on(
+      "teacher:delete_student",
+      (data) => {
+         const student = data.student as StudentInfo;
+         deleteStudent(student.id);
+      },
+      { autoClean: false },
+   );
+
+   socket.on(
       "teacher:create_monitor_log",
       (data) => {
          const monitorLog = data.monitorLog as MonitorLog;
@@ -290,6 +346,7 @@ export const useStore = defineStore("main-store", () => {
       upsertMonitorLogs,
       upsertTeachers,
       deleteRoom,
+      deleteStudent,
       clear,
       countStudentsOfRoom,
       countMonitorLogsOfStudent,

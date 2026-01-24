@@ -68,18 +68,24 @@
             </NCard>
             <NCard class="md:flex-1" :bordered="false">
                <NStatistic label="Total Number of Warnings">
-                  {{ monitorLogsArray.length }}
+                  {{ monitorLogsArrayPreprocessed.length }}
                </NStatistic>
             </NCard>
             <NCard class="md:flex-1" :bordered="false">
                <NStatistic label="Active Students">
-                  {{ studentsArray.filter((student) => student.active).length }}
+                  {{
+                     studentsArrayPreprocessed.filter(
+                        (student) => student.active,
+                     ).length
+                  }}
                </NStatistic>
             </NCard>
             <NCard class="md:flex-1" :bordered="false">
                <NStatistic label="Inactive Students">
                   {{
-                     studentsArray.filter((student) => !student.active).length
+                     studentsArrayPreprocessed.filter(
+                        (student) => !student.active,
+                     ).length
                   }}
                </NStatistic>
             </NCard>
@@ -118,6 +124,7 @@ import {
    MONITOR_LOGS_INJECTION_KEY,
    TEACHER_INJECTION_KEY,
    ROOM_INJECTION_KEY,
+   STUDENTS_MAP_INJECTION_KEY,
 } from "@/lib/injection-keys";
 import WarningLevelChart from "./charts/warning-level-chart.vue";
 
@@ -128,17 +135,26 @@ const props = defineProps<{
 
 const room = inject(ROOM_INJECTION_KEY)!;
 const teacher = inject(TEACHER_INJECTION_KEY)!;
+const students = inject(STUDENTS_MAP_INJECTION_KEY)!;
 const studentsArray = inject(STUDENTS_INJECTION_KEY)!;
+const studentsArrayPreprocessed = computed(() =>
+   studentsArray.value.filter((student) => student.permitted),
+);
 const monitorLogsArray = inject(MONITOR_LOGS_INJECTION_KEY)!;
+const monitorLogsArrayPreprocessed = computed(() =>
+   monitorLogsArray.value.filter(
+      (log) => students.value.get(log.studentId)?.permitted,
+   ),
+);
 
 // Calculations
 const integrityScoreAvg = computed(() => {
-   if (monitorLogsArray.value.length === 0) return 0;
-   const sum = monitorLogsArray.value.reduce(
+   if (monitorLogsArrayPreprocessed.value.length === 0) return 0;
+   const sum = monitorLogsArrayPreprocessed.value.reduce(
       (acc, log) => acc + log.integrityScore,
       0,
    );
-   return sum / monitorLogsArray.value.length;
+   return sum / monitorLogsArrayPreprocessed.value.length;
 });
 
 const integrityExplanation = computed(() => {

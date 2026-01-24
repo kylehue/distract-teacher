@@ -99,6 +99,13 @@ const columns: DataTableColumns<MonitorLog> = [
                     { default: () => "Inactive" },
                  )
                : "",
+            !student?.permitted
+               ? h(
+                    NTag,
+                    { type: "warning", round: true, size: "small" },
+                    { default: () => "Needs Approval" },
+                 )
+               : "",
          ]);
       },
       filterMultiple: true,

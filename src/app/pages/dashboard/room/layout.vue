@@ -39,12 +39,14 @@
       <template v-else>
          <NTabs type="card" :value="activeKey" @update:value="router.push">
             <NTab v-for="tab in tabs" :key="tab.key" :name="tab.key">
-               <RouterLink :to="tab.key">
-                  <div class="flex gap-2 items-center">
-                     <component v-if="tab.icon" :is="tab.icon" />
-                     {{ tab.name }}
-                  </div>
-               </RouterLink>
+               <NBadge :value="tab.badgeValue" :offset="[6, -3]">
+                  <RouterLink :to="tab.key">
+                     <div class="flex gap-2 items-center">
+                        <component v-if="tab.icon" :is="tab.icon" />
+                        {{ tab.name }}
+                     </div>
+                  </RouterLink>
+               </NBadge>
             </NTab>
          </NTabs>
          <div class="py-4">
@@ -55,9 +57,18 @@
 </template>
 
 <script setup lang="ts">
-import { NButton, NTabs, NTab, NSpin, NText, NTag, NTooltip } from "naive-ui";
+import {
+   NButton,
+   NTabs,
+   NTab,
+   NSpin,
+   NText,
+   NTag,
+   NTooltip,
+   NBadge,
+} from "naive-ui";
 import Layout from "../layout.vue";
-import { computed, onMounted, provide, watchEffect } from "vue";
+import { computed, onMounted, provide, reactive } from "vue";
 import { useRouter, useRoute, RouterLink, RouterView } from "vue-router";
 import { renderIcon } from "@/lib/ui";
 import {
@@ -108,12 +119,20 @@ const studentsArray = computed(() => Array.from(students.value.values()));
 const teacher = computed(() => {
    return store.allTeachers.get(room.value?.teacherAccountId ?? -1) ?? null;
 });
-const tabs = [
+const tabs = reactive([
    { name: "Overview", key: "overview", icon: renderIcon(PhHouse) },
    { name: "Monitoring", key: "monitoring", icon: renderIcon(PhUserFocus) },
-   { name: "Students", key: "students", icon: renderIcon(PhUsers) },
+   {
+      name: "Students",
+      key: "students",
+      icon: renderIcon(PhUsers),
+      badgeValue: computed(
+         () =>
+            studentsArray.value.filter((v) => !v.permitted && v.active).length,
+      ),
+   },
    { name: "Settings", key: "settings", icon: renderIcon(PhGear) },
-];
+]);
 const activeKey = computed(() => route.path.split("/").pop() || "overview");
 
 onMounted(() => {

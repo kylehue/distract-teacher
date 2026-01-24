@@ -14,7 +14,10 @@ import { computed, inject, useTemplateRef } from "vue";
 import ApexChart from "vue3-apexcharts";
 import { deepMerge } from "@/lib/object";
 import { apexChartOverrides } from "@/lib/theme-overrides";
-import { MONITOR_LOGS_INJECTION_KEY } from "@/lib/injection-keys";
+import {
+   MONITOR_LOGS_INJECTION_KEY,
+   STUDENTS_MAP_INJECTION_KEY,
+} from "@/lib/injection-keys";
 
 const props = defineProps<{
    theme: "light" | "dark";
@@ -23,6 +26,7 @@ const props = defineProps<{
 const chart = useTemplateRef("chart");
 const themeVars = useThemeVars();
 const monitorLogs = inject(MONITOR_LOGS_INJECTION_KEY)!;
+const students = inject(STUDENTS_MAP_INJECTION_KEY)!;
 const warningLevels = computed(() => {
    const levels = [
       { name: "Low", count: 0, color: themeVars.value.successColorSuppl },
@@ -30,11 +34,13 @@ const warningLevels = computed(() => {
       { name: "Severe", count: 0, color: themeVars.value.errorColorSuppl },
    ];
 
-   monitorLogs.value.forEach((log) => {
-      if (log.warningLevel === "low") levels[0].count += 1;
-      else if (log.warningLevel === "moderate") levels[1].count += 1;
-      else levels[2].count += 1;
-   });
+   monitorLogs.value
+      .filter((log) => students.value.get(log.studentId)?.permitted)
+      .forEach((log) => {
+         if (log.warningLevel === "low") levels[0].count += 1;
+         else if (log.warningLevel === "moderate") levels[1].count += 1;
+         else levels[2].count += 1;
+      });
 
    return levels;
 });

@@ -36,7 +36,9 @@ const props = defineProps<{
 const themeVars = useThemeVars();
 const store = useStore();
 const students = inject(STUDENTS_MAP_INJECTION_KEY)!;
-const studentsArray = computed(() => Array.from(students.value.values()));
+const studentsArray = computed(() =>
+   Array.from(students.value.values()).filter((student) => student.permitted),
+);
 
 const columns: DataTableColumns<StudentInfo> = [
    {

@@ -46,7 +46,7 @@ import {
 } from "naive-ui";
 import InputSearch from "@/app/components/input-search.vue";
 import CopyButton from "@/app/components/copy-button.vue";
-import { computed, h, onMounted, useTemplateRef } from "vue";
+import { computed, h, onMounted, useTemplateRef, reactive } from "vue";
 import { RoomInfo } from "@/lib/typings";
 import { RouterLink } from "vue-router";
 import { useStore } from "@/app/composables/use-store";
@@ -57,7 +57,7 @@ const store = useStore();
 const createRoom = useCreateRoom();
 const table = useTemplateRef("table");
 
-const columns: DataTableColumns<RoomInfo> = [
+const columns: DataTableColumns<RoomInfo> = reactive([
    {
       title: "Title",
       key: "title",
@@ -198,7 +198,7 @@ const columns: DataTableColumns<RoomInfo> = [
          );
       },
    },
-];
+]);
 
 const roomsArray = computed(() => Array.from(store.allRooms.values()));
 onMounted(() => {
