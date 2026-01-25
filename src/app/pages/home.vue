@@ -1,5 +1,6 @@
 <template>
    <div class="flex flex-col items-start justify-center w-full h-full gap-4">
+      <LightCanvas />
       <NText class="text-7xl font-bold">
          Supporting academic integrity through behavioral analysis.
       </NText>
@@ -29,6 +30,7 @@ import { PhDownloadSimple } from "@phosphor-icons/vue";
 import { NButton, NText } from "naive-ui";
 import { onMounted, ref } from "vue";
 import { RouterLink } from "vue-router";
+import LightCanvas from "../components/light-canvas.vue";
 
 async function getLatestExeUrl(): Promise<string | null> {
    const res = await fetch(

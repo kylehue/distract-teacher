@@ -1,12 +1,17 @@
 <template>
    <NLayout embedded>
       <div class="flex flex-col w-screen h-screen">
-         <nav>
+         <nav class="relative z-50">
             <div
                class="container mx-auto h-16 flex items-center justify-between"
             >
                <RouterLink to="/">
-                  <NText>Distract</NText>
+                  <div class="flex items-center gap-2">
+                     <NIcon :size="24">
+                        <img src="/distract.svg" />
+                     </NIcon>
+                     <NText class="font-bold">Distract</NText>
+                  </div>
                </RouterLink>
                <div class="flex items-center">
                   <template v-for="link in links" :key="link.to">
@@ -61,6 +66,7 @@ import {
    NLayoutHeader,
    NPopselect,
    useThemeVars,
+   NIcon,
 } from "naive-ui";
 import { computed, h, inject, reactive } from "vue";
 import { useRoute, RouterLink, RouterView } from "vue-router";
