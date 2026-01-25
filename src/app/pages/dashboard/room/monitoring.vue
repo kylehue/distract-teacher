@@ -60,10 +60,16 @@ import {
    NTag,
    NText,
    useMessage,
+   NPopselect,
 } from "naive-ui";
 import { computed, h, inject, onMounted, reactive, Ref, ref, watch } from "vue";
 import { MonitorLog, RoomInfo } from "@/lib/typings";
-import { PhPause, PhPlay, PhStop } from "@phosphor-icons/vue";
+import {
+   PhPause,
+   PhPlay,
+   PhStop,
+   PhDotsThreeVertical,
+} from "@phosphor-icons/vue";
 import { RouterLink, useRoute } from "vue-router";
 import { renderIcon, warningLevelToComponentType } from "@/lib/ui";
 import FilterMenuMultiselect from "@/app/components/filter-menu-multiselect.vue";
@@ -143,6 +149,19 @@ const columns: DataTableColumns<MonitorLog> = [
       },
    }),
    {
+      title: "Integrity Score",
+      key: "integrityScore",
+      render(row) {
+         return (row.integrityScore * 100).toFixed(2) + "%";
+      },
+      sorter: {
+         compare(rowA, rowB) {
+            return rowA.integrityScore - rowB.integrityScore;
+         },
+         multiple: 3,
+      },
+   },
+   {
       title: "Warning Level",
       key: "warningLevel",
       render(row) {
@@ -198,18 +217,46 @@ const columns: DataTableColumns<MonitorLog> = [
    {
       title: "",
       key: "actions",
-      width: 120,
+      width: 50,
       align: "center",
       render(row) {
          return h(
-            RouterLink,
-            { to: { query: { monitorLogId: row.id } } },
+            NPopselect,
+            {
+               options: [
+                  {
+                     value: "evidence",
+                     label: "View Evidence",
+                     render({ node }: any) {
+                        return h(
+                           RouterLink,
+                           { to: { query: { monitorLogId: row.id } } },
+                           () => node,
+                        );
+                     },
+                  },
+                  {
+                     value: "reports",
+                     label: "View Reports",
+                     render({ node }: any) {
+                        return h(
+                           RouterLink,
+                           {
+                              to: `/dashboard/student-reports/${row.studentId}`,
+                           },
+                           () => node,
+                        );
+                     },
+                  },
+               ],
+               trigger: "click",
+            },
             {
                default: () =>
                   h(
                      NButton,
-                     { size: "small", tertiary: true },
-                     { default: () => "View Evidence" },
+                     { size: "small", circle: true, quaternary: true },
+                     { default: renderIcon(PhDotsThreeVertical) },
                   ),
             },
          );
