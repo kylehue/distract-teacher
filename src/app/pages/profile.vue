@@ -192,7 +192,6 @@ import { PhArrowLeft } from "@phosphor-icons/vue";
 import { useAuthStore } from "../composables/use-auth-store";
 import { UnauthorizedError } from "@/lib/errors";
 
-const store = useStore();
 const auth = useAuthStore();
 
 const form = reactive({
@@ -219,14 +218,11 @@ async function saveProfileSettings() {
    form.displayNameFeedback = "";
    form.displayNameStatus = "success";
    try {
-      const { data } = await patchAccount.execute({
+      await patchAccount.execute({
          body: {
             displayName: form.displayName,
          },
       });
-
-      store.upsertTeachers([data!.teacher]);
-      auth.teacher = data!.teacher;
 
       message.success("Profile settings has been updated.");
    } catch {
@@ -257,14 +253,11 @@ async function saveAccountSettings() {
    form.usernameFeedback = "";
    form.usernameStatus = "success";
    try {
-      const { data } = await patchAccount.execute({
+      await patchAccount.execute({
          body: {
             username: form.username,
          },
       });
-
-      store.upsertTeachers([data!.teacher]);
-      auth.teacher = data!.teacher;
 
       message.success("Account settings has been updated.");
    } catch {

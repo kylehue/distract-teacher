@@ -82,15 +82,10 @@ import {
 import { reactive } from "vue";
 import { useCreateRoom } from "../composables/use-create-room";
 import { useFetch } from "../composables/use-fetch";
-import { useStore } from "../composables/use-store";
-import { RoomInfo } from "@/lib/typings";
 
 const message = useMessage();
-const postRooms = useFetch<{
-   room: RoomInfo;
-}>("/api/rooms", "POST");
+const postRooms = useFetch("/api/rooms", "POST");
 const { isShowing, hide } = useCreateRoom();
-const store = useStore();
 const form = reactive({
    title: "",
    code: "",
@@ -113,7 +108,7 @@ async function createRoom() {
    form.studentCapacityStatus = "success";
 
    try {
-      const { data } = await postRooms.execute({
+      await postRooms.execute({
          body: {
             title: form.title,
             code: form.code,
@@ -126,7 +121,7 @@ async function createRoom() {
       form.code = "";
       form.studentCapacity = 10;
       form.autoGenerateCode = true;
-      store.upsertRooms([data!.room]);
+
       message.success("Room created successfully!");
       hide();
    } catch {

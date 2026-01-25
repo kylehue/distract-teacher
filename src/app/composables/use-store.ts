@@ -1,4 +1,4 @@
-import { computed, reactive, ref, watch } from "vue";
+import { computed, reactive } from "vue";
 import type {
    MonitorLog,
    RoomInfo,
@@ -24,7 +24,6 @@ export const useStore = defineStore("main-store", () => {
    const monitorLogsGroupedByStudentId = reactive(
       new Map<string | number, Map<string | number, MonitorLog>>(),
    );
-   const allTeachers = reactive(new Map<string | number, TeacherInfo>());
 
    // --- data loaders ---
    const getRoom = useFetch<{
@@ -43,7 +42,6 @@ export const useStore = defineStore("main-store", () => {
          upsertRooms([data.room]);
          upsertStudents(data.students);
          upsertMonitorLogs(data.monitorLogs);
-         upsertTeachers([data.teacher]);
          return data;
       } catch {
          // ignore fetch errors
@@ -83,7 +81,6 @@ export const useStore = defineStore("main-store", () => {
          upsertStudents([data.student]);
          upsertMonitorLogs(data.monitorLogs);
          upsertRooms([data.room]);
-         upsertTeachers([data.teacher]);
          return data;
       } catch {
          // ignore fetch errors
@@ -123,7 +120,6 @@ export const useStore = defineStore("main-store", () => {
          upsertRooms([data.room]);
          upsertMonitorLogs([data.monitorLog]);
          upsertStudents([data.student]);
-         upsertTeachers([data.teacher]);
          return data;
       } catch {
          // ignore fetch errors
@@ -234,26 +230,6 @@ export const useStore = defineStore("main-store", () => {
       }
    }
 
-   function upsertTeachers(teachers: TeacherInfo[]) {
-      for (const incoming of teachers) {
-         const existing = allTeachers.get(incoming.id);
-
-         if (!existing) {
-            // new teacher
-            allTeachers.set(incoming.id, incoming);
-         } else {
-            // teacher already exists so just mutate in place
-            for (const key in incoming) {
-               // @ts-ignore
-               if (existing[key] !== incoming[key]) {
-                  // @ts-ignore
-                  existing[key] = incoming[key];
-               }
-            }
-         }
-      }
-   }
-
    // --- delete functions ---
    function deleteRoom(roomId: string | number) {
       allRooms.delete(roomId);
@@ -305,7 +281,6 @@ export const useStore = defineStore("main-store", () => {
       studentsGroupedByRoomId.clear();
       monitorLogsGroupedByRoomId.clear();
       monitorLogsGroupedByStudentId.clear();
-      allTeachers.clear();
    }
 
    // --- count functions ---
@@ -371,11 +346,19 @@ export const useStore = defineStore("main-store", () => {
       { autoClean: false },
    );
 
+   socket.on(
+      "teacher:delete_room",
+      (data) => {
+         const room = data.room as RoomInfo;
+         deleteRoom(room.id);
+      },
+      { autoClean: false },
+   );
+
    return {
       allRooms,
       allStudents,
       allMonitorLogs,
-      allTeachers,
       studentsGroupedByRoomId,
       monitorLogsGroupedByRoomId,
       monitorLogsGroupedByStudentId,
@@ -394,7 +377,6 @@ export const useStore = defineStore("main-store", () => {
       upsertRooms,
       upsertStudents,
       upsertMonitorLogs,
-      upsertTeachers,
       deleteRoom,
       deleteStudent,
       clear,

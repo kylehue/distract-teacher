@@ -75,8 +75,10 @@ import {
 import Dashboard from "./dashboard.vue";
 import { lightThemeOverrides } from "@/lib/theme-overrides";
 import { printElement, waitForSvg } from "@/lib/dom";
+import { useAuthStore } from "@/app/composables/use-auth-store";
 
 const store = useStore();
+const auth = useAuthStore();
 const route = useRoute();
 const printDashboard = useTemplateRef("printDashboard");
 const theme = inject(THEME_INJECTION_KEY)!;
@@ -91,9 +93,7 @@ const student = computed(
 const room = computed(
    () => store.allRooms.get(student.value?.roomId || -1) ?? null,
 );
-const teacher = computed(
-   () => store.allTeachers.get(room.value?.teacherAccountId || -1) ?? null,
-);
+const teacher = computed(() => auth.teacher);
 const monitorLogs = computed(() =>
    Array.from(
       store.monitorLogsGroupedByStudentId

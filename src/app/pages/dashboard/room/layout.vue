@@ -91,10 +91,12 @@ import {
 import RoomStatusTag from "@/app/components/room-status-tag.vue";
 import { getWithDefault } from "@/lib/object";
 import { useAnnouncement } from "@/app/composables/use-announcement";
+import { useAuthStore } from "@/app/composables/use-auth-store";
 
 const router = useRouter();
 const route = useRoute();
 const store = useStore();
+const auth = useAuthStore();
 const announcement = useAnnouncement();
 
 const room = computed(
@@ -116,9 +118,7 @@ const students = computed(() =>
 );
 const monitorLogsArray = computed(() => Array.from(monitorLogs.value.values()));
 const studentsArray = computed(() => Array.from(students.value.values()));
-const teacher = computed(() => {
-   return store.allTeachers.get(room.value?.teacherAccountId ?? -1) ?? null;
-});
+const teacher = computed(() => auth.teacher);
 const tabs = reactive([
    { name: "Overview", key: "overview", icon: renderIcon(PhHouse) },
    { name: "Monitoring", key: "monitoring", icon: renderIcon(PhUserFocus) },

@@ -230,7 +230,6 @@
 import {
    NButton,
    NCard,
-   NCheckbox,
    NForm,
    NFormItem,
    NInput,
@@ -242,16 +241,12 @@ import {
    useDialog,
    useMessage,
 } from "naive-ui";
-import { RoomInfo } from "@/lib/typings";
-import { computed, h, inject, nextTick, reactive, ref, Ref } from "vue";
+import { h, inject, reactive, ref } from "vue";
 import { useFetch } from "@/app/composables/use-fetch";
-import { useStore } from "@/app/composables/use-store";
-import { PhTrash } from "@phosphor-icons/vue";
 import { useRouter } from "vue-router";
 import { ROOM_INJECTION_KEY } from "@/lib/injection-keys";
 
 const room = inject(ROOM_INJECTION_KEY)!;
-const store = useStore();
 
 const form = reactive({
    title: room.value!.title,
@@ -277,10 +272,7 @@ const form = reactive({
    joinConfirmationFeedback: "",
 });
 const message = useMessage();
-const patchRoom = useFetch<{ room: RoomInfo }>(
-   `/api/rooms/${room.value!.id}`,
-   "PATCH"
-);
+const patchRoom = useFetch(`/api/rooms/${room.value!.id}`, "PATCH");
 
 async function saveGeneralSettings() {
    form.titleFeedback = "";
@@ -290,15 +282,13 @@ async function saveGeneralSettings() {
    form.codeStatus = "success";
    form.studentCapacityStatus = "success";
    try {
-      const { data } = await patchRoom.execute({
+      await patchRoom.execute({
          body: {
             title: form.title,
             code: form.code,
             studentCapacity: form.studentCapacity,
          },
       });
-
-      store.upsertRooms([data!.room]);
 
       message.success("General settings has been updated.");
    } catch {
@@ -347,14 +337,12 @@ async function saveMonitoringSettings() {
    form.evidenceWarningLevelStatus = "success";
    form.severeWarningPunishmentStatus = "success";
    try {
-      const { data } = await patchRoom.execute({
+      await patchRoom.execute({
          body: {
             evidenceWarningLevel: form.evidenceWarningLevel,
             severeWarningPunishment: form.severeWarningPunishment,
          },
       });
-
-      store.upsertRooms([data!.room]);
 
       message.success("Monitoring settings has been updated.");
    } catch {
@@ -396,14 +384,12 @@ async function saveJoiningPermissionSettings() {
    form.allowLateStudentsStatus = "success";
    form.joinConfirmationStatus = "success";
    try {
-      const { data } = await patchRoom.execute({
+      await patchRoom.execute({
          body: {
             allowLateStudents: form.allowLateStudents,
             joinConfirmation: form.joinConfirmation,
          },
       });
-
-      store.upsertRooms([data!.room]);
 
       message.success("Join permission settings has been updated.");
    } catch {
@@ -456,7 +442,7 @@ function handleDeleteRoom() {
                {
                   default: () =>
                      "Please note that this action is IRREVERSIBLE. It will delete all associated data with this room such as monitor logs, evidences, and student records.",
-               }
+               },
             ),
             h(NForm, null, {
                default: () => {
@@ -477,7 +463,7 @@ function handleDeleteRoom() {
                               },
                            });
                         },
-                     }
+                     },
                   );
                },
             }),
@@ -498,9 +484,6 @@ function handleDeleteRoom() {
             _dialog.destroy();
             message.success("Room has been deleted.");
             router.push("/dashboard/rooms");
-            nextTick(() => {
-               store.deleteRoom(roomId);
-            });
          } catch {
             if (!deleteRoom.error) {
                message.error("Failed to delete the room.");
