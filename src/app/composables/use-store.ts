@@ -150,46 +150,111 @@ export const useStore = defineStore("main-store", () => {
       }
    }
 
+   // --- upsert functions ---
    function upsertRooms(rooms: RoomInfo[]) {
-      for (let room of rooms) {
-         allRooms.set(room.id, room);
+      for (const incoming of rooms) {
+         const existing = allRooms.get(incoming.id);
+
+         if (!existing) {
+            // new room
+            allRooms.set(incoming.id, incoming);
+         } else {
+            // room already exists so just mutate in place
+            for (const key in incoming) {
+               // @ts-ignore
+               if (existing[key] !== incoming[key]) {
+                  // @ts-ignore
+                  existing[key] = incoming[key];
+               }
+            }
+         }
       }
    }
 
    function upsertStudents(students: StudentInfo[]) {
-      for (let student of students) {
-         allStudents.set(student.id, student);
+      for (const incoming of students) {
+         const existing = allStudents.get(incoming.id);
 
-         getWithDefault(
-            studentsGroupedByRoomId,
-            student.roomId,
-            reactive(new Map()),
-         ).set(student.id, student);
+         if (!existing) {
+            // new student
+            allStudents.set(incoming.id, incoming);
+            getWithDefault(
+               studentsGroupedByRoomId,
+               incoming.roomId,
+               reactive(new Map()),
+            ).set(incoming.id, incoming);
+         } else {
+            // student already exists so just mutate in place
+            for (const key in incoming) {
+               // @ts-ignore
+               if (existing[key] !== incoming[key]) {
+                  // @ts-ignore
+                  existing[key] = incoming[key];
+               }
+            }
+         }
+
+         // *roomId is immutable so no need to move between groups
       }
    }
 
    function upsertMonitorLogs(monitorLogs: MonitorLog[]) {
-      for (let monitorLog of monitorLogs) {
-         allMonitorLogs.set(monitorLog.id, monitorLog);
-         getWithDefault(
-            monitorLogsGroupedByRoomId,
-            monitorLog.roomId,
-            reactive(new Map()),
-         ).set(monitorLog.id, monitorLog);
-         getWithDefault(
-            monitorLogsGroupedByStudentId,
-            monitorLog.studentId,
-            reactive(new Map()),
-         ).set(monitorLog.id, monitorLog);
+      for (const incoming of monitorLogs) {
+         const existing = allMonitorLogs.get(incoming.id);
+
+         if (!existing) {
+            // new monitor log
+            allMonitorLogs.set(incoming.id, incoming);
+
+            getWithDefault(
+               monitorLogsGroupedByRoomId,
+               incoming.roomId,
+               reactive(new Map()),
+            ).set(incoming.id, incoming);
+
+            getWithDefault(
+               monitorLogsGroupedByStudentId,
+               incoming.studentId,
+               reactive(new Map()),
+            ).set(incoming.id, incoming);
+
+            continue;
+         } else {
+            // log already exists so just mutate in place
+            for (const key in incoming) {
+               // @ts-ignore
+               if (existing[key] !== incoming[key]) {
+                  // @ts-ignore
+                  existing[key] = incoming[key];
+               }
+            }
+         }
+
+         // *roomId and studentId are immutable so no need to move between groups
       }
    }
 
    function upsertTeachers(teachers: TeacherInfo[]) {
-      for (let teacher of teachers) {
-         allTeachers.set(teacher.id, teacher);
+      for (const incoming of teachers) {
+         const existing = allTeachers.get(incoming.id);
+
+         if (!existing) {
+            // new teacher
+            allTeachers.set(incoming.id, incoming);
+         } else {
+            // teacher already exists so just mutate in place
+            for (const key in incoming) {
+               // @ts-ignore
+               if (existing[key] !== incoming[key]) {
+                  // @ts-ignore
+                  existing[key] = incoming[key];
+               }
+            }
+         }
       }
    }
 
+   // --- delete functions ---
    function deleteRoom(roomId: string | number) {
       allRooms.delete(roomId);
       studentsGroupedByRoomId.delete(roomId);
@@ -198,7 +263,7 @@ export const useStore = defineStore("main-store", () => {
 
    function deleteStudent(studentId: string | number) {
       // remove from studentsGroupedByRoomId
-      for (let [roomId, studentsMap] of studentsGroupedByRoomId) {
+      for (let [_, studentsMap] of studentsGroupedByRoomId) {
          if (studentsMap.has(studentId)) {
             studentsMap.delete(studentId);
             break;
@@ -239,8 +304,11 @@ export const useStore = defineStore("main-store", () => {
       allMonitorLogs.clear();
       studentsGroupedByRoomId.clear();
       monitorLogsGroupedByRoomId.clear();
+      monitorLogsGroupedByStudentId.clear();
+      allTeachers.clear();
    }
 
+   // --- count functions ---
    function countStudentsOfRoom(roomId: string | number) {
       const students = studentsGroupedByRoomId.get(roomId);
       let count = 0;
@@ -265,10 +333,10 @@ export const useStore = defineStore("main-store", () => {
       return count;
    }
 
-   // real-time updates
+   // --- real-time update listeners ---
    const socket = useSocket();
    socket.on(
-      "teacher:update_room",
+      "teacher:upsert_room",
       (data) => {
          const room = data.room as RoomInfo;
          upsertRooms([room]);
@@ -277,7 +345,7 @@ export const useStore = defineStore("main-store", () => {
    );
 
    socket.on(
-      "teacher:create_student",
+      "teacher:upsert_student",
       (data) => {
          const student = data.student as StudentInfo;
          upsertStudents([student]);
@@ -286,10 +354,10 @@ export const useStore = defineStore("main-store", () => {
    );
 
    socket.on(
-      "teacher:update_student",
+      "teacher:upsert_monitor_log",
       (data) => {
-         const student = data.student as StudentInfo;
-         upsertStudents([student]);
+         const monitorLog = data.monitorLog as MonitorLog;
+         upsertMonitorLogs([monitorLog]);
       },
       { autoClean: false },
    );
@@ -299,24 +367,6 @@ export const useStore = defineStore("main-store", () => {
       (data) => {
          const student = data.student as StudentInfo;
          deleteStudent(student.id);
-      },
-      { autoClean: false },
-   );
-
-   socket.on(
-      "teacher:create_monitor_log",
-      (data) => {
-         const monitorLog = data.monitorLog as MonitorLog;
-         upsertMonitorLogs([monitorLog]);
-      },
-      { autoClean: false },
-   );
-
-   socket.on(
-      "teacher:update_monitor_log",
-      (data) => {
-         const monitorLog = data.monitorLog as MonitorLog;
-         upsertMonitorLogs([monitorLog]);
       },
       { autoClean: false },
    );

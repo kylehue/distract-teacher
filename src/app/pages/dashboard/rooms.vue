@@ -51,7 +51,11 @@ import { RoomInfo } from "@/lib/typings";
 import { RouterLink } from "vue-router";
 import { useStore } from "@/app/composables/use-store";
 import { useCreateRoom } from "@/app/composables/use-create-room";
-import { compareTimestamps, timestampToDateString, timestampToTimeString } from "@/lib/datetime";
+import {
+   compareTimestamps,
+   timestampToDateString,
+   timestampToTimeString,
+} from "@/lib/datetime";
 
 const store = useStore();
 const createRoom = useCreateRoom();
@@ -113,7 +117,7 @@ const columns: DataTableColumns<RoomInfo> = reactive([
             {
                default: () =>
                   row.status !== "concluded" ? "Ongoing" : "Concluded",
-            }
+            },
          );
       },
       filterOptions: [
@@ -192,9 +196,9 @@ const columns: DataTableColumns<RoomInfo> = reactive([
                   h(
                      NButton,
                      { size: "small", tertiary: true },
-                     { default: () => "View Room" }
+                     { default: () => "View Room" },
                   ),
-            }
+            },
          );
       },
    },
