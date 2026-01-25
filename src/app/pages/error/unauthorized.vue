@@ -2,7 +2,7 @@
    <div class="flex items-center justify-center w-full h-full">
       <div class="flex items-center gap-8">
          <NImage
-            src="/public/happy-music.svg"
+            src="/happy-music.svg"
             class="w-[330px]"
             preview-disabled
          ></NImage>

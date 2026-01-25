@@ -3,7 +3,7 @@
       <div class="flex items-center gap-8">
          <!-- Illustration for 404 -->
          <NImage
-            src="/public/page-eaten.svg"
+            src="/page-eaten.svg"
             class="w-[330px]"
             preview-disabled
          ></NImage>
