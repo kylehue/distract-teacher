@@ -1,7 +1,5 @@
 <template>
-   <div
-      class="flex flex-col items-start justify-center w-full h-full gap-4"
-   >
+   <div class="flex flex-col items-start justify-center w-full h-full gap-4">
       <NText class="text-7xl font-bold">
          Supporting academic integrity through behavioral analysis.
       </NText>
@@ -14,7 +12,7 @@
          <RouterLink to="/register">
             <NButton type="primary" size="large"> Get Started </NButton>
          </RouterLink>
-         <a v-if="typeof latestExeUrl === 'string'" :href="latestExeUrl">
+         <a :href="latestExeUrl || '#'">
             <NButton size="large">
                <template #icon>
                   <PhDownloadSimple />
