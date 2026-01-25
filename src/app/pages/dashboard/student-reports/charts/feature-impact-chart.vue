@@ -23,6 +23,7 @@ import { MONITOR_LOGS_INJECTION_KEY } from "@/lib/injection-keys";
 import { MonitorLog } from "@/lib/typings";
 import { timestampToTimeString } from "@/lib/datetime";
 import { useRouter } from "vue-router";
+import { FEATURE_GROUPS_MAP, groupFeatureImpacts } from "@/lib/reports";
 
 const props = defineProps<{
    theme: "light" | "dark";
@@ -33,52 +34,25 @@ const chart = useTemplateRef("chart");
 const themeVars = useThemeVars();
 const router = useRouter();
 const monitorLogs = inject(MONITOR_LOGS_INJECTION_KEY)!;
-const featureGroups: Record<keyof MonitorLog["featureImpacts"], string> = {
-   faceX: "Face Position",
-   faceY: "Face Position",
-   faceW: "Face Position",
-   faceH: "Face Position",
-   faceConf: "Face Position",
-   eyeGazeX: "Eye Gaze",
-   eyeGazeY: "Eye Gaze",
-   headPitch: "Head Orientation",
-   headYaw: "Head Orientation",
-   headRoll: "Head Orientation",
-   wristLeftX: "Hand Position",
-   wristLeftY: "Hand Position",
-   wristRightX: "Hand Position",
-   wristRightY: "Hand Position",
-   faceCount: "Face Count",
-   facePresent: "Face Count",
-   handCount: "Hand Count",
-};
 
 const featureImpactTimeline = computed(() => {
    return monitorLogs.value.map((log) => {
-      const grouped: Record<string, number> = {};
-
-      Object.entries(log.featureImpacts).forEach(([feature, value]) => {
-         const group =
-            featureGroups[feature as keyof MonitorLog["featureImpacts"]];
-         grouped[group] = (grouped[group] || 0) + value;
-      });
-
       return {
          time: timestampToTimeString(log.createdAt, false, true),
-         grouped,
+         grouped: groupFeatureImpacts(log.featureImpacts),
       };
    });
 });
 
 const featureImpactSeries = computed(() => {
-   const featureSeries = Array.from(new Set(Object.values(featureGroups))).map(
-      (group) => ({
-         name: group,
-         data: featureImpactTimeline.value.map(
-            (entry) => entry.grouped[group] ?? 0,
-         ),
-      }),
-   );
+   const featureSeries = Array.from(
+      new Set(Object.values(FEATURE_GROUPS_MAP)),
+   ).map((group) => ({
+      name: group,
+      data: featureImpactTimeline.value.map(
+         (entry) => entry.grouped[group] ?? 0,
+      ),
+   }));
 
    const integrityOverTimeSeries = {
       name: "Integrity Score",
@@ -123,7 +97,7 @@ const featureImpactChartOptions = computed(() =>
       yaxis: {
          title: { text: "Impact Strength" },
          labels: {
-            formatter: (v: number) => v * 100 + "%",
+            formatter: (v: number) => (v * 100).toFixed(0) + "%",
          },
       },
       stroke: {

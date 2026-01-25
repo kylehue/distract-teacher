@@ -4,49 +4,63 @@
          title="Evidence"
          closable
          @close="show = false"
-         class="w-fit! min-w-[300px] min-h-[200px]"
+         class="w-fit! min-w-[300px] min-h-[200px] max-w-[calc(100vw-100px)]"
          content-class="flex items-center justify-center w-full h-full"
       >
-         <NSpin
+         <template v-if="monitorLog" #action>
+            <div class="flex flex-wrap justify-around gap-x-16 gap-y-8 min-w-[140px]">
+               <NStatistic label="Student Name">
+                  <NText class="block max-w-[200px] text-lg!">
+                     {{ student?.name || "<unknown>" }}
+                  </NText>
+               </NStatistic>
+               <NStatistic label="Room">
+                  <NText class="block max-w-[200px] text-lg!">
+                     {{ room?.title || "<unknown>" }}
+                  </NText>
+               </NStatistic>
+               <NStatistic label="Date">
+                  <NText class="block max-w-[200px] text-lg!">
+                     {{ timestampToDateString(monitorLog.createdAt) }}
+                  </NText>
+               </NStatistic>
+               <NStatistic label="Time">
+                  <NText class="block max-w-[200px] text-lg!">
+                     {{ timestampToTimeString(monitorLog.createdAt, false, true) }}
+                  </NText>
+               </NStatistic>
+               <NStatistic label="Integrity Score">
+                  <NText class="block max-w-[200px] text-lg!">
+                     {{ (monitorLog.integrityScore * 100).toFixed(2) }}%
+                  </NText>
+               </NStatistic>
+               <NStatistic label="Warning Level">
+                  <NTag
+                     :type="warningLevelToComponentType(monitorLog.warningLevel)"
+                     round
+                  >
+                     {{ monitorLog.warningLevel }}
+                  </NTag>
+               </NStatistic>
+            </div>
+         </template>
+         <div
             v-if="
                store.isLoadMonitorLogLoading ||
                store.isLoadStudentLoading ||
                store.isLoadRoomLoading
             "
-         />
-         <NEmpty
-            v-else-if="!monitorLog"
-            description="Not found"
-            size="huge"
-         />
-         <div v-else class="flex w-full h-full gap-8">
-            <div class="flex min-w-[140px]">
-               <NDescriptions label-placement="top" class="w-full" :column="1">
-                  <NDescriptionsItem label="Student Name">
-                     <NText class="block max-w-[200px]">
-                        {{ student?.name || "<unknown>" }}
-                     </NText>
-                  </NDescriptionsItem>
-                  <NDescriptionsItem label="Room">
-                     <NText class="block max-w-[200px]">
-                        {{ room?.title || "<unknown>" }}
-                     </NText>
-                  </NDescriptionsItem>
-                  <NDescriptionsItem label="Date">
-                     {{ timestampToDateString(monitorLog.createdAt) }}
-                  </NDescriptionsItem>
-                  <NDescriptionsItem label="Time">
-                     {{ timestampToTimeString(monitorLog.createdAt, false, true) }}
-                  </NDescriptionsItem>
-                  <NDescriptionsItem label="Warning Level">
-                     <NTag
-                        :type="warningLevelToComponentType(monitorLog.warningLevel)"
-                        round
-                     >
-                        {{ monitorLog.warningLevel }}
-                     </NTag>
-                  </NDescriptionsItem>
-               </NDescriptions>
+            class="flex items-center gap-2"
+         >
+            <NSpin />
+            Loading...
+         </div>
+         <NEmpty v-else-if="!monitorLog" description="Not found" size="huge" />
+         <div v-else class="flex flex-wrap justify-around w-full h-full gap-8">
+            <!-- feature impact grouped rank bar chart -->
+            <div class="flex items-center justify-center flex-col gap-2">
+               <NText>Feature Impact Ranking</NText>
+               <FeatureImpactRankChart :monitorLog="monitorLog" height="300" />
             </div>
             <div
                v-if="!monitorLog.recordingUrl"
@@ -58,17 +72,16 @@
                   class="max-w-[300px]"
                   size="huge"
                >
-                  <template #icon><PhVideoCameraSlash/></template>
+                  <template #icon><PhVideoCameraSlash /></template>
                </NEmpty>
             </div>
             <video
                v-else
-               class="max-w-[calc(80vw-200px)] max-h-[70vh] min-w-[320px] min-h-[180px] rounded object-contain"
+               class="max-w-[calc(80vw-200px)] min-w-[320px] max-h-[calc(100vh-300px)] min-h-[180px] rounded object-contain"
                controls
                :src="monitorLog.recordingUrl"
                type="video/webm"
-            >
-            </video>
+            ></video>
          </div>
       </NCard>
    </NModal>
@@ -80,10 +93,8 @@ import {
    NCard,
    NSpin,
    NEmpty,
-   NDescriptions,
-   NDescriptionsItem,
+   NStatistic,
    NTag,
-   NDivider,
    NText,
 } from "naive-ui";
 import { ref, watch } from "vue";
@@ -93,6 +104,7 @@ import { useRoute, useRouter } from "vue-router";
 import { PhVideoCameraSlash } from "@phosphor-icons/vue";
 import { timestampToDateString, timestampToTimeString } from "@/lib/datetime";
 import { warningLevelToComponentType } from "@/lib/ui";
+import FeatureImpactRankChart from "./feature-impact-rank-chart.vue";
 
 const show = ref(false);
 const store = useStore();
@@ -102,19 +114,23 @@ const monitorLog = ref<MonitorLog>();
 const route = useRoute();
 const router = useRouter();
 
-watch(() => route.query.monitorLogId, async (newId) => {
-   if (newId) {
-      show.value = true;
+watch(
+   () => route.query.monitorLogId,
+   async (newId) => {
+      if (newId) {
+         show.value = true;
 
-      const data = await store.loadMonitorLog(Number(newId));
-      if (!data) return;
-      room.value = data.room;
-      student.value = data.student;
-      monitorLog.value = data.monitorLog;
-   } else {
-      show.value = false;
-   }
-});
+         const data = await store.loadMonitorLog(Number(newId));
+         if (!data) return;
+         room.value = data.room;
+         student.value = data.student;
+         monitorLog.value = data.monitorLog;
+         // monitorLog.value.recordingUrl = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
+      } else {
+         show.value = false;
+      }
+   },
+);
 
 watch(show, (show) => {
    if (!show) {
