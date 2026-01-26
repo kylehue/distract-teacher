@@ -115,6 +115,7 @@
                            v-model:value="form.password1"
                            placeholder="Type your new password"
                            :disabled="patchAccount.isLoading"
+                           show-password-on="click"
                            type="password"
                         />
                      </NFormItem>
@@ -128,6 +129,7 @@
                            v-model:value="form.password2"
                            placeholder="Confirm your new password"
                            :disabled="patchAccount.isLoading"
+                           show-password-on="click"
                            type="password"
                         />
                      </NFormItem>

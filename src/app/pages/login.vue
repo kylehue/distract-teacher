@@ -23,6 +23,7 @@
                   v-model:value="password"
                   type="password"
                   placeholder="Enter your password"
+                  show-password-on="click"
                   :disabled="auth.isLoading"
                />
             </NFormItem>

@@ -23,6 +23,7 @@
                   v-model:value="password1"
                   type="password"
                   placeholder="Enter your password"
+                  show-password-on="click"
                   :disabled="postAccount.isLoading"
                />
             </NFormItem>
@@ -35,7 +36,8 @@
                <NInput
                   v-model:value="password2"
                   type="password"
-                  placeholder="Enter your password again"
+                  placeholder="Confirm your password"
+                  show-password-on="click"
                   :disabled="postAccount.isLoading"
                />
             </NFormItem>
