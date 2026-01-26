@@ -67,7 +67,7 @@ onMounted(() => {
    if (!canvas.value) return;
 
    const c = canvas.value;
-   const dpr = 0.1;
+   const dpr = 0.05;
 
    const resize = () => {
       width = 800;
@@ -149,7 +149,8 @@ onMounted(() => {
          light.radius,
       );
       const [r, g, b] = light.color;
-      gradient.addColorStop(0, `rgba(${r},${g},${b},${light.alpha * 0.2})`);
+      const multiplier = theme.value === "light" ? 0.4 : 0.2;
+      gradient.addColorStop(0, `rgba(${r},${g},${b},${light.alpha * multiplier})`);
       gradient.addColorStop(1, `rgba(${r},${g},${b},0)`);
 
       ctx.fillStyle = gradient;
