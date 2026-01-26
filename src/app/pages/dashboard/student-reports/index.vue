@@ -87,8 +87,7 @@ const isPrintLoading = ref(false);
 
 // reports data
 const student = computed(
-   () =>
-      store.allStudents.get(Number(route.params.studentId as string)) ?? null,
+   () => store.allStudents.get(route.params.studentId as string) ?? null,
 );
 const room = computed(
    () => store.allRooms.get(student.value?.roomId || -1) ?? null,
@@ -116,7 +115,7 @@ async function print() {
 }
 
 onMounted(async () => {
-   await store.loadStudent(Number(route.params.studentId as string));
+   await store.loadStudent(route.params.studentId as string);
 });
 
 provide(STUDENT_INJECTION_KEY, student);

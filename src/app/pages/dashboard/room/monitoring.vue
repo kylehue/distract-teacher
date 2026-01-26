@@ -329,7 +329,7 @@ function filterByStudentIds(ids: (string | number)[]) {
 
 onMounted(() => {
    if (route.query.filterByStudent) {
-      filteredStudentIds.value = [Number(route.query.filterByStudent)];
+      filteredStudentIds.value = [route.query.filterByStudent as string];
       filterByStudentIds(filteredStudentIds.value);
    }
 });

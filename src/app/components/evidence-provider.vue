@@ -120,7 +120,7 @@ watch(
       if (newId) {
          show.value = true;
 
-         const data = await store.loadMonitorLog(Number(newId));
+         const data = await store.loadMonitorLog(newId as string);
          if (!data) return;
          room.value = data.room;
          student.value = data.student;

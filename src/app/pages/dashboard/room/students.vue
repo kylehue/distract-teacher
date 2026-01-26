@@ -268,8 +268,4 @@ const columns: DataTableColumns<StudentInfo> = [
       },
    },
 ];
-
-onMounted(() => {
-   (window as any).$store = store;
-});
 </script>

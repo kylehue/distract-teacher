@@ -100,7 +100,7 @@ const auth = useAuthStore();
 const announcement = useAnnouncement();
 
 const room = computed(
-   () => store.allRooms.get(Number(route.params.roomId as string)) ?? null,
+   () => store.allRooms.get(route.params.roomId as string) ?? null,
 );
 const monitorLogs = computed(() =>
    getWithDefault(
@@ -137,6 +137,7 @@ const activeKey = computed(() => route.path.split("/").pop() || "overview");
 
 onMounted(() => {
    store.loadRoom(route.params.roomId as string);
+   (window as any).$store = store;
 });
 
 provide(ROOM_INJECTION_KEY, room);
