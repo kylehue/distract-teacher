@@ -121,7 +121,17 @@ const studentsArray = computed(() => Array.from(students.value.values()));
 const teacher = computed(() => auth.teacher);
 const tabs = reactive([
    { name: "Overview", key: "overview", icon: renderIcon(PhHouse) },
-   { name: "Monitoring", key: "monitoring", icon: renderIcon(PhUserFocus) },
+   {
+      name: "Monitoring",
+      key: "monitoring",
+      icon: renderIcon(PhUserFocus),
+      badgeValue: computed(
+         () =>
+            studentsArray.value.filter(
+               (v) => v.permitted && !!v.lockMonitorLogId,
+            ).length,
+      ),
+   },
    {
       name: "Students",
       key: "students",

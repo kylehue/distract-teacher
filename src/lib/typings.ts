@@ -19,9 +19,9 @@ const FEATURE_COLUMNS = [
 ] as const;
 
 export interface MonitorLog {
-   id: string | number;
-   roomId: string | number;
-   studentId: string | number;
+   id: string;
+   roomId: string;
+   studentId: string;
    warningLevel: WarningLevel;
    createdAt: string;
 
@@ -37,8 +37,8 @@ export interface MonitorLog {
 export type WarningLevel = "none" | "low" | "moderate" | "severe";
 
 export interface RoomInfo {
-   id: string | number;
-   teacherAccountId: string | number;
+   id: string;
+   teacherAccountId: string;
    title: string;
    code: string;
    studentCapacity: number;
@@ -53,19 +53,20 @@ export interface RoomInfo {
 }
 
 export interface StudentInfo {
-   id: string | number;
-   roomId: string | number;
+   id: string;
+   roomId: string;
    uuid: string;
    name: string;
    timeJoined: string;
    timeLeft?: string;
    active: boolean;
    permitted: boolean;
+   lockMonitorLogId?: string;
    createdAt: string;
 }
 
 export interface TeacherInfo {
-   id: string | number;
+   id: string;
    displayName: string;
    username: string;
    createdAt: string;
