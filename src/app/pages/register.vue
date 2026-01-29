@@ -1,6 +1,6 @@
 <template>
    <div class="flex items-center justify-center w-full h-full">
-      <NCard class="flex w-[420px]!" title="Register" :bordered="false">
+      <NCard class="flex w-[420px]!" title="Create Your Account" :bordered="false">
          <NForm>
             <NFormItem
                label="Username"
@@ -49,7 +49,7 @@
                   :loading="postAccount.isLoading"
                   @click="register"
                >
-                  Register
+                  Create Account
                </NButton>
                <RouterLink to="/login">
                   <NButton type="tertiary" text>

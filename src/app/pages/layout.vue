@@ -46,6 +46,14 @@
                         </NButton>
                      </NPopselect>
                   </div>
+                  <div v-else class="flex items-center">
+                     <NButton circle quaternary @click="toggleTheme">
+                        <template #icon>
+                           <PhMoon v-if="theme === 'dark'" />
+                           <PhSunDim v-else />
+                        </template>
+                     </NButton>
+                  </div>
                </div>
             </div>
          </nav>
@@ -72,7 +80,7 @@ import { computed, h, inject, reactive } from "vue";
 import { useRoute, RouterLink, RouterView } from "vue-router";
 import { isUrlRelatedToParent } from "@/lib/url";
 import { THEME_INJECTION_KEY } from "@/lib/injection-keys";
-import { PhUser } from "@phosphor-icons/vue";
+import { PhUser, PhMoon, PhSunDim } from "@phosphor-icons/vue";
 import { SelectMixedOption } from "naive-ui/es/select/src/interface";
 import { useAuthStore } from "../composables/use-auth-store";
 
@@ -135,8 +143,12 @@ function onUpdateUserMenu(value: string) {
    if (value === "logout") {
       auth.logout();
    } else if (value === "switch-theme") {
-      theme.value = theme.value === "light" ? "dark" : "light";
+      toggleTheme();
    }
+}
+
+function toggleTheme() {
+   theme.value = theme.value === "light" ? "dark" : "light";
 }
 </script>
 

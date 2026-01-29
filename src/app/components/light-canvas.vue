@@ -32,6 +32,7 @@ type Light = {
    maxLife: number;
    vy: number;
    color: [number, number, number];
+   decay: number;
 };
 
 const lights: Light[] = [];
@@ -67,7 +68,7 @@ onMounted(() => {
    if (!canvas.value) return;
 
    const c = canvas.value;
-   const dpr = 0.05;
+   const dpr = window.devicePixelRatio || 1;
 
    const resize = () => {
       width = 800;
@@ -101,6 +102,7 @@ onMounted(() => {
          const light = lights[i];
 
          light.life += delta;
+         light.decay += 1;
          light.alpha = Math.sin((light.life / light.maxLife) * Math.PI); // fade in/out
          light.y -= light.vy * (delta / 16); // drift upward, normalize to ~60fps
 
@@ -117,8 +119,8 @@ onMounted(() => {
    raf = requestAnimationFrame(animate);
 
    function spawnLight() {
-      const radius = random(280, 680);
-      const x = random(width * 0.25, width * 0.75);
+      const radius = 200 + random(width * 0.25, width * 0.5);
+      const x = random(0, width);
       const y = height + radius / 2; // off-screen bottom
       const maxLife = spawnInterval + random(2000, 2500);
       const vy = random(0.5, 1); // upward speed
@@ -134,23 +136,29 @@ onMounted(() => {
          maxLife,
          vy,
          color,
+         decay: 0,
       });
    }
 
    function drawLight(light: Light) {
       if (!ctx) return;
-      ctx.globalCompositeOperation = "multiply";
+      ctx.filter = "blur(100px)";
+      ctx.globalCompositeOperation = "color-dodge";
       const gradient = ctx.createRadialGradient(
          light.x,
          light.y,
-         0,
+         light.decay,
          light.x,
          light.y,
-         light.radius,
+         light.radius + light.decay,
       );
       const [r, g, b] = light.color;
-      const multiplier = theme.value === "light" ? 0.4 : 0.2;
-      gradient.addColorStop(0, `rgba(${r},${g},${b},${light.alpha * multiplier})`);
+      const multiplier = theme.value === "light" ? 1 : 0.3;
+      gradient.addColorStop(0, `rgba(255,255,255,${light.alpha * multiplier})`);
+      gradient.addColorStop(
+         0.4,
+         `rgba(${r},${g},${b},${light.alpha * multiplier})`,
+      );
       gradient.addColorStop(1, `rgba(${r},${g},${b},0)`);
 
       ctx.fillStyle = gradient;
@@ -164,9 +172,3 @@ onMounted(() => {
    });
 });
 </script>
-
-<style scoped>
-canvas {
-   image-rendering: pixelated;
-}
-</style>
