@@ -67,18 +67,18 @@
             </NCard>
             <NCard :bordered="false">
                <NStatistic label="Average Integrity Score">
-                  {{ (integrityScoreAvg * 100).toFixed(2) }}%
+                  {{ (reports.integrityScoreAverage * 100).toFixed(2) }}%
                </NStatistic>
                <NText :depth="3" class="text-xs">
-                  {{ integrityExplanation }}
+                  {{ reports.integritySummary }}
                </NText>
             </NCard>
             <NCard :bordered="false">
                <NStatistic label="Standard Deviation">
-                  {{ (stdDev * 100).toFixed(2) }}%
+                  {{ (reports.standardDeviation * 100).toFixed(2) }}%
                </NStatistic>
                <NText :depth="3" class="text-xs">
-                  {{ stdDevExplanation }}
+                  {{ reports.standardDeviationSummary }}
                </NText>
             </NCard>
          </div>
@@ -101,7 +101,7 @@
       </div>
       <NCard title="Findings" :bordered="false">
          <NText :depth="3">
-            {{ integrityAndStdDevExplanation }}
+            {{ reports.findings }}
          </NText>
       </NCard>
    </div>
@@ -117,12 +117,7 @@ import {
    timestampToTimeString,
    totalTime,
 } from "@/lib/datetime";
-import {
-   computeStdDev,
-   explainIntegrity,
-   explainIntegrityAndStdDev,
-   explainStdDev,
-} from "@/lib/reports";
+import { createMonitorLogsReports } from "@/lib/reports";
 import IntegrityScoreChart from "./charts/integrity-score-chart.vue";
 import FeatureImpactChart from "./charts/feature-impact-chart.vue";
 import WarningLevelChart from "./charts/warning-level-chart.vue";
@@ -142,32 +137,5 @@ const student = inject(STUDENT_INJECTION_KEY)!;
 const room = inject(ROOM_INJECTION_KEY)!;
 const teacher = inject(TEACHER_INJECTION_KEY)!;
 const monitorLogs = inject(MONITOR_LOGS_INJECTION_KEY)!;
-
-// Calculations
-const integrityScoreAvg = computed(() => {
-   if (monitorLogs.value.length === 0) return 0;
-   const sum = monitorLogs.value.reduce(
-      (acc, log) => acc + log.integrityScore,
-      0,
-   );
-   return sum / monitorLogs.value.length;
-});
-
-const stdDev = computed(() => {
-   const scores = monitorLogs.value.map((log) => log.integrityScore);
-   return computeStdDev(scores);
-});
-
-// Explanations
-const integrityAndStdDevExplanation = computed(() => {
-   return explainIntegrityAndStdDev(integrityScoreAvg.value, stdDev.value);
-});
-
-const integrityExplanation = computed(() => {
-   return explainIntegrity(integrityScoreAvg.value);
-});
-
-const stdDevExplanation = computed(() => {
-   return explainStdDev(stdDev.value);
-});
+const reports = computed(() => createMonitorLogsReports(monitorLogs.value));
 </script>

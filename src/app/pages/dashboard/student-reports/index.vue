@@ -25,17 +25,23 @@
          >
             <Dashboard ref="printDashboard" :theme="'light'" static />
          </NConfigProvider>
-         <div class="flex w-full justify-start mt-8 gap-4">
+         <div class="flex w-full justify-start mt-8 gap-2">
             <NButton
                secondary
                @click="print()"
                :disabled="isLoading"
                :loading="isPrintLoading"
             >
-               Print Report
+               Print Summary
                <template #icon>
                   <PhPrinter />
                </template>
+            </NButton>
+            <NButton secondary @click="exportData()">
+               <template #icon>
+                  <PhFileXls />
+               </template>
+               Export Student Data
             </NButton>
          </div>
       </template>
@@ -44,7 +50,7 @@
 
 <script setup lang="ts">
 import Layout from "../layout.vue";
-import { PhArrowLeft, PhPrinter } from "@phosphor-icons/vue";
+import { PhArrowLeft, PhPrinter, PhFileXls } from "@phosphor-icons/vue";
 import {
    NButton,
    NText,
@@ -76,6 +82,8 @@ import Dashboard from "./dashboard.vue";
 import { lightThemeOverrides } from "@/lib/theme-overrides";
 import { printElement, waitForSvg } from "@/lib/dom";
 import { useAuthStore } from "@/app/composables/use-auth-store";
+import { exportToExcel } from "@/lib/excel";
+import { createMonitorLogsReports } from "@/lib/reports";
 
 const store = useStore();
 const auth = useAuthStore();
@@ -112,6 +120,33 @@ async function print() {
    });
    pdf.save(`Student_Report_${student.value?.name || "unnamed"}.pdf`);
    isPrintLoading.value = false;
+}
+
+function exportData() {
+   if (!student.value) return;
+   if (!room.value) return;
+   if (!teacher.value) return;
+   exportToExcel([
+      {
+         sheetName: "Student Reports",
+         data: {
+            ...student.value,
+            ...createMonitorLogsReports(monitorLogs.value),
+         },
+      },
+      {
+         sheetName: "Monitor Logs",
+         data: monitorLogs.value,
+      },
+      {
+         sheetName: "Room",
+         data: room.value,
+      },
+      {
+         sheetName: "Teacher",
+         data: teacher.value,
+      },
+   ]);
 }
 
 onMounted(async () => {

@@ -1,4 +1,4 @@
-import { MonitorLog } from "./typings";
+import { MonitorLog, StudentInfo } from "./typings";
 
 export function computeStdDev(values: number[]): number {
    if (!values.length) return 0;
@@ -95,4 +95,33 @@ export function groupFeatureImpacts(
       }
    }
    return groupedImpacts;
+}
+
+export function createMonitorLogsReports(monitorLogs: MonitorLog[]) {
+   const integrityScoreAverage = monitorLogs.length
+      ? monitorLogs
+           .map((log) => log.integrityScore)
+           .reduce((a, b) => a + b, 0) / monitorLogs.length
+      : 0;
+
+   const standardDeviation = computeStdDev(
+      monitorLogs.map((log) => log.integrityScore),
+   );
+
+   const findings = explainIntegrityAndStdDev(
+      integrityScoreAverage,
+      standardDeviation,
+   );
+
+   const integritySummary = explainIntegrity(integrityScoreAverage);
+
+   const standardDeviationSummary = explainStdDev(standardDeviation);
+
+   return {
+      integrityScoreAverage,
+      standardDeviation,
+      findings,
+      integritySummary,
+      standardDeviationSummary,
+   };
 }
