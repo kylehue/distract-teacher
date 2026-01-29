@@ -93,14 +93,11 @@ const columns: DataTableColumns<RoomInfo> = reactive([
       title: "Students",
       key: "students",
       render(row) {
-         return `${store.countStudentsOfRoom(row.id)} / ${row.studentCapacity}`;
+         return `${row.studentCount} / ${row.studentCapacity}`;
       },
       sorter: {
          compare(rowA, rowB) {
-            return (
-               store.countStudentsOfRoom(rowA.id) -
-               store.countStudentsOfRoom(rowB.id)
-            );
+            return rowA.studentCount - rowB.studentCount;
          },
          multiple: 2,
       },
