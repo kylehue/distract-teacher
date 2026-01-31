@@ -81,7 +81,6 @@ export function useFetch<T = any>(url: string, method: string = "GET") {
             ...options.headers,
             // attach sid
             "X-SID": sid ?? "",
-            "ngrok-skip-browser-warning": "True",
          };
 
          let body: BodyInit | undefined;
