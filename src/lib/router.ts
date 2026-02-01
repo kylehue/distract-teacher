@@ -18,10 +18,9 @@ import MainLayout from "@/app/pages/layout.vue";
 const routes: RouteRecordRaw[] = [
    {
       path: "/",
-      redirect: "/home",
       component: MainLayout,
       children: [
-         { path: "/home", component: HomePage },
+         { path: "/", component: HomePage },
          { path: "/login", component: LoginPage },
          { path: "/register", component: RegisterPage },
          { path: "/profile", component: ProfilePage },

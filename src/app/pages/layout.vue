@@ -6,12 +6,10 @@
                class="container mx-auto h-16 flex items-center justify-between"
             >
                <RouterLink to="/">
-                  <div class="flex items-center gap-2">
-                     <NIcon :size="24">
-                        <img src="/distract.svg" />
-                     </NIcon>
-                     <NText class="font-bold">Distract</NText>
-                  </div>
+                  <img
+                     :src="`/distract-text-${theme != 'light' ? 'light' : 'dark'}.svg`"
+                     class="h-8 pointer-events-none"
+                  />
                </RouterLink>
                <div class="flex items-center">
                   <template v-for="link in links" :key="link.to">
@@ -93,7 +91,7 @@ const links = reactive([
    {
       label: "Home",
       to: "/",
-      isActive: computed(() => isUrlRelatedToParent(route.path, "/home")),
+      isActive: computed(() => isUrlRelatedToParent(route.path, "/")),
    },
    {
       label: "Dashboard",
