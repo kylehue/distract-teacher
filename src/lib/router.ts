@@ -1,65 +1,105 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
+import { defineAsyncComponent } from "vue";
+import MainLayout from "@/app/pages/layout.vue";
+import ContentLoader from "@/app/components/content-loader.vue";
+
+// public pages
 import HomePage from "@/app/pages/home.vue";
 import LoginPage from "@/app/pages/login.vue";
 import RegisterPage from "@/app/pages/register.vue";
-import ProfilePage from "@/app/pages/profile.vue";
-import DashboardRoomsPage from "@/app/pages/dashboard/rooms.vue";
-import RoomOverviewPage from "@/app/pages/dashboard/room/overview/index.vue";
-import RoomSettingsPage from "@/app/pages/dashboard/room/settings.vue";
-import RoomStudentsPage from "@/app/pages/dashboard/room/students.vue";
-import RoomMonitoringPage from "@/app/pages/dashboard/room/monitoring.vue";
 import UnauthorizedPage from "@/app/pages/error/unauthorized.vue";
 import ForbiddenPage from "@/app/pages/error/forbidden.vue";
 import NotFoundPage from "@/app/pages/error/not-found.vue";
-import RoomLayout from "@/app/pages/dashboard/room/layout.vue";
-import StudentReportsPage from "@/app/pages/dashboard/student-reports/index.vue";
-import MainLayout from "@/app/pages/layout.vue";
+
+function _defineAsyncComponent(loader: () => Promise<any>) {
+   return defineAsyncComponent({
+      loader,
+      loadingComponent: ContentLoader,
+      suspensible: false,
+      delay: 0,
+      timeout: 15000,
+   });
+}
 
 const routes: RouteRecordRaw[] = [
    {
       path: "/",
       component: MainLayout,
       children: [
-         { path: "/", component: HomePage },
-         { path: "/login", component: LoginPage },
-         { path: "/register", component: RegisterPage },
-         { path: "/profile", component: ProfilePage },
+         { path: "", component: HomePage },
+         { path: "login", component: LoginPage },
+         { path: "register", component: RegisterPage },
          {
-            path: "/dashboard",
+            path: "profile",
+            component: _defineAsyncComponent(
+               () => import("@/app/pages/profile.vue"),
+            ),
+         },
+         {
+            path: "dashboard",
             children: [
-               {
-                  path: "",
-                  redirect: "/dashboard/rooms",
-               },
+               { path: "", redirect: "/dashboard/rooms" },
                {
                   path: "student-reports/:studentId",
-                  component: StudentReportsPage,
+                  component: _defineAsyncComponent(
+                     () =>
+                        import("@/app/pages/dashboard/student-reports/index.vue"),
+                  ),
                },
-               { path: "rooms", component: DashboardRoomsPage },
+               {
+                  path: "rooms",
+                  component: _defineAsyncComponent(
+                     () => import("@/app/pages/dashboard/rooms.vue"),
+                  ),
+               },
                {
                   path: "rooms/:roomId",
-                  component: RoomLayout,
+                  component: _defineAsyncComponent(
+                     () => import("@/app/pages/dashboard/room/layout.vue"),
+                  ),
                   redirect: (to) => ({
                      path: `/dashboard/rooms/${to.params.roomId}/overview`,
                   }),
                   children: [
-                     { path: "overview", component: RoomOverviewPage },
-                     { path: "settings", component: RoomSettingsPage },
-                     { path: "students", component: RoomStudentsPage },
-                     { path: "monitoring", component: RoomMonitoringPage },
+                     {
+                        path: "overview",
+                        component: _defineAsyncComponent(
+                           () =>
+                              import("@/app/pages/dashboard/room/overview/index.vue"),
+                        ),
+                     },
+                     {
+                        path: "settings",
+                        component: _defineAsyncComponent(
+                           () =>
+                              import("@/app/pages/dashboard/room/settings.vue"),
+                        ),
+                     },
+                     {
+                        path: "students",
+                        component: _defineAsyncComponent(
+                           () =>
+                              import("@/app/pages/dashboard/room/students.vue"),
+                        ),
+                     },
+                     {
+                        path: "monitoring",
+                        component: _defineAsyncComponent(
+                           () =>
+                              import("@/app/pages/dashboard/room/monitoring.vue"),
+                        ),
+                     },
                   ],
                },
             ],
          },
-         { path: "/unauthorized", component: UnauthorizedPage },
-         { path: "/forbidden", component: ForbiddenPage },
-         { path: "/not-found", component: NotFoundPage },
+
+         { path: "unauthorized", component: UnauthorizedPage },
+         { path: "forbidden", component: ForbiddenPage },
+         { path: "not-found", component: NotFoundPage },
       ],
    },
-   {
-      path: "/:pathMatch(.*)*",
-      redirect: "/not-found",
-   },
+   { path: "/:pathMatch(.*)*", redirect: "/not-found" },
 ];
 
 const router = createRouter({
