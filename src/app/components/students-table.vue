@@ -200,7 +200,7 @@ if (props.columns.includes("warningDistribution")) {
 
 if (props.columns.includes("phoneDetections")) {
    columns.push({
-      title: "# of Phone Detections",
+      title: "Phone Activity Count",
       key: "phoneDetections",
       render(row) {
          let monitorLogs = store.monitorLogsGroupedByStudentId.get(row.id);

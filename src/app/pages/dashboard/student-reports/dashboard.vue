@@ -66,6 +66,11 @@
                </NStatistic>
             </NCard>
             <NCard :bordered="false">
+               <NStatistic label="Phone Activity Count">
+                  {{ reports.phoneDetectionCount }}
+               </NStatistic>
+            </NCard>
+            <NCard :bordered="false">
                <NStatistic label="Average Integrity Score">
                   {{ (reports.integrityScoreAverage * 100).toFixed(2) }}%
                </NStatistic>

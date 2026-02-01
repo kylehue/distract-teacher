@@ -117,11 +117,16 @@ export function createMonitorLogsReports(monitorLogs: MonitorLog[]) {
 
    const standardDeviationSummary = explainStdDev(standardDeviation);
 
+   const phoneDetectionCount = monitorLogs.filter(
+      (log) => log.isPhonePresent,
+   ).length;
+
    return {
       integrityScoreAverage,
       standardDeviation,
       findings,
       integritySummary,
       standardDeviationSummary,
+      phoneDetectionCount,
    };
 }
