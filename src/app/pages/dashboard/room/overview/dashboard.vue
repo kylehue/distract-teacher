@@ -104,13 +104,28 @@
       <NText class="text-xl font-medium mt-8" data-print-new-page>
          Students Summary
       </NText>
-      <StudentsTable :static="static" />
+      <StudentsTable
+         :static="static"
+         :columns="[
+            'studentName',
+            'warningDistribution',
+            'phoneDetections',
+            'averageIntegrityScore',
+            'standardDeviation',
+            'timeJoined',
+            'timeLeft',
+            'actions',
+         ]"
+         :actions="['view-reports', 'view-logs']"
+         :students="studentsArrayPreprocessed"
+         summary
+      />
    </div>
 </template>
 
 <script setup lang="ts">
 import { NText, NStatistic, NCard } from "naive-ui";
-import { computed, h, inject } from "vue";
+import { computed, inject } from "vue";
 import {
    timestampToDateString,
    timestampToTimeString,
@@ -118,7 +133,7 @@ import {
 } from "@/lib/datetime";
 import { explainIntegrity } from "@/lib/reports";
 import RoomStatusTag from "@/app/components/room-status-tag.vue";
-import StudentsTable from "./tables/students.vue";
+import StudentsTable from "@/app/components/students-table.vue";
 import {
    STUDENTS_INJECTION_KEY,
    MONITOR_LOGS_INJECTION_KEY,
