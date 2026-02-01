@@ -95,15 +95,15 @@
             <NFormItem
                :show-label="false"
                content-class="flex items-start gap-2"
-               :validation-status="form.severeWarningPunishmentStatus"
+               :validation-status="form.enablePunishmentsStatus"
                :feedback="
-                  form.severeWarningPunishmentFeedback ||
-                  'Lock students\' systems when they reach severe warning level.'
+                  form.enablePunishmentsFeedback ||
+                  'Lock students\' systems when they reach severe warning level or when phone is detected.'
                "
             >
-               <NText>Severe Warning Punishment</NText>
+               <NText>Punishments</NText>
                <NSwitch
-                  v-model:value="form.severeWarningPunishment"
+                  v-model:value="form.enablePunishments"
                   :disabled="patchRoom.isLoading"
                ></NSwitch>
             </NFormItem>
@@ -114,8 +114,7 @@
                   quaternary
                   :disabled="
                      (form.evidenceWarningLevel === room.evidenceWarningLevel &&
-                        form.severeWarningPunishment ===
-                           room.severeWarningPunishment) ||
+                        form.enablePunishments === room.enablePunishments) ||
                      patchRoom.isLoading
                   "
                   @click="resetMonitoringSettings()"
@@ -125,8 +124,7 @@
                <NButton
                   :disabled="
                      form.evidenceWarningLevel === room.evidenceWarningLevel &&
-                     form.severeWarningPunishment ===
-                        room.severeWarningPunishment
+                     form.enablePunishments === room.enablePunishments
                   "
                   :loading="patchRoom.isLoading"
                   @click="saveMonitoringSettings()"
@@ -261,9 +259,9 @@ const form = reactive({
    evidenceWarningLevel: room.value!.evidenceWarningLevel,
    evidenceWarningLevelStatus: "success" as "success" | "error",
    evidenceWarningLevelFeedback: "",
-   severeWarningPunishment: room.value!.severeWarningPunishment,
-   severeWarningPunishmentStatus: "success" as "success" | "error",
-   severeWarningPunishmentFeedback: "",
+   enablePunishments: room.value!.enablePunishments,
+   enablePunishmentsStatus: "success" as "success" | "error",
+   enablePunishmentsFeedback: "",
    allowLateStudents: room.value!.allowLateStudents,
    allowLateStudentsStatus: "success" as "success" | "error",
    allowLateStudentsFeedback: "",
@@ -333,14 +331,14 @@ function resetGeneralSettings() {
 
 async function saveMonitoringSettings() {
    form.evidenceWarningLevelFeedback = "";
-   form.severeWarningPunishmentFeedback = "";
+   form.enablePunishmentsFeedback = "";
    form.evidenceWarningLevelStatus = "success";
-   form.severeWarningPunishmentStatus = "success";
+   form.enablePunishmentsStatus = "success";
    try {
       await patchRoom.execute({
          body: {
             evidenceWarningLevel: form.evidenceWarningLevel,
-            severeWarningPunishment: form.severeWarningPunishment,
+            enablePunishments: form.enablePunishments,
          },
       });
 
@@ -361,21 +359,20 @@ async function saveMonitoringSettings() {
          form.evidenceWarningLevelFeedback = fieldErrors.evidenceWarningLevel;
       }
 
-      if (fieldErrors.severeWarningPunishment) {
-         form.severeWarningPunishmentStatus = "error";
-         form.severeWarningPunishmentFeedback =
-            fieldErrors.severeWarningPunishment;
+      if (fieldErrors.enablePunishments) {
+         form.enablePunishmentsStatus = "error";
+         form.enablePunishmentsFeedback = fieldErrors.enablePunishments;
       }
    }
 }
 
 function resetMonitoringSettings() {
    form.evidenceWarningLevel = room.value!.evidenceWarningLevel;
-   form.severeWarningPunishment = room.value!.severeWarningPunishment;
+   form.enablePunishments = room.value!.enablePunishments;
    form.evidenceWarningLevelStatus = "success";
-   form.severeWarningPunishmentStatus = "success";
+   form.enablePunishmentsStatus = "success";
    form.evidenceWarningLevelFeedback = "";
-   form.severeWarningPunishmentFeedback = "";
+   form.enablePunishmentsFeedback = "";
 }
 
 async function saveJoiningPermissionSettings() {
