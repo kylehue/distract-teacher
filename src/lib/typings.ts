@@ -29,6 +29,7 @@ export interface MonitorLog {
    rfScore: number;
    ifScore: number;
    featureImpacts: Record<(typeof FEATURE_COLUMNS)[number], number>;
+   isPhonePresent: boolean;
 
    recordingPath: string;
    recordingUrl: string;

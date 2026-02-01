@@ -61,7 +61,7 @@ const columns: DataTableColumns<StudentInfo> = [
       },
    },
    {
-      title: "Number of Warnings",
+      title: "# of Warnings",
       key: "totalLogs",
       sorter: {
          compare(rowA, rowB) {
@@ -74,6 +74,45 @@ const columns: DataTableColumns<StudentInfo> = [
       },
       render(row) {
          return store.countMonitorLogsOfStudent(row.id);
+      },
+   },
+   {
+      title: "# of Phone Detections",
+      key: "phoneDetections",
+      render(row) {
+         let monitorLogs = store.monitorLogsGroupedByStudentId.get(row.id);
+         if (!monitorLogs) return 0;
+         return Array.from(monitorLogs.values()).filter(
+            (log) => log.isPhonePresent,
+         ).length;
+      },
+      sorter: {
+         compare(rowA, rowB) {
+            return (
+               Number(rowA.permitted) - Number(rowB.permitted) ||
+               Number(rowB.active) - Number(rowA.active) ||
+               (() => {
+                  let logsA = store.monitorLogsGroupedByStudentId.get(
+                     rowA.id,
+                  );
+                  let logsB = store.monitorLogsGroupedByStudentId.get(
+                     rowB.id,
+                  );
+                  let countA = logsA
+                     ? Array.from(logsA.values()).filter(
+                          (log) => log.isPhonePresent,
+                       ).length
+                     : 0;
+                  let countB = logsB
+                     ? Array.from(logsB.values()).filter(
+                          (log) => log.isPhonePresent,
+                       ).length
+                     : 0;
+                  return countA - countB;
+               })()
+            );
+         },
+         multiple: 2,
       },
    },
    {

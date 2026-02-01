@@ -2,7 +2,7 @@
    <template v-if="!room">Nothing</template>
    <div v-else class="flex flex-col gap-4">
       <div class="flex items-center justify-end gap-2">
-         <NButtonGroup class="me-auto" >
+         <NButtonGroup class="me-auto">
             <NButton
                :focusable="false"
                :type="activeTab === 'warningLogs' ? 'primary' : 'default'"
@@ -242,6 +242,38 @@ const monitorLogColumns: DataTableColumns<MonitorLog> = [
       },
    },
    {
+      title: "Phone Detected",
+      key: "isPhonePresent",
+      width: 200,
+      render(row) {
+         return h(
+            NText,
+            { type: row.isPhonePresent ? "error" : undefined },
+            { default: () => (row.isPhonePresent ? "Yes" : "No") },
+         );
+      },
+      filterOptions: [
+         {
+            label: "Yes",
+            value: "true",
+         },
+         {
+            label: "No",
+            value: "false",
+         },
+      ],
+      filterMultiple: true,
+      filter(value, row) {
+         return String(row.isPhonePresent) === value;
+      },
+      sorter: {
+         compare(rowA, rowB) {
+            return Number(rowA.isPhonePresent) - Number(rowB.isPhonePresent);
+         },
+         multiple: 4,
+      },
+   },
+   {
       title: "Time",
       key: "time",
       render(row) {
@@ -375,6 +407,44 @@ const lockedStudentColumns: DataTableColumns<StudentInfo> = [
             return monitorLogA.integrityScore - monitorLogB.integrityScore;
          },
          multiple: 3,
+      },
+   },
+   {
+      title: "Phone Detected",
+      key: "isPhonePresent",
+      render(row) {
+         let monitorLog = monitorLogs.value.get(row.lockMonitorLogId!)!;
+         return h(
+            NText,
+            { type: monitorLog.isPhonePresent ? "error" : undefined },
+            { default: () => (monitorLog.isPhonePresent ? "Yes" : "No") },
+         );
+      },
+      filterOptions: [
+         {
+            label: "Yes",
+            value: "true",
+         },
+         {
+            label: "No",
+            value: "false",
+         },
+      ],
+      filterMultiple: true,
+      filter(value, row) {
+         let monitorLog = monitorLogs.value.get(row.lockMonitorLogId!)!;
+         return String(monitorLog.isPhonePresent) === value;
+      },
+      sorter: {
+         compare(rowA, rowB) {
+            let monitorLogA = monitorLogs.value.get(rowA.lockMonitorLogId!)!;
+            let monitorLogB = monitorLogs.value.get(rowB.lockMonitorLogId!)!;
+            return (
+               Number(monitorLogA.isPhonePresent) -
+               Number(monitorLogB.isPhonePresent)
+            );
+         },
+         multiple: 4,
       },
    },
    {
