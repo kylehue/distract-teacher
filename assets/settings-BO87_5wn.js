@@ -1,0 +1,117 @@
+import{t as re,b1 as Te,b2 as Ne,ag as ze,b3 as _e,d as H,b4 as ce,a8 as u,B as W,as as $,ai as Ve,b5 as Ee,b6 as ve,au as de,v as T,aF as we,aA as le,am as q,ap as c,ao as O,b7 as Oe,al as Ie,b8 as Ue,av as J,b9 as De,_ as z,aL as I,ba as Ae,a5 as Me,an as P,aq as fe,bb as he,bc as ne,bd as Ke,be as qe,bf as He,bg as Je,ay as Ge,aD as B,bh as ae,aG as L,R as Ye,r as Xe,a as Qe,b as ge,A as Ze,c as be,f as n,g as pe,i as m,F as et,h as l,w as o,n as V,p as F,q as ie,bi as tt,k as se,m as M,j as K}from"./index-v4FvHuDo.js";import{N as nt}from"./Select-DG7N46M3.js";import"./attribute-Cz32yFEB.js";function at(){const a=re(Te,null);return a===null&&Ne("use-dialog","No outer <n-dialog-provider /> founded."),a}const ye=ze("n-popconfirm"),ke={positiveText:String,negativeText:String,showIcon:{type:Boolean,default:!0},onPositiveClick:{type:Function,required:!0},onNegativeClick:{type:Function,required:!0}},me=_e(ke),it=H({name:"NPopconfirmPanel",props:ke,setup(a){const{localeRef:i}=ve("Popconfirm"),{inlineThemeDisabled:e}=de(),{mergedClsPrefixRef:r,mergedThemeRef:s,props:w}=re(ye),S=T(()=>{const{common:{cubicBezierEaseInOut:h},self:{fontSize:p,iconSize:y,iconColor:k}}=s.value;return{"--n-bezier":h,"--n-font-size":p,"--n-icon-size":y,"--n-icon-color":k}}),f=e?we("popconfirm-panel",void 0,S,w):void 0;return Object.assign(Object.assign({},ve("Popconfirm")),{mergedClsPrefix:r,cssVars:e?void 0:S,localizedPositiveText:T(()=>a.positiveText||i.value.positiveText),localizedNegativeText:T(()=>a.negativeText||i.value.negativeText),positiveButtonProps:le(w,"positiveButtonProps"),negativeButtonProps:le(w,"negativeButtonProps"),handlePositiveClick(h){a.onPositiveClick(h)},handleNegativeClick(h){a.onNegativeClick(h)},themeClass:f==null?void 0:f.themeClass,onRender:f==null?void 0:f.onRender})},render(){var a;const{mergedClsPrefix:i,showIcon:e,$slots:r}=this,s=ce(r.action,()=>this.negativeText===null&&this.positiveText===null?[]:[this.negativeText!==null&&u(W,Object.assign({size:"small",onClick:this.handleNegativeClick},this.negativeButtonProps),{default:()=>this.localizedNegativeText}),this.positiveText!==null&&u(W,Object.assign({size:"small",type:"primary",onClick:this.handlePositiveClick},this.positiveButtonProps),{default:()=>this.localizedPositiveText})]);return(a=this.onRender)===null||a===void 0||a.call(this),u("div",{class:[`${i}-popconfirm__panel`,this.themeClass],style:this.cssVars},$(r.default,w=>e||w?u("div",{class:`${i}-popconfirm__body`},e?u("div",{class:`${i}-popconfirm__icon`},ce(r.icon,()=>[u(Ve,{clsPrefix:i},{default:()=>u(Ee,null)})])):null,w):null),s?u("div",{class:[`${i}-popconfirm__action`]},s):null)}}),st=q("popconfirm",[c("body",`
+ font-size: var(--n-font-size);
+ display: flex;
+ align-items: center;
+ flex-wrap: nowrap;
+ position: relative;
+ `,[c("icon",`
+ display: flex;
+ font-size: var(--n-icon-size);
+ color: var(--n-icon-color);
+ transition: color .3s var(--n-bezier);
+ margin: 0 8px 0 0;
+ `)]),c("action",`
+ display: flex;
+ justify-content: flex-end;
+ `,[O("&:not(:first-child)","margin-top: 8px"),q("button",[O("&:not(:last-child)","margin-right: 8px;")])])]),ot=Object.assign(Object.assign(Object.assign({},J.props),Ae),{positiveText:String,negativeText:String,showIcon:{type:Boolean,default:!0},trigger:{type:String,default:"click"},positiveButtonProps:Object,negativeButtonProps:Object,onPositiveClick:Function,onNegativeClick:Function}),lt=H({name:"Popconfirm",props:ot,slots:Object,__popover__:!0,setup(a){const{mergedClsPrefixRef:i}=de(),e=J("Popconfirm","-popconfirm",st,De,a,i),r=z(null);function s(f){var h;if(!(!((h=r.value)===null||h===void 0)&&h.getMergedShow()))return;const{onPositiveClick:p,"onUpdate:show":y}=a;Promise.resolve(p?p(f):!0).then(k=>{var d;k!==!1&&((d=r.value)===null||d===void 0||d.setShow(!1),y&&I(y,!1))})}function w(f){var h;if(!(!((h=r.value)===null||h===void 0)&&h.getMergedShow()))return;const{onNegativeClick:p,"onUpdate:show":y}=a;Promise.resolve(p?p(f):!0).then(k=>{var d;k!==!1&&((d=r.value)===null||d===void 0||d.setShow(!1),y&&I(y,!1))})}return Me(ye,{mergedThemeRef:e,mergedClsPrefixRef:i,props:a}),{setShow(f){var h;(h=r.value)===null||h===void 0||h.setShow(f)},syncPosition(){var f;(f=r.value)===null||f===void 0||f.syncPosition()},mergedTheme:e,popoverInstRef:r,handlePositiveClick:s,handleNegativeClick:w}},render(){const{$slots:a,$props:i,mergedTheme:e}=this;return u(Ue,Object.assign({},Ie(i,me),{theme:e.peers.Popover,themeOverrides:e.peerOverrides.Popover,internalExtraClass:["popconfirm"],ref:"popoverInstRef"}),{trigger:a.trigger,default:()=>{const r=Oe(i,me);return u(it,Object.assign({},r,{onPositiveClick:this.handlePositiveClick,onNegativeClick:this.handleNegativeClick}),a)}})}}),rt=q("switch",`
+ height: var(--n-height);
+ min-width: var(--n-width);
+ vertical-align: middle;
+ user-select: none;
+ -webkit-user-select: none;
+ display: inline-flex;
+ outline: none;
+ justify-content: center;
+ align-items: center;
+`,[c("children-placeholder",`
+ height: var(--n-rail-height);
+ display: flex;
+ flex-direction: column;
+ overflow: hidden;
+ pointer-events: none;
+ visibility: hidden;
+ `),c("rail-placeholder",`
+ display: flex;
+ flex-wrap: none;
+ `),c("button-placeholder",`
+ width: calc(1.75 * var(--n-rail-height));
+ height: var(--n-rail-height);
+ `),q("base-loading",`
+ position: absolute;
+ top: 50%;
+ left: 50%;
+ transform: translateX(-50%) translateY(-50%);
+ font-size: calc(var(--n-button-width) - 4px);
+ color: var(--n-loading-color);
+ transition: color .3s var(--n-bezier);
+ `,[he({left:"50%",top:"50%",originalTransform:"translateX(-50%) translateY(-50%)"})]),c("checked, unchecked",`
+ transition: color .3s var(--n-bezier);
+ color: var(--n-text-color);
+ box-sizing: border-box;
+ position: absolute;
+ white-space: nowrap;
+ top: 0;
+ bottom: 0;
+ display: flex;
+ align-items: center;
+ line-height: 1;
+ `),c("checked",`
+ right: 0;
+ padding-right: calc(1.25 * var(--n-rail-height) - var(--n-offset));
+ `),c("unchecked",`
+ left: 0;
+ justify-content: flex-end;
+ padding-left: calc(1.25 * var(--n-rail-height) - var(--n-offset));
+ `),O("&:focus",[c("rail",`
+ box-shadow: var(--n-box-shadow-focus);
+ `)]),P("round",[c("rail","border-radius: calc(var(--n-rail-height) / 2);",[c("button","border-radius: calc(var(--n-button-height) / 2);")])]),fe("disabled",[fe("icon",[P("rubber-band",[P("pressed",[c("rail",[c("button","max-width: var(--n-button-width-pressed);")])]),c("rail",[O("&:active",[c("button","max-width: var(--n-button-width-pressed);")])]),P("active",[P("pressed",[c("rail",[c("button","left: calc(100% - var(--n-offset) - var(--n-button-width-pressed));")])]),c("rail",[O("&:active",[c("button","left: calc(100% - var(--n-offset) - var(--n-button-width-pressed));")])])])])])]),P("active",[c("rail",[c("button","left: calc(100% - var(--n-button-width) - var(--n-offset))")])]),c("rail",`
+ overflow: hidden;
+ height: var(--n-rail-height);
+ min-width: var(--n-rail-width);
+ border-radius: var(--n-rail-border-radius);
+ cursor: pointer;
+ position: relative;
+ transition:
+ opacity .3s var(--n-bezier),
+ background .3s var(--n-bezier),
+ box-shadow .3s var(--n-bezier);
+ background-color: var(--n-rail-color);
+ `,[c("button-icon",`
+ color: var(--n-icon-color);
+ transition: color .3s var(--n-bezier);
+ font-size: calc(var(--n-button-height) - 4px);
+ position: absolute;
+ left: 0;
+ right: 0;
+ top: 0;
+ bottom: 0;
+ display: flex;
+ justify-content: center;
+ align-items: center;
+ line-height: 1;
+ `,[he()]),c("button",`
+ align-items: center; 
+ top: var(--n-offset);
+ left: var(--n-offset);
+ height: var(--n-button-height);
+ width: var(--n-button-width-pressed);
+ max-width: var(--n-button-width);
+ border-radius: var(--n-button-border-radius);
+ background-color: var(--n-button-color);
+ box-shadow: var(--n-button-box-shadow);
+ box-sizing: border-box;
+ cursor: inherit;
+ content: "";
+ position: absolute;
+ transition:
+ background-color .3s var(--n-bezier),
+ left .3s var(--n-bezier),
+ opacity .3s var(--n-bezier),
+ max-width .3s var(--n-bezier),
+ box-shadow .3s var(--n-bezier);
+ `)]),P("active",[c("rail","background-color: var(--n-rail-color-active);")]),P("loading",[c("rail",`
+ cursor: wait;
+ `)]),P("disabled",[c("rail",`
+ cursor: not-allowed;
+ opacity: .5;
+ `)])]),dt=Object.assign(Object.assign({},J.props),{size:{type:String,default:"medium"},value:{type:[String,Number,Boolean],default:void 0},loading:Boolean,defaultValue:{type:[String,Number,Boolean],default:!1},disabled:{type:Boolean,default:void 0},round:{type:Boolean,default:!0},"onUpdate:value":[Function,Array],onUpdateValue:[Function,Array],checkedValue:{type:[String,Number,Boolean],default:!0},uncheckedValue:{type:[String,Number,Boolean],default:!1},railStyle:Function,rubberBand:{type:Boolean,default:!0},onChange:[Function,Array]});let E;const oe=H({name:"Switch",props:dt,slots:Object,setup(a){E===void 0&&(typeof CSS<"u"?typeof CSS.supports<"u"?E=CSS.supports("width","max(1px)"):E=!1:E=!0);const{mergedClsPrefixRef:i,inlineThemeDisabled:e}=de(a),r=J("Switch","-switch",rt,He,a,i),s=Je(a),{mergedSizeRef:w,mergedDisabledRef:S}=s,f=z(a.defaultValue),h=le(a,"value"),p=Ge(h,f),y=T(()=>p.value===a.checkedValue),k=z(!1),d=z(!1),C=T(()=>{const{railStyle:g}=a;if(g)return g({focused:d.value,checked:y.value})});function x(g){const{"onUpdate:value":U,onChange:D,onUpdateValue:A}=a,{nTriggerFormInput:X,nTriggerFormChange:Q}=s;U&&I(U,g),A&&I(A,g),D&&I(D,g),f.value=g,X(),Q()}function b(){const{nTriggerFormFocus:g}=s;g()}function t(){const{nTriggerFormBlur:g}=s;g()}function v(){a.loading||S.value||(p.value!==a.checkedValue?x(a.checkedValue):x(a.uncheckedValue))}function G(){d.value=!0,b()}function Y(){d.value=!1,t(),k.value=!1}function Se(g){a.loading||S.value||g.key===" "&&(p.value!==a.checkedValue?x(a.checkedValue):x(a.uncheckedValue),k.value=!1)}function Ce(g){a.loading||S.value||g.key===" "&&(g.preventDefault(),k.value=!0)}const ue=T(()=>{const{value:g}=w,{self:{opacityDisabled:U,railColor:D,railColorActive:A,buttonBoxShadow:X,buttonColor:Q,boxShadowFocus:xe,loadingColor:Pe,textColor:Le,iconColor:Fe,[B("buttonHeight",g)]:j,[B("buttonWidth",g)]:We,[B("buttonWidthPressed",g)]:je,[B("railHeight",g)]:R,[B("railWidth",g)]:_,[B("railBorderRadius",g)]:Re,[B("buttonBorderRadius",g)]:$e},common:{cubicBezierEaseInOut:Be}}=r.value;let Z,ee,te;return E?(Z=`calc((${R} - ${j}) / 2)`,ee=`max(${R}, ${j})`,te=`max(${_}, calc(${_} + ${j} - ${R}))`):(Z=ae((L(R)-L(j))/2),ee=ae(Math.max(L(R),L(j))),te=L(R)>L(j)?_:ae(L(_)+L(j)-L(R))),{"--n-bezier":Be,"--n-button-border-radius":$e,"--n-button-box-shadow":X,"--n-button-color":Q,"--n-button-width":We,"--n-button-width-pressed":je,"--n-button-height":j,"--n-height":ee,"--n-offset":Z,"--n-opacity-disabled":U,"--n-rail-border-radius":Re,"--n-rail-color":D,"--n-rail-color-active":A,"--n-rail-height":R,"--n-rail-width":_,"--n-width":te,"--n-box-shadow-focus":xe,"--n-loading-color":Pe,"--n-text-color":Le,"--n-icon-color":Fe}}),N=e?we("switch",T(()=>w.value[0]),ue,a):void 0;return{handleClick:v,handleBlur:Y,handleFocus:G,handleKeyup:Se,handleKeydown:Ce,mergedRailStyle:C,pressed:k,mergedClsPrefix:i,mergedValue:p,checked:y,mergedDisabled:S,cssVars:e?void 0:ue,themeClass:N==null?void 0:N.themeClass,onRender:N==null?void 0:N.onRender}},render(){const{mergedClsPrefix:a,mergedDisabled:i,checked:e,mergedRailStyle:r,onRender:s,$slots:w}=this;s==null||s();const{checked:S,unchecked:f,icon:h,"checked-icon":p,"unchecked-icon":y}=w,k=!(ne(h)&&ne(p)&&ne(y));return u("div",{role:"switch","aria-checked":e,class:[`${a}-switch`,this.themeClass,k&&`${a}-switch--icon`,e&&`${a}-switch--active`,i&&`${a}-switch--disabled`,this.round&&`${a}-switch--round`,this.loading&&`${a}-switch--loading`,this.pressed&&`${a}-switch--pressed`,this.rubberBand&&`${a}-switch--rubber-band`],tabindex:this.mergedDisabled?void 0:0,style:this.cssVars,onClick:this.handleClick,onFocus:this.handleFocus,onBlur:this.handleBlur,onKeyup:this.handleKeyup,onKeydown:this.handleKeydown},u("div",{class:`${a}-switch__rail`,"aria-hidden":"true",style:r},$(S,d=>$(f,C=>d||C?u("div",{"aria-hidden":!0,class:`${a}-switch__children-placeholder`},u("div",{class:`${a}-switch__rail-placeholder`},u("div",{class:`${a}-switch__button-placeholder`}),d),u("div",{class:`${a}-switch__rail-placeholder`},u("div",{class:`${a}-switch__button-placeholder`}),C)):null)),u("div",{class:`${a}-switch__button`},$(h,d=>$(p,C=>$(y,x=>u(Ke,null,{default:()=>this.loading?u(qe,{key:"loading",clsPrefix:a,strokeWidth:20}):this.checked&&(C||d)?u("div",{class:`${a}-switch__button-icon`,key:C?"checked-icon":"icon"},C||d):!this.checked&&(x||d)?u("div",{class:`${a}-switch__button-icon`,key:x?"unchecked-icon":"icon"},x||d):null})))),$(S,d=>d&&u("div",{key:"checked",class:`${a}-switch__checked`},d)),$(f,d=>d&&u("div",{key:"unchecked",class:`${a}-switch__unchecked`},d)))))}}),ut={key:1,class:"flex flex-col gap-4"},ct={class:"flex justify-between gap-2"},vt={class:"flex justify-between gap-2"},ft={class:"flex justify-between gap-2"},pt=H({__name:"settings",setup(a){const i=re(Ye),e=Xe({title:i.value.title,titleStatus:"success",titleFeedback:"",code:i.value.code,codeStatus:"success",codeFeedback:"",studentCapacity:i.value.studentCapacity,studentCapacityStatus:"success",studentCapacityFeedback:"",evidenceWarningLevel:i.value.evidenceWarningLevel,evidenceWarningLevelStatus:"success",evidenceWarningLevelFeedback:"",severeWarningPunishment:i.value.severeWarningPunishment,severeWarningPunishmentStatus:"success",severeWarningPunishmentFeedback:"",allowLateStudents:i.value.allowLateStudents,allowLateStudentsStatus:"success",allowLateStudentsFeedback:"",joinConfirmation:i.value.joinConfirmation,joinConfirmationStatus:"success",joinConfirmationFeedback:""}),r=Qe(),s=ge(`/api/rooms/${i.value.id}`,"PATCH");async function w(){e.titleFeedback="",e.codeFeedback="",e.studentCapacityFeedback="",e.titleStatus="success",e.codeStatus="success",e.studentCapacityStatus="success";try{await s.execute({body:{title:e.title,code:e.code,studentCapacity:e.studentCapacity}}),r.success("General settings has been updated.")}catch{if(!s.error)return;if(!s.error.fieldErrors){r.error(s.error.message);return}const b=s.error.fieldErrors;b.title&&(e.titleStatus="error",e.titleFeedback=b.title),b.code&&(e.codeStatus="error",e.codeFeedback=b.code),b.studentCapacity&&(e.studentCapacityStatus="error",e.studentCapacityFeedback=b.studentCapacity)}}function S(){e.title=i.value.title,e.code=i.value.code,e.studentCapacity=i.value.studentCapacity,e.titleStatus="success",e.codeStatus="success",e.studentCapacityStatus="success",e.titleFeedback="",e.codeFeedback="",e.studentCapacityFeedback=""}async function f(){e.evidenceWarningLevelFeedback="",e.severeWarningPunishmentFeedback="",e.evidenceWarningLevelStatus="success",e.severeWarningPunishmentStatus="success";try{await s.execute({body:{evidenceWarningLevel:e.evidenceWarningLevel,severeWarningPunishment:e.severeWarningPunishment}}),r.success("Monitoring settings has been updated.")}catch{if(!s.error)return;if(!s.error.fieldErrors){r.error(s.error.message);return}const b=s.error.fieldErrors;b.evidenceWarningLevel&&(e.evidenceWarningLevelStatus="error",e.evidenceWarningLevelFeedback=b.evidenceWarningLevel),b.severeWarningPunishment&&(e.severeWarningPunishmentStatus="error",e.severeWarningPunishmentFeedback=b.severeWarningPunishment)}}function h(){e.evidenceWarningLevel=i.value.evidenceWarningLevel,e.severeWarningPunishment=i.value.severeWarningPunishment,e.evidenceWarningLevelStatus="success",e.severeWarningPunishmentStatus="success",e.evidenceWarningLevelFeedback="",e.severeWarningPunishmentFeedback=""}async function p(){e.allowLateStudentsFeedback="",e.joinConfirmationFeedback="",e.allowLateStudentsStatus="success",e.joinConfirmationStatus="success";try{await s.execute({body:{allowLateStudents:e.allowLateStudents,joinConfirmation:e.joinConfirmation}}),r.success("Join permission settings has been updated.")}catch{if(!s.error)return;if(!s.error.fieldErrors){r.error(s.error.message);return}const b=s.error.fieldErrors;b.allowLateStudents&&(e.allowLateStudentsStatus="error",e.allowLateStudentsFeedback=b.allowLateStudents),b.joinConfirmation&&(e.joinConfirmationStatus="error",e.joinConfirmationFeedback=b.joinConfirmation)}}function y(){e.allowLateStudents=i.value.allowLateStudents,e.joinConfirmation=i.value.joinConfirmation,e.allowLateStudentsStatus="success",e.joinConfirmationStatus="success",e.allowLateStudentsFeedback="",e.joinConfirmationFeedback=""}const k=at(),d=ge(`/api/rooms/${i.value.id}`,"DELETE"),C=Ze();function x(){let b=z(""),t=z(""),v=i.value.code;i.value.id;let G=k.error({title:"Confirm Delete",content:()=>u("div",{class:"flex flex-col gap-2"},[u(K,{depth:3,class:"text-xs"},{default:()=>"Please note that this action is IRREVERSIBLE. It will delete all associated data with this room such as monitor logs, evidences, and student records."}),u(V,null,{default:()=>u(F,{label:`Please type '${v}' to confirm:`,validationStatus:t.value?"error":"success",feedback:t.value},{default:()=>u(ie,{type:"text",placeholder:`Type ${v} to confirm`,onUpdateValue(Y){b.value=Y}})})})]),positiveText:"Delete",showIcon:!1,onPositiveClick:async()=>{if(t.value="",b.value!==v)return t.value="Room code does not match.",!1;try{await d.execute(),G.destroy(),r.success("Room has been deleted."),C.push("/dashboard/rooms")}catch{if(!d.error){r.error("Failed to delete the room.");return}r.error(d.error.message)}}})}return(b,t)=>n(i)?(pe(),be("div",ut,[l(n(M),null,{header:o(()=>[...t[14]||(t[14]=[m("General",-1)])]),action:o(()=>[se("div",ct,[l(n(W),{quaternary:"",disabled:e.studentCapacity===n(i).studentCapacity&&e.code===n(i).code&&e.title===n(i).title||n(s).isLoading,onClick:t[3]||(t[3]=v=>S())},{default:o(()=>[...t[15]||(t[15]=[m(" Reset All ",-1)])]),_:1},8,["disabled"]),l(n(W),{disabled:e.studentCapacity===n(i).studentCapacity&&e.code===n(i).code&&e.title===n(i).title,loading:n(s).isLoading,onClick:t[4]||(t[4]=v=>w())},{default:o(()=>[...t[16]||(t[16]=[m(" Save ",-1)])]),_:1},8,["disabled","loading"])])]),default:o(()=>[l(n(V),{class:"flex flex-col gap-2 items-start justify-start"},{default:o(()=>[l(n(F),{label:"Room Title","content-class":"flex items-start gap-2",feedback:e.titleFeedback,"validation-status":e.titleStatus},{default:o(()=>[l(n(ie),{value:e.title,"onUpdate:value":t[0]||(t[0]=v=>e.title=v),placeholder:"Type the room title",disabled:n(s).isLoading},null,8,["value","disabled"])]),_:1},8,["feedback","validation-status"]),l(n(F),{label:"Room Code","content-class":"flex items-start gap-2",feedback:e.codeFeedback,"validation-status":e.codeStatus},{default:o(()=>[l(n(ie),{value:e.code,"onUpdate:value":t[1]||(t[1]=v=>e.code=v),placeholder:"Type the room code",disabled:n(s).isLoading},null,8,["value","disabled"])]),_:1},8,["feedback","validation-status"]),l(n(F),{label:"Student Capacity","content-class":"flex items-start gap-2",feedback:e.studentCapacityFeedback,"validation-status":e.studentCapacityStatus},{default:o(()=>[l(n(tt),{value:e.studentCapacity,"onUpdate:value":t[2]||(t[2]=v=>e.studentCapacity=v),placeholder:"Enter the max number of students",min:0,disabled:n(s).isLoading},null,8,["value","disabled"])]),_:1},8,["feedback","validation-status"])]),_:1})]),_:1}),l(n(M),null,{header:o(()=>[...t[17]||(t[17]=[m("Monitoring",-1)])]),action:o(()=>[se("div",vt,[l(n(W),{quaternary:"",disabled:e.evidenceWarningLevel===n(i).evidenceWarningLevel&&e.severeWarningPunishment===n(i).severeWarningPunishment||n(s).isLoading,onClick:t[7]||(t[7]=v=>h())},{default:o(()=>[...t[19]||(t[19]=[m(" Reset All ",-1)])]),_:1},8,["disabled"]),l(n(W),{disabled:e.evidenceWarningLevel===n(i).evidenceWarningLevel&&e.severeWarningPunishment===n(i).severeWarningPunishment,loading:n(s).isLoading,onClick:t[8]||(t[8]=v=>f())},{default:o(()=>[...t[20]||(t[20]=[m(" Save ",-1)])]),_:1},8,["disabled","loading"])])]),default:o(()=>[l(n(V),{class:"flex flex-col gap-2 items-start justify-start"},{default:o(()=>[l(n(F),{label:"Evidence Warning Level","content-class":"flex items-start gap-2","validation-status":e.evidenceWarningLevelStatus,feedback:e.evidenceWarningLevelFeedback||"Set at which warning level the system starts recording evidences."},{default:o(()=>[l(n(nt),{options:[{value:"low",label:"Low"},{value:"moderate",label:"Moderate"},{value:"severe",label:"Severe"}],value:e.evidenceWarningLevel,"onUpdate:value":t[5]||(t[5]=v=>e.evidenceWarningLevel=v),disabled:n(s).isLoading},null,8,["value","disabled"])]),_:1},8,["validation-status","feedback"]),l(n(F),{"show-label":!1,"content-class":"flex items-start gap-2","validation-status":e.severeWarningPunishmentStatus,feedback:e.severeWarningPunishmentFeedback||"Lock students' systems when they reach severe warning level."},{default:o(()=>[l(n(K),null,{default:o(()=>[...t[18]||(t[18]=[m("Severe Warning Punishment",-1)])]),_:1}),l(n(oe),{value:e.severeWarningPunishment,"onUpdate:value":t[6]||(t[6]=v=>e.severeWarningPunishment=v),disabled:n(s).isLoading},null,8,["value","disabled"])]),_:1},8,["validation-status","feedback"])]),_:1})]),_:1}),l(n(M),null,{header:o(()=>[...t[21]||(t[21]=[m("Joining Permission",-1)])]),action:o(()=>[se("div",ft,[l(n(W),{quaternary:"",disabled:e.allowLateStudents===n(i).allowLateStudents&&e.joinConfirmation===n(i).joinConfirmation||n(s).isLoading,onClick:t[11]||(t[11]=v=>y())},{default:o(()=>[...t[24]||(t[24]=[m(" Reset All ",-1)])]),_:1},8,["disabled"]),l(n(W),{disabled:e.allowLateStudents===n(i).allowLateStudents&&e.joinConfirmation===n(i).joinConfirmation,loading:n(s).isLoading,onClick:t[12]||(t[12]=v=>p())},{default:o(()=>[...t[25]||(t[25]=[m(" Save ",-1)])]),_:1},8,["disabled","loading"])])]),default:o(()=>[l(n(V),{class:"flex flex-col gap-2 items-start justify-start"},{default:o(()=>[l(n(F),{"show-label":!1,"content-class":"flex items-start gap-2","validation-status":e.allowLateStudentsStatus,feedback:e.allowLateStudentsFeedback||"Allow new students to join the room when monitoring has started."},{default:o(()=>[l(n(K),null,{default:o(()=>[...t[22]||(t[22]=[m("Allow Late Students",-1)])]),_:1}),l(n(oe),{value:e.allowLateStudents,"onUpdate:value":t[9]||(t[9]=v=>e.allowLateStudents=v),disabled:n(s).isLoading},null,8,["value","disabled"])]),_:1},8,["validation-status","feedback"]),l(n(F),{"show-label":!1,"content-class":"flex items-start gap-2","validation-status":e.joinConfirmationStatus,feedback:e.joinConfirmationFeedback||"Require students to be confirmed before joining the room."},{default:o(()=>[l(n(K),null,{default:o(()=>[...t[23]||(t[23]=[m("Join Confirmation",-1)])]),_:1}),l(n(oe),{value:e.joinConfirmation,"onUpdate:value":t[10]||(t[10]=v=>e.joinConfirmation=v),disabled:n(s).isLoading},null,8,["value","disabled"])]),_:1},8,["validation-status","feedback"])]),_:1})]),_:1}),l(n(M),null,{header:o(()=>[...t[26]||(t[26]=[m("Others",-1)])]),default:o(()=>[l(n(V),{class:"flex flex-col gap-2 items-start justify-start"},{default:o(()=>[l(n(F),{"show-label":!1,"content-class":"flex items-start gap-2",feedback:"Once you delete a room, there is no going back. Please be certain."},{default:o(()=>[l(n(lt),{onPositiveClick:t[13]||(t[13]=v=>x()),"positive-button-props":{type:"error"},"show-icon":!1},{trigger:o(()=>[l(n(W),{type:"error",secondary:"",disabled:n(s).isLoading},{default:o(()=>[...t[27]||(t[27]=[m(" Delete Room ",-1)])]),_:1},8,["disabled"])]),default:o(()=>[t[28]||(t[28]=m(" Are you sure you want to delete this room? ",-1))]),_:1})]),_:1})]),_:1})]),_:1})])):(pe(),be(et,{key:0},[m("Nothing")],64))}});export{pt as default};
