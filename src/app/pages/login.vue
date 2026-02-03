@@ -1,7 +1,7 @@
 <template>
    <div class="flex items-center justify-evenly w-full h-full">
       <NCard class="flex w-[420px]!" title="Welcome Back :)" :bordered="false">
-         <NForm>
+         <NForm @keydown.enter="login()">
             <NFormItem
                label="Username"
                :validation-status="usernameStatus"
@@ -33,7 +33,7 @@
                   type="primary"
                   block
                   :loading="auth.isLoading"
-                  @click="login"
+                  @click="login()"
                >
                   Login
                </NButton>

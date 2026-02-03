@@ -3,7 +3,10 @@
    <div v-else class="flex flex-col gap-4">
       <NCard>
          <template #header>General</template>
-         <NForm class="flex flex-col gap-2 items-start justify-start">
+         <NForm
+            @keydown.enter="saveGeneralSettings()"
+            class="flex flex-col gap-2 items-start justify-start"
+         >
             <NFormItem
                label="Room Title"
                content-class="flex items-start gap-2"
@@ -72,7 +75,10 @@
       </NCard>
       <NCard>
          <template #header>Monitoring</template>
-         <NForm class="flex flex-col gap-2 items-start justify-start">
+         <NForm
+            @keydown.enter="saveMonitoringSettings()"
+            class="flex flex-col gap-2 items-start justify-start"
+         >
             <NFormItem
                label="Evidence Warning Level"
                content-class="flex items-start gap-2"
@@ -136,7 +142,10 @@
       </NCard>
       <NCard>
          <template #header>Joining Permission</template>
-         <NForm class="flex flex-col gap-2 items-start justify-start">
+         <NForm
+            @keydown.enter="saveJoiningPermissionSettings()"
+            class="flex flex-col gap-2 items-start justify-start"
+         >
             <NFormItem
                :show-label="false"
                content-class="flex items-start gap-2"
@@ -196,7 +205,10 @@
       </NCard>
       <NCard>
          <template #header>Others</template>
-         <NForm class="flex flex-col gap-2 items-start justify-start">
+         <NForm
+            @keydown.enter="handleDeleteRoom()"
+            class="flex flex-col gap-2 items-start justify-start"
+         >
             <NFormItem
                :show-label="false"
                content-class="flex items-start gap-2"

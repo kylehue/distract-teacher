@@ -1,7 +1,7 @@
 <template>
    <NModal v-model:show="isShowing" closable>
       <NCard title="Create Room" closable @close="hide" class="w-[420px]!">
-         <NForm>
+         <NForm @keydown.enter="createRoom()">
             <NFormItem
                label="Room Title"
                :validation-status="form.titleStatus"

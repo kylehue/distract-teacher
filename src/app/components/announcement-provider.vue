@@ -8,7 +8,7 @@
          @close="hide"
          class="w-[420px]!"
       >
-         <NForm>
+         <NForm @keydown.enter="sendAnnoucement()">
             <NFormItem
                label="Room"
                :validation-status="form.messageStatus"

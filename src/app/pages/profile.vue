@@ -26,7 +26,7 @@
             <div class="flex flex-col gap-4">
                <NCard>
                   <template #header>Profile</template>
-                  <NForm class="flex flex-col gap-2 items-start justify-start">
+                  <NForm @keydown.enter="saveProfileSettings()" class="flex flex-col gap-2 items-start justify-start">
                      <NFormItem
                         label="Display Name"
                         content-class="flex items-start gap-2"
@@ -66,7 +66,7 @@
                </NCard>
                <NCard>
                   <template #header>Account</template>
-                  <NForm class="flex flex-col gap-2 items-start justify-start">
+                  <NForm @keydown.enter="saveAccountSettings()" class="flex flex-col gap-2 items-start justify-start">
                      <NFormItem
                         label="Username"
                         content-class="flex items-start gap-2"
@@ -104,7 +104,7 @@
                </NCard>
                <NCard>
                   <template #header>Password</template>
-                  <NForm class="flex flex-col gap-2 items-start justify-start">
+                  <NForm @keydown.enter="savePasswordSettings()" class="flex flex-col gap-2 items-start justify-start">
                      <NFormItem
                         label="New Password"
                         content-class="flex items-start gap-2"

@@ -1,7 +1,11 @@
 <template>
    <div class="flex items-center justify-center w-full h-full">
-      <NCard class="flex w-[420px]!" title="Create Your Account" :bordered="false">
-         <NForm>
+      <NCard
+         class="flex w-[420px]!"
+         title="Create Your Account"
+         :bordered="false"
+      >
+         <NForm @keydown.enter="register()">
             <NFormItem
                label="Username"
                :validation-status="usernameStatus"
@@ -47,7 +51,7 @@
                   type="primary"
                   block
                   :loading="postAccount.isLoading"
-                  @click="register"
+                  @click="register()"
                >
                   Create Account
                </NButton>
