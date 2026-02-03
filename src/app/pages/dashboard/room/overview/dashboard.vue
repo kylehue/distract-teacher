@@ -118,6 +118,7 @@
          ]"
          :actions="['view-reports', 'view-logs']"
          :students="studentsArrayPreprocessed"
+         :room="room"
          summary
       />
    </div>

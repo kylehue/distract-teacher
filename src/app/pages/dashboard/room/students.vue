@@ -1,7 +1,8 @@
 <template>
-   <div class="flex flex-col gap-4">
+   <template v-if="!room">No room</template>
+   <div v-else class="flex flex-col gap-4">
       <div class="flex items-center justify-between w-full gap-2">
-         <NBadge :value="numberOfJoinRequests">
+         <NBadge v-if="room.status === 'concluded'" :value="numberOfJoinRequests">
             <NCheckbox v-model:checked="showJoinRequests">
                Show Join Requests
             </NCheckbox>
@@ -32,6 +33,7 @@
          ]"
          :actions="['approve', 'reject', 'view-reports', 'view-logs', 'kick']"
          :students="allStudentsPreprocessed"
+         :room="room"
       />
    </div>
 </template>
@@ -40,10 +42,11 @@
 import { NBadge, NCheckbox } from "naive-ui";
 import { computed, inject, ref, useTemplateRef } from "vue";
 import InputSearch from "@/app/components/input-search.vue";
-import { STUDENTS_INJECTION_KEY } from "@/lib/injection-keys";
+import { ROOM_INJECTION_KEY, STUDENTS_INJECTION_KEY } from "@/lib/injection-keys";
 import StudentsTable from "@/app/components/students-table.vue";
 
 const table = useTemplateRef("table");
+const room = inject(ROOM_INJECTION_KEY)!;
 const showJoinRequests = ref(false);
 const allStudents = inject(STUDENTS_INJECTION_KEY)!;
 const allStudentsPreprocessed = computed(() => {

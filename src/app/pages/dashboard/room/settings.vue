@@ -16,7 +16,7 @@
                <NInput
                   v-model:value="form.title"
                   placeholder="Type the room title"
-                  :disabled="patchRoom.isLoading"
+                  :disabled="patchRoom.isLoading || room.status === 'concluded'"
                />
             </NFormItem>
             <NFormItem
@@ -28,7 +28,7 @@
                <NInput
                   v-model:value="form.code"
                   placeholder="Type the room code"
-                  :disabled="patchRoom.isLoading"
+                  :disabled="patchRoom.isLoading || room.status === 'concluded'"
                />
             </NFormItem>
             <NFormItem
@@ -41,7 +41,7 @@
                   v-model:value="form.studentCapacity"
                   placeholder="Enter the max number of students"
                   :min="0"
-                  :disabled="patchRoom.isLoading"
+                  :disabled="patchRoom.isLoading || room.status === 'concluded'"
                />
             </NFormItem>
          </NForm>
@@ -53,7 +53,8 @@
                      (form.studentCapacity === room.studentCapacity &&
                         form.code === room.code &&
                         form.title === room.title) ||
-                     patchRoom.isLoading
+                     patchRoom.isLoading ||
+                     room.status === 'concluded'
                   "
                   @click="resetGeneralSettings()"
                >
@@ -61,9 +62,10 @@
                </NButton>
                <NButton
                   :disabled="
-                     form.studentCapacity === room.studentCapacity &&
-                     form.code === room.code &&
-                     form.title === room.title
+                     (form.studentCapacity === room.studentCapacity &&
+                        form.code === room.code &&
+                        form.title === room.title) ||
+                     room.status === 'concluded'
                   "
                   :loading="patchRoom.isLoading"
                   @click="saveGeneralSettings()"
@@ -95,7 +97,7 @@
                      { value: 'severe', label: 'Severe' },
                   ]"
                   v-model:value="form.evidenceWarningLevel"
-                  :disabled="patchRoom.isLoading"
+                  :disabled="patchRoom.isLoading || room.status === 'concluded'"
                ></NSelect>
             </NFormItem>
             <NFormItem
@@ -110,7 +112,7 @@
                <NText>Punishments</NText>
                <NSwitch
                   v-model:value="form.enablePunishments"
-                  :disabled="patchRoom.isLoading"
+                  :disabled="patchRoom.isLoading || room.status === 'concluded'"
                ></NSwitch>
             </NFormItem>
          </NForm>
@@ -121,7 +123,8 @@
                   :disabled="
                      (form.evidenceWarningLevel === room.evidenceWarningLevel &&
                         form.enablePunishments === room.enablePunishments) ||
-                     patchRoom.isLoading
+                     patchRoom.isLoading ||
+                     room.status === 'concluded'
                   "
                   @click="resetMonitoringSettings()"
                >
@@ -129,8 +132,9 @@
                </NButton>
                <NButton
                   :disabled="
-                     form.evidenceWarningLevel === room.evidenceWarningLevel &&
-                     form.enablePunishments === room.enablePunishments
+                     (form.evidenceWarningLevel === room.evidenceWarningLevel &&
+                        form.enablePunishments === room.enablePunishments) ||
+                     room.status === 'concluded'
                   "
                   :loading="patchRoom.isLoading"
                   @click="saveMonitoringSettings()"
@@ -158,7 +162,7 @@
                <NText>Allow Late Students</NText>
                <NSwitch
                   v-model:value="form.allowLateStudents"
-                  :disabled="patchRoom.isLoading"
+                  :disabled="patchRoom.isLoading || room.status === 'concluded'"
                ></NSwitch>
             </NFormItem>
             <NFormItem
@@ -173,7 +177,7 @@
                <NText>Join Confirmation</NText>
                <NSwitch
                   v-model:value="form.joinConfirmation"
-                  :disabled="patchRoom.isLoading"
+                  :disabled="patchRoom.isLoading || room.status === 'concluded'"
                ></NSwitch>
             </NFormItem>
          </NForm>
@@ -184,7 +188,8 @@
                   :disabled="
                      (form.allowLateStudents === room.allowLateStudents &&
                         form.joinConfirmation === room.joinConfirmation) ||
-                     patchRoom.isLoading
+                     patchRoom.isLoading ||
+                     room.status === 'concluded'
                   "
                   @click="resetJoiningPermissionSettings()"
                >
@@ -192,8 +197,9 @@
                </NButton>
                <NButton
                   :disabled="
-                     form.allowLateStudents === room.allowLateStudents &&
-                     form.joinConfirmation === room.joinConfirmation
+                     (form.allowLateStudents === room.allowLateStudents &&
+                        form.joinConfirmation === room.joinConfirmation) ||
+                     room.status === 'concluded'
                   "
                   :loading="patchRoom.isLoading"
                   @click="saveJoiningPermissionSettings()"
@@ -205,10 +211,20 @@
       </NCard>
       <NCard>
          <template #header>Others</template>
-         <NForm
-            @keydown.enter="handleDeleteRoom()"
-            class="flex flex-col gap-2 items-start justify-start"
-         >
+         <NForm class="flex flex-col gap-2 items-start justify-start">
+            <NFormItem
+               :show-label="false"
+               content-class="flex items-start gap-2"
+               feedback="Clear this room's memory. This action is safe and will not delete any data."
+            >
+               <NButton
+                  secondary
+                  :loading="postClearRoomCache.isLoading"
+                  @click="postClearRoomCache.execute()"
+               >
+                  Clear Cache
+               </NButton>
+            </NFormItem>
             <NFormItem
                :show-label="false"
                content-class="flex items-start gap-2"
@@ -282,6 +298,10 @@ const form = reactive({
    joinConfirmationFeedback: "",
 });
 const message = useMessage();
+const postClearRoomCache = useFetch(
+   `/api/rooms/${room.value!.id}/clear_cache`,
+   "POST",
+);
 const patchRoom = useFetch(`/api/rooms/${room.value!.id}`, "PATCH");
 
 async function saveGeneralSettings() {

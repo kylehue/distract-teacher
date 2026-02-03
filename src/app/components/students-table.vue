@@ -23,7 +23,7 @@ import {
    useThemeVars,
 } from "naive-ui";
 import { computed, h, useTemplateRef, VNode } from "vue";
-import { StudentInfo } from "@/lib/typings";
+import { StudentInfo, RoomInfo } from "@/lib/typings";
 import { RouterLink } from "vue-router";
 import { useStore } from "@/app/composables/use-store";
 import { renderIcon } from "@/lib/ui";
@@ -54,6 +54,7 @@ const props = defineProps<{
    columns: StudentTableColumns[];
    actions: StudentTableActions[];
    students: StudentInfo[];
+   room: RoomInfo;
 }>();
 
 const table = useTemplateRef("table");
@@ -366,7 +367,10 @@ if (!props.static && props.columns.includes("actions")) {
                value: "approve",
                label: "Approve",
                style: { color: theme.value.successColor },
-               disabled: row.permitted || !props.actions.includes("approve"),
+               disabled:
+                  row.permitted ||
+                  !props.actions.includes("approve") ||
+                  props.room.status === "concluded",
             },
             {
                value: "reject",
@@ -375,7 +379,8 @@ if (!props.static && props.columns.includes("actions")) {
                disabled:
                   row.permitted ||
                   !row.active ||
-                  !props.actions.includes("reject"),
+                  !props.actions.includes("reject") ||
+                  props.room.status === "concluded",
             },
             {
                value: "reports",
@@ -410,7 +415,10 @@ if (!props.static && props.columns.includes("actions")) {
                value: "kick",
                label: "Kick",
                style: { color: theme.value.errorColor },
-               disabled: !row.permitted || !props.actions.includes("kick"),
+               disabled:
+                  !row.permitted ||
+                  !props.actions.includes("kick") ||
+                  props.room.status === "concluded",
             },
          ];
 

@@ -15,8 +15,8 @@
             <RoomStatusTag :room="room" />
          </div>
       </template>
-      <template v-if="!!room" #header-extra>
-         <div v-if="room.status !== 'concluded'" class="flex items-center gap-1">
+      <template v-if="!!room && room.status !== 'concluded'" #header-extra>
+         <div class="flex items-center gap-1">
             <NTooltip placement="bottom">
                <template #trigger>
                   <NButton
