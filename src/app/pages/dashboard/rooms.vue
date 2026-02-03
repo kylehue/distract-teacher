@@ -22,6 +22,7 @@
          :pagination="{ pageSize: 10 }"
          :single-line="false"
          :loading="store.isLoadRoomsLoading"
+         :scroll-x="900"
       />
       <template #header-extra>
          <div class="flex flex-row gap-2">

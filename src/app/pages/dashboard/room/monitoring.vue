@@ -70,6 +70,7 @@
          :row-class-name="
             (row) => (!students.get(row.studentId)?.active ? 'opacity-50' : '')
          "
+         :scroll-x="900"
       />
       <NDataTable
          v-if="activeTab === 'lockedStudents'"
@@ -80,6 +81,7 @@
          :row-class-name="
             (row) => (!students.get(row.studentId)?.active ? 'opacity-50' : '')
          "
+         :scroll-x="900"
       />
    </div>
 </template>
