@@ -24,42 +24,6 @@
                </NBadge>
             </NButton>
          </NButtonGroup>
-         <NButton
-            v-if="!!room.timeStarted && room.status !== 'concluded'"
-            type="error"
-            tertiary
-            @click="stopMonitoring()"
-            :loading="patchStopMonitoring.isLoading"
-         >
-            Stop Monitoring
-            <template #icon>
-               <PhStop />
-            </template>
-         </NButton>
-         <NButton
-            v-if="room.status === 'paused'"
-            type="success"
-            secondary
-            @click="startMonitoring()"
-            :loading="patchStartMonitoring.isLoading"
-         >
-            {{ !!room.timeStarted ? "Continue" : "Start" }} Monitoring
-            <template #icon>
-               <PhPlay />
-            </template>
-         </NButton>
-         <NButton
-            v-if="room.status === 'monitoring'"
-            type="warning"
-            ghost
-            @click="pauseMonitoring()"
-            :loading="patchPauseMonitoring.isLoading"
-         >
-            Pause Monitoring
-            <template #icon>
-               <PhPause />
-            </template>
-         </NButton>
       </div>
       <NDataTable
          v-if="activeTab === 'warningLogs'"
@@ -534,61 +498,6 @@ const lockedStudents = computed(() => {
       (s) => s.permitted && !!s.lockMonitorLogId,
    );
 });
-
-const patchStartMonitoring = useFetch("/api/start_monitoring/:roomId", "PATCH");
-
-async function startMonitoring() {
-   try {
-      await patchStartMonitoring.execute({
-         params: { roomId: route.params.roomId },
-      });
-
-      message.success("Monitoring has started.", {
-         icon: renderIcon(PhPlay),
-      });
-   } catch (error: any) {
-      message.error(error.message);
-   }
-}
-
-const patchPauseMonitoring = useFetch("/api/pause_monitoring/:roomId", "PATCH");
-
-async function pauseMonitoring() {
-   try {
-      await patchPauseMonitoring.execute({
-         params: { roomId: route.params.roomId },
-      });
-
-      message.warning("Monitoring has been paused.", {
-         icon: renderIcon(PhPause),
-      });
-   } catch (error: any) {
-      message.error(error.message);
-   }
-}
-
-const patchStopMonitoring = useFetch("/api/stop_monitoring/:roomId", "PATCH");
-
-async function stopMonitoring() {
-   let confirmed = confirm(
-      "Are you sure you want to stop monitoring? This will conclude and archive the room session. This action cannot be undone.",
-   );
-   if (!confirmed) {
-      return;
-   }
-
-   try {
-      await patchStopMonitoring.execute({
-         params: { roomId: route.params.roomId },
-      });
-
-      message.error("Monitoring has been stopped.", {
-         icon: renderIcon(PhStop),
-      });
-   } catch (error: any) {
-      message.error(error.message);
-   }
-}
 
 function filterByStudentIds(ids: (string | number)[]) {
    const studentNameColumn = monitorLogColumns.find(

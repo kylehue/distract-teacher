@@ -16,7 +16,57 @@
          </div>
       </template>
       <template v-if="!!room" #header-extra>
-         <NTooltip>
+         <div v-if="room.status !== 'concluded'" class="flex items-center gap-1">
+            <NTooltip placement="bottom">
+               <template #trigger>
+                  <NButton
+                     type="error"
+                     secondary
+                     circle
+                     @click="stopMonitoring()"
+                  >
+                     <template #icon>
+                        <PhStop />
+                     </template>
+                  </NButton>
+               </template>
+               Stop monitoring and conclude room session
+            </NTooltip>
+            <NTooltip placement="bottom">
+               <template #trigger>
+                  <NButton
+                     type="warning"
+                     secondary
+                     circle
+                     @click="pauseMonitoring()"
+                     :disabled="room.status === 'paused'"
+                  >
+                     <template #icon>
+                        <PhPause />
+                     </template>
+                  </NButton>
+               </template>
+               Pause monitoring
+            </NTooltip>
+            <NTooltip placement="bottom">
+               <template #trigger>
+                  <NButton
+                     type="success"
+                     secondary
+                     circle
+                     @click="startMonitoring()"
+                     :disabled="room.status === 'monitoring'"
+                  >
+                     <template #icon>
+                        <PhPlay />
+                     </template>
+                  </NButton>
+               </template>
+               Start monitoring
+            </NTooltip>
+         </div>
+         <NDivider vertical />
+         <NTooltip placement="bottom">
             <template #trigger>
                <NButton circle @click="announcement.show(room)">
                   <template #icon>
@@ -24,7 +74,7 @@
                   </template>
                </NButton>
             </template>
-            Announce to students
+            Send announcement to students
          </NTooltip>
       </template>
       <div v-if="!room" class="flex items-center justify-center w-full h-full">
@@ -63,15 +113,19 @@ import {
    NTab,
    NSpin,
    NText,
-   NTag,
+   NDivider,
    NTooltip,
    NBadge,
+   useMessage,
 } from "naive-ui";
 import Layout from "../layout.vue";
 import { computed, onMounted, provide, reactive } from "vue";
 import { useRouter, useRoute, RouterLink, RouterView } from "vue-router";
 import { renderIcon } from "@/lib/ui";
 import {
+   PhPause,
+   PhPlay,
+   PhStop,
    PhArrowLeft,
    PhGear,
    PhHouse,
@@ -92,13 +146,14 @@ import RoomStatusTag from "@/app/components/room-status-tag.vue";
 import { getWithDefault } from "@/lib/object";
 import { useAnnouncement } from "@/app/composables/use-announcement";
 import { useAuthStore } from "@/app/composables/use-auth-store";
+import { useFetch } from "@/app/composables/use-fetch";
 
 const router = useRouter();
 const route = useRoute();
 const store = useStore();
 const auth = useAuthStore();
 const announcement = useAnnouncement();
-
+const message = useMessage();
 const room = computed(
    () => store.allRooms.get(route.params.roomId as string) ?? null,
 );
@@ -144,6 +199,60 @@ const tabs = reactive([
    { name: "Settings", key: "settings", icon: renderIcon(PhGear) },
 ]);
 const activeKey = computed(() => route.path.split("/").pop() || "overview");
+const patchStartMonitoring = useFetch("/api/start_monitoring/:roomId", "PATCH");
+
+async function startMonitoring() {
+   try {
+      await patchStartMonitoring.execute({
+         params: { roomId: route.params.roomId },
+      });
+
+      message.success("Monitoring has started.", {
+         icon: renderIcon(PhPlay),
+      });
+   } catch (error: any) {
+      message.error(error.message);
+   }
+}
+
+const patchPauseMonitoring = useFetch("/api/pause_monitoring/:roomId", "PATCH");
+
+async function pauseMonitoring() {
+   try {
+      await patchPauseMonitoring.execute({
+         params: { roomId: route.params.roomId },
+      });
+
+      message.warning("Monitoring has been paused.", {
+         icon: renderIcon(PhPause),
+      });
+   } catch (error: any) {
+      message.error(error.message);
+   }
+}
+
+const patchStopMonitoring = useFetch("/api/stop_monitoring/:roomId", "PATCH");
+
+async function stopMonitoring() {
+   let confirmed = confirm(
+      "Are you sure you want to stop monitoring? This will conclude and archive the room session. This action cannot be undone.",
+   );
+   if (!confirmed) {
+      return;
+   }
+
+   try {
+      await patchStopMonitoring.execute({
+         params: { roomId: route.params.roomId },
+      });
+
+      message.error("Monitoring has been stopped.", {
+         icon: renderIcon(PhStop),
+      });
+   } catch (error: any) {
+      message.error(error.message);
+   }
+}
 
 onMounted(() => {
    store.loadRoom(route.params.roomId as string);
