@@ -15,15 +15,17 @@
             "
          ></InputSearch>
       </div>
-      <NDataTable
-         ref="table"
-         :columns="columns"
-         :data="roomsArray"
-         :pagination="{ pageSize: 10 }"
-         :single-line="false"
-         :loading="store.isLoadRoomsLoading"
-         :scroll-x="900"
-      />
+      <div class="flex w-full overflow-hidden">
+         <NDataTable
+            ref="table"
+            :columns="columns"
+            :data="roomsArray"
+            :pagination="{ pageSize: 10 }"
+            :single-line="false"
+            :loading="store.isLoadRoomsLoading"
+            :scroll-x="900"
+         />
+      </div>
       <template #header-extra>
          <div class="flex flex-row gap-2">
             <NButton @click="createRoom.show()">
@@ -185,6 +187,7 @@ const columns: DataTableColumns<RoomInfo> = reactive([
       key: "actions",
       width: 120,
       align: "center",
+      fixed: "right",
       render(row) {
          return h(
             RouterLink,

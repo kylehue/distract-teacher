@@ -25,28 +25,34 @@
             </NButton>
          </NButtonGroup>
       </div>
-      <NDataTable
-         v-if="activeTab === 'warningLogs'"
-         :columns="monitorLogColumns"
-         :data="monitorLogsArray"
-         :pagination="{ pageSize: 10 }"
-         :single-line="false"
-         :row-class-name="
-            (row) => (!students.get(row.studentId)?.active ? 'opacity-50' : '')
-         "
-         :scroll-x="900"
-      />
-      <NDataTable
-         v-if="activeTab === 'lockedStudents'"
-         :columns="lockedStudentColumns"
-         :data="lockedStudents"
-         :pagination="{ pageSize: 10 }"
-         :single-line="false"
-         :row-class-name="
-            (row) => (!students.get(row.studentId)?.active ? 'opacity-50' : '')
-         "
-         :scroll-x="900"
-      />
+      <div class="flex w-full overflow-hidden">
+         <NDataTable
+            v-if="activeTab === 'warningLogs'"
+            :columns="monitorLogColumns"
+            :data="monitorLogsArray"
+            :pagination="{ pageSize: 10 }"
+            :single-line="false"
+            :row-class-name="
+               (row) =>
+                  !students.get(row.studentId)?.active ? 'opacity-50' : ''
+            "
+            :scroll-x="900"
+         />
+      </div>
+      <div class="flex w-full overflow-hidden">
+         <NDataTable
+            v-if="activeTab === 'lockedStudents'"
+            :columns="lockedStudentColumns"
+            :data="lockedStudents"
+            :pagination="{ pageSize: 10 }"
+            :single-line="false"
+            :row-class-name="
+               (row) =>
+                  !students.get(row.studentId)?.active ? 'opacity-50' : ''
+            "
+            :scroll-x="900"
+         />
+      </div>
    </div>
 </template>
 
@@ -258,6 +264,7 @@ const monitorLogColumns: DataTableColumns<MonitorLog> = [
       key: "actions",
       width: 50,
       align: "center",
+      fixed: "right",
       render(row) {
          return h(
             NPopselect,
@@ -438,6 +445,7 @@ const lockedStudentColumns: DataTableColumns<StudentInfo> = [
       key: "actions",
       width: 50,
       align: "center",
+      fixed: "right",
       render(row) {
          let monitorLog = monitorLogs.value.get(row.lockMonitorLogId!)!;
          return h(

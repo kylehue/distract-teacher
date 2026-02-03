@@ -1,13 +1,17 @@
 <template>
-   <NDataTable
-      ref="table"
-      :columns="columns"
-      :data="students"
-      :pagination="static ? false : { pageSize: 10 }"
-      :single-line="false"
-      :row-class-name="(row) => (!row.active && !summary ? 'opacity-50' : '')"
-      :scroll-x="900"
-   />
+   <div class="flex w-full overflow-hidden">
+      <NDataTable
+         ref="table"
+         :columns="columns"
+         :data="students"
+         :pagination="static ? false : { pageSize: 10 }"
+         :single-line="false"
+         :row-class-name="
+            (row) => (!row.active && !summary ? 'opacity-50' : '')
+         "
+         :scroll-x="900"
+      />
+   </div>
 </template>
 
 <script setup lang="ts">
@@ -361,6 +365,7 @@ if (!props.static && props.columns.includes("actions")) {
       key: "actions",
       width: 50,
       align: "center",
+      fixed: "right",
       render(row) {
          let options: SelectMixedOption[] = [
             {
