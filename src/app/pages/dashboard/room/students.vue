@@ -13,7 +13,7 @@
             label-field="name"
             id-field="id"
             placeholder="Search students..."
-            class="w-fit!"
+            class="ml-auto w-fit!"
             @search="
                (ids) => {
                   table?.table?.filters({ name: ids });

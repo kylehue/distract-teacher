@@ -1,6 +1,6 @@
 <template>
    <template v-if="!room">Nothing</template>
-   <div v-else class="flex flex-col gap-4">
+   <div v-else class="flex flex-col w-full h-full gap-4">
       <div class="flex items-center justify-end gap-2">
          <NButtonGroup class="me-auto">
             <NButton
@@ -25,9 +25,12 @@
             </NButton>
          </NButtonGroup>
       </div>
-      <div class="flex w-full overflow-hidden">
+      <div
+         v-if="activeTab === 'warningLogs'"
+         class="flex flex-col w-full h-full overflow-hidden"
+      >
          <NDataTable
-            v-if="activeTab === 'warningLogs'"
+            v-if="monitorLogsArray.length > 0"
             :columns="monitorLogColumns"
             :data="monitorLogsArray"
             :pagination="{ pageSize: 10 }"
@@ -38,10 +41,14 @@
             "
             :scroll-x="900"
          />
+         <NEmpty v-else class="m-auto" description="There are currently no warning logs." />
       </div>
-      <div class="flex w-full overflow-hidden">
+      <div
+         v-if="activeTab === 'lockedStudents'"
+         class="flex flex-col w-full h-full overflow-hidden"
+      >
          <NDataTable
-            v-if="activeTab === 'lockedStudents'"
+            v-if="lockedStudents.length > 0"
             :columns="lockedStudentColumns"
             :data="lockedStudents"
             :pagination="{ pageSize: 10 }"
@@ -52,6 +59,7 @@
             "
             :scroll-x="900"
          />
+         <NEmpty v-else class="m-auto" description="There are currently no locked students." />
       </div>
    </div>
 </template>
@@ -69,7 +77,7 @@ import {
    NButtonGroup,
    useThemeVars,
    NBadge,
-   NAlert,
+   NEmpty,
 } from "naive-ui";
 import { computed, h, inject, onMounted, reactive, Ref, ref, watch } from "vue";
 import { MonitorLog, RoomInfo, StudentInfo } from "@/lib/typings";

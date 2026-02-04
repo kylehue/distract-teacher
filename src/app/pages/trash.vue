@@ -23,8 +23,9 @@
          <NDivider class="m-0!" />
          <div class="flex flex-col h-full">
             <div class="w-full h-4 flex-none"></div>
-            <div class="flex flex-col gap-4">
+            <div class="flex flex-col w-full h-full overflow-hidden">
                <NDataTable
+                  v-if="roomsArray.length > 0 || store.isLoadDeletedRoomsLoading"
                   ref="table"
                   :columns="columns"
                   :data="roomsArray"
@@ -33,6 +34,11 @@
                   :loading="store.isLoadDeletedRoomsLoading"
                   :scroll-x="900"
                />
+               <NEmpty v-else class="m-auto" description="Your trash is empty.">
+                  <template #icon>
+                     <PhTrash />
+                  </template>
+               </NEmpty>
             </div>
             <div class="w-full h-8 flex-none"></div>
          </div>
@@ -46,30 +52,18 @@ import {
    NButton,
    NDataTable,
    NDivider,
-   NForm,
-   NFormItem,
-   NInput,
+   NEmpty,
    NLayout,
    NLayoutContent,
    NSpin,
    NText,
    useMessage,
 } from "naive-ui";
-import { RoomInfo, TeacherInfo } from "@/lib/typings";
-import {
-   computed,
-   h,
-   inject,
-   nextTick,
-   onMounted,
-   reactive,
-   ref,
-   Ref,
-} from "vue";
-import { RouterLink } from "vue-router";
+import { RoomInfo } from "@/lib/typings";
+import { computed, h, onMounted, reactive } from "vue";
 import { useFetch } from "@/app/composables/use-fetch";
 import { useStore } from "@/app/composables/use-store";
-import { PhArrowLeft } from "@phosphor-icons/vue";
+import { PhArrowLeft, PhTrash } from "@phosphor-icons/vue";
 import { useAuthStore } from "../composables/use-auth-store";
 import { UnauthorizedError } from "@/lib/errors";
 import { timestampToDateString, compareTimestamps } from "@/lib/datetime";

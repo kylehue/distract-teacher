@@ -8,12 +8,13 @@
             <NText strong class="text-lg"> Student Report </NText>
          </div>
       </template>
-      <div v-if="isLoading" class="flex items-center gap-2">
+      <div v-if="isLoading" class="m-auto flex items-center gap-2">
          <NSpin />
          <NText>Loading student report...</NText>
       </div>
       <NEmpty
          v-else-if="!student || !room || !teacher"
+         class="m-auto"
          description="Data not found."
       />
       <template v-else>

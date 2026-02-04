@@ -2,7 +2,7 @@
    <NLayout class="w-full h-full" embedded>
       <NLayoutContent
          class="w-full h-full"
-         content-class="flex flex-col p-8"
+         content-class="flex flex-col w-full h-full p-8"
          embedded
       >
          <div class="flex flex-row items-center justify-between mb-8">
@@ -17,7 +17,7 @@
             </div>
          </div>
          <NDivider v-if="!noDivider" class="m-0!" />
-         <div class="flex flex-col h-full">
+         <div class="flex flex-col w-full h-full">
             <div class="w-full h-4 flex-none"></div>
             <slot></slot>
             <div class="w-full h-8 flex-none"></div>

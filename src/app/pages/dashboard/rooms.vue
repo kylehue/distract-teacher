@@ -15,8 +15,9 @@
             "
          ></InputSearch>
       </div>
-      <div class="flex w-full overflow-hidden">
+      <div class="flex flex-col w-full h-full overflow-hidden">
          <NDataTable
+            v-if="roomsArray.length > 0 || store.isLoadRoomsLoading"
             ref="table"
             :columns="columns"
             :data="roomsArray"
@@ -25,6 +26,7 @@
             :loading="store.isLoadRoomsLoading"
             :scroll-x="900"
          />
+         <NEmpty v-else class="m-auto" description="You haven't created any rooms yet." />
       </div>
       <template #header-extra>
          <div class="flex flex-row gap-2">
@@ -40,13 +42,7 @@
 <script setup lang="ts">
 import Layout from "./layout.vue";
 import { PhPlus } from "@phosphor-icons/vue";
-import {
-   NButton,
-   NDataTable,
-   NText,
-   DataTableColumns,
-   useMessage,
-} from "naive-ui";
+import { NButton, NDataTable, NText, NEmpty, DataTableColumns } from "naive-ui";
 import InputSearch from "@/app/components/input-search.vue";
 import CopyButton from "@/app/components/copy-button.vue";
 import { computed, h, onMounted, useTemplateRef, reactive } from "vue";

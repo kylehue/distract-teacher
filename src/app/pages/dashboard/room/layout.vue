@@ -99,7 +99,7 @@
                </NBadge>
             </NTab>
          </NTabs>
-         <div class="py-4">
+         <div class="w-full h-full py-4">
             <RouterView />
          </div>
       </template>

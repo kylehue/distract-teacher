@@ -1,6 +1,7 @@
 <template>
-   <div class="flex w-full overflow-hidden">
+   <div class="flex flex-col w-full h-full overflow-hidden">
       <NDataTable
+         v-if="students.length > 0"
          ref="table"
          :columns="columns"
          :data="students"
@@ -10,6 +11,11 @@
             (row) => (!row.active && !summary ? 'opacity-50' : '')
          "
          :scroll-x="900"
+      />
+      <NEmpty
+         v-else
+         class="m-auto"
+         description="There are currently no students."
       />
    </div>
 </template>
@@ -23,6 +29,7 @@ import {
    NPopselect,
    NTag,
    NText,
+   NEmpty,
    useMessage,
    useThemeVars,
 } from "naive-ui";

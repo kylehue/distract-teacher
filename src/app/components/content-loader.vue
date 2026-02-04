@@ -1,6 +1,6 @@
 <template>
-   <div class="flex items-center justify-center w-full h-full">
-      <div class="flex gap-2">
+   <div class="flex-1 flex items-center justify-center w-full h-full">
+      <div class="m-auto flex items-center gap-2">
          <NSpin />
          Loading...
       </div>
