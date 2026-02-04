@@ -26,7 +26,10 @@
             <div class="flex flex-col gap-4">
                <NCard>
                   <template #header>Profile</template>
-                  <NForm @keydown.enter="saveProfileSettings()" class="flex flex-col gap-2 items-start justify-start">
+                  <NForm
+                     @keydown.enter="saveProfileSettings()"
+                     class="flex flex-col gap-2 items-start justify-start"
+                  >
                      <NFormItem
                         label="Display Name"
                         content-class="flex items-start gap-2"
@@ -66,7 +69,10 @@
                </NCard>
                <NCard>
                   <template #header>Account</template>
-                  <NForm @keydown.enter="saveAccountSettings()" class="flex flex-col gap-2 items-start justify-start">
+                  <NForm
+                     @keydown.enter="saveAccountSettings()"
+                     class="flex flex-col gap-2 items-start justify-start"
+                  >
                      <NFormItem
                         label="Username"
                         content-class="flex items-start gap-2"
@@ -104,7 +110,10 @@
                </NCard>
                <NCard>
                   <template #header>Password</template>
-                  <NForm @keydown.enter="savePasswordSettings()" class="flex flex-col gap-2 items-start justify-start">
+                  <NForm
+                     @keydown.enter="savePasswordSettings()"
+                     class="flex flex-col gap-2 items-start justify-start"
+                  >
                      <NFormItem
                         label="New Password"
                         content-class="flex items-start gap-2"
@@ -156,6 +165,33 @@
                      </div>
                   </template>
                </NCard>
+               <NCard>
+                  <template #header>Others</template>
+                  <NForm class="flex flex-col gap-2 items-start justify-start">
+                     <NFormItem
+                        :show-label="false"
+                        content-class="flex items-start gap-2"
+                        feedback="Clear all cached data. This action is safe and will not delete any data."
+                     >
+                        <NButton
+                           secondary
+                           :loading="postClearCache.isLoading"
+                           @click="postClearCache.execute()"
+                        >
+                           Clear Cache
+                        </NButton>
+                     </NFormItem>
+                     <RouterLink to="/trash">
+                        <NButton
+                           secondary
+                           :loading="postClearCache.isLoading"
+                           @click="postClearCache.execute()"
+                        >
+                           View Trash
+                        </NButton>
+                     </RouterLink>
+                  </NForm>
+               </NCard>
             </div>
             <div class="w-full h-8 flex-none"></div>
          </div>
@@ -188,6 +224,7 @@ import {
    ref,
    Ref,
 } from "vue";
+import { RouterLink } from "vue-router";
 import { useFetch } from "@/app/composables/use-fetch";
 import { useStore } from "@/app/composables/use-store";
 import { PhArrowLeft } from "@phosphor-icons/vue";
@@ -211,6 +248,9 @@ const form = reactive({
    password2Feedback: "",
 });
 const message = useMessage();
+
+const postClearCache = useFetch("/api/clear_cache", "POST");
+
 const patchAccount = useFetch<{ teacher: TeacherInfo }>(
    "/api/account",
    "PATCH",

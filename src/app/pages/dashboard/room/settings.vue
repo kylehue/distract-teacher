@@ -215,20 +215,7 @@
             <NFormItem
                :show-label="false"
                content-class="flex items-start gap-2"
-               feedback="Clear this room's memory. This action is safe and will not delete any data."
-            >
-               <NButton
-                  secondary
-                  :loading="postClearRoomCache.isLoading"
-                  @click="postClearRoomCache.execute()"
-               >
-                  Clear Cache
-               </NButton>
-            </NFormItem>
-            <NFormItem
-               :show-label="false"
-               content-class="flex items-start gap-2"
-               feedback="Once you delete a room, there is no going back. Please be certain."
+               feedback="Move this room to trash."
             >
                <NPopconfirm
                   @positive-click="handleDeleteRoom()"
@@ -267,7 +254,7 @@ import {
    useDialog,
    useMessage,
 } from "naive-ui";
-import { h, inject, reactive, ref } from "vue";
+import { computed, h, inject, reactive, ref } from "vue";
 import { useFetch } from "@/app/composables/use-fetch";
 import { useRouter } from "vue-router";
 import { ROOM_INJECTION_KEY } from "@/lib/injection-keys";
@@ -298,10 +285,6 @@ const form = reactive({
    joinConfirmationFeedback: "",
 });
 const message = useMessage();
-const postClearRoomCache = useFetch(
-   `/api/rooms/${room.value!.id}/clear_cache`,
-   "POST",
-);
 const patchRoom = useFetch(`/api/rooms/${room.value!.id}`, "PATCH");
 
 async function saveGeneralSettings() {
@@ -460,68 +443,74 @@ function handleDeleteRoom() {
    let value = ref("");
    let feedback = ref("");
    let roomCode = room.value!.code;
-   let roomId = room.value!.id;
-   let _dialog = dialog.error({
-      title: "Confirm Delete",
-      content: () => {
-         return h("div", { class: "flex flex-col gap-2" }, [
-            h(
-               NText,
-               { depth: 3, class: "text-xs" },
-               {
-                  default: () =>
-                     "Please note that this action is IRREVERSIBLE. It will delete all associated data with this room such as monitor logs, evidences, and student records.",
-               },
-            ),
-            h(NForm, null, {
-               default: () => {
-                  return h(
-                     NFormItem,
-                     {
-                        label: `Please type '${roomCode}' to confirm:`,
-                        validationStatus: feedback.value ? "error" : "success",
-                        feedback: feedback.value,
-                     },
-                     {
-                        default: () => {
-                           return h(NInput, {
-                              type: "text",
-                              placeholder: `Type ${roomCode} to confirm`,
-                              onUpdateValue(v) {
-                                 value.value = v;
-                              },
-                           });
+   let _dialog = dialog.error(
+      reactive({
+         title: "Confirm Delete",
+         content: () => {
+            return h("div", { class: "flex flex-col gap-2" }, [
+               h(
+                  NText,
+                  { depth: 3, class: "text-xs" },
+                  {
+                     default: () =>
+                        "This room will be scheduled for permanent deletion in 30 days. Once deleted, all associated data with this room such as monitor logs, evidences, and student records will also be deleted.",
+                  },
+               ),
+               h(NForm, null, {
+                  default: () => {
+                     return h(
+                        NFormItem,
+                        {
+                           label: `Please type '${roomCode}' to confirm:`,
+                           validationStatus: feedback.value
+                              ? "error"
+                              : "success",
+                           feedback: feedback.value,
                         },
-                     },
-                  );
-               },
-            }),
-         ]);
-      },
-      positiveText: "Delete",
-      showIcon: false,
-      onPositiveClick: async () => {
-         feedback.value = "";
-         if (value.value !== roomCode) {
-            feedback.value = "Room code does not match.";
-            return false;
-         }
-
-         // delete
-         try {
-            await deleteRoom.execute();
-            _dialog.destroy();
-            message.success("Room has been deleted.");
-            router.push("/dashboard/rooms");
-         } catch {
-            if (!deleteRoom.error) {
-               message.error("Failed to delete the room.");
-               return;
+                        {
+                           default: () => {
+                              return h(NInput, {
+                                 type: "text",
+                                 placeholder: `Type ${roomCode} to confirm`,
+                                 disabled: computed(() => deleteRoom.isLoading)
+                                    .value,
+                                 onUpdateValue(v) {
+                                    value.value = v;
+                                 },
+                              });
+                           },
+                        },
+                     );
+                  },
+               }),
+            ]);
+         },
+         positiveText: "Delete",
+         showIcon: false,
+         positiveButtonProps: { loading: computed(() => deleteRoom.isLoading) },
+         onPositiveClick: async () => {
+            feedback.value = "";
+            if (value.value !== roomCode) {
+               feedback.value = "Room code does not match.";
+               return false;
             }
 
-            message.error(deleteRoom.error.message);
-         }
-      },
-   });
+            // delete
+            try {
+               await deleteRoom.execute();
+               _dialog.destroy();
+               message.success("Room has been deleted.");
+               router.push("/dashboard/rooms");
+            } catch {
+               if (!deleteRoom.error) {
+                  message.error("Failed to delete the room.");
+                  return;
+               }
+
+               message.error(deleteRoom.error.message);
+            }
+         },
+      }),
+   );
 }
 </script>

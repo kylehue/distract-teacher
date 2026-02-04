@@ -52,6 +52,7 @@ export interface RoomInfo {
    allowLateStudents: boolean;
    joinConfirmation: boolean;
    createdAt: string;
+   deletedAt?: string;
 }
 
 export interface StudentInfo {

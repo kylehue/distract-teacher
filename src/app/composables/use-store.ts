@@ -12,6 +12,7 @@ import { useFetch } from "./use-fetch";
 
 export const useStore = defineStore("main-store", () => {
    // --- cache ---
+   const deletedRooms = reactive(new Map<string | number, RoomInfo>());
    const allRooms = reactive(new Map<string | number, RoomInfo>());
    const allStudents = reactive(new Map<string | number, StudentInfo>());
    const allMonitorLogs = reactive(new Map<string | number, MonitorLog>());
@@ -30,7 +31,6 @@ export const useStore = defineStore("main-store", () => {
       room: RoomInfo;
       students: StudentInfo[];
       monitorLogs: MonitorLog[];
-      teacher: any;
    }>("/api/rooms/:roomId");
 
    async function loadRoom(roomId: string | number) {
@@ -59,6 +59,23 @@ export const useStore = defineStore("main-store", () => {
          const data = getRooms.data?.data;
          if (!data) throw new Error("No data");
          upsertRooms(data.rooms);
+         return data;
+      } catch {
+         // ignore fetch errors
+      }
+   }
+
+   const getDeletedRooms = useFetch<{
+      rooms: RoomInfo[];
+   }>("/api/deleted_rooms");
+
+   async function loadDeletedRooms() {
+      try {
+         await getDeletedRooms.execute();
+
+         const data = getDeletedRooms.data?.data;
+         if (!data) throw new Error("No data");
+         upsertDeletedRooms(data.rooms);
          return data;
       } catch {
          // ignore fetch errors
@@ -167,6 +184,26 @@ export const useStore = defineStore("main-store", () => {
       }
    }
 
+   function upsertDeletedRooms(rooms: RoomInfo[]) {
+      for (const incoming of rooms) {
+         const existing = deletedRooms.get(incoming.id);
+
+         if (!existing) {
+            // new room
+            deletedRooms.set(incoming.id, incoming);
+         } else {
+            // room already exists so just mutate in place
+            for (const key in incoming) {
+               // @ts-ignore
+               if (existing[key] !== incoming[key]) {
+                  // @ts-ignore
+                  existing[key] = incoming[key];
+               }
+            }
+         }
+      }
+   }
+
    function upsertStudents(students: StudentInfo[]) {
       for (const incoming of students) {
          const existing = allStudents.get(incoming.id);
@@ -235,6 +272,10 @@ export const useStore = defineStore("main-store", () => {
       allRooms.delete(roomId);
       studentsGroupedByRoomId.delete(roomId);
       monitorLogsGroupedByRoomId.delete(roomId);
+   }
+
+   function deleteDeletedRoom(roomId: string | number) {
+      deletedRooms.delete(roomId);
    }
 
    function deleteStudent(studentId: string | number) {
@@ -351,12 +392,28 @@ export const useStore = defineStore("main-store", () => {
       (data) => {
          const room = data.room as RoomInfo;
          deleteRoom(room.id);
+         upsertDeletedRooms([room]);
+      },
+      { autoClean: false },
+   );
+
+   socket.on(
+      "teacher:restore_room",
+      (data) => {
+         const room = data.room as RoomInfo;
+         const students = data.students as StudentInfo[];
+         const monitorLogs = data.monitorLogs as MonitorLog[];
+         deleteDeletedRoom(room.id);
+         upsertRooms([room]);
+         upsertStudents(students);
+         upsertMonitorLogs(monitorLogs);
       },
       { autoClean: false },
    );
 
    return {
       allRooms,
+      deletedRooms,
       allStudents,
       allMonitorLogs,
       studentsGroupedByRoomId,
@@ -366,6 +423,8 @@ export const useStore = defineStore("main-store", () => {
       isLoadRoomLoading: computed(() => getRoom.isLoading),
       loadRooms,
       isLoadRoomsLoading: computed(() => getRooms.isLoading),
+      loadDeletedRooms,
+      isLoadDeletedRoomsLoading: computed(() => getDeletedRooms.isLoading),
       loadStudent,
       isLoadStudentLoading: computed(() => getStudent.isLoading),
       loadStudents,
@@ -375,9 +434,11 @@ export const useStore = defineStore("main-store", () => {
       loadMonitorLogs,
       isLoadMonitorLogsLoading: computed(() => getRoomMonitorLogs.isLoading),
       upsertRooms,
+      upsertDeletedRooms,
       upsertStudents,
       upsertMonitorLogs,
       deleteRoom,
+      deleteDeletedRoom,
       deleteStudent,
       clear,
       countStudentsOfRoom,

@@ -36,6 +36,12 @@ const routes: RouteRecordRaw[] = [
             ),
          },
          {
+            path: "trash",
+            component: _defineAsyncComponent(
+               () => import("@/app/pages/trash.vue"),
+            ),
+         },
+         {
             path: "dashboard",
             children: [
                { path: "", redirect: "/dashboard/rooms" },
