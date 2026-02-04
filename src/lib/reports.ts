@@ -130,3 +130,80 @@ export function createMonitorLogsReports(monitorLogs: MonitorLog[]) {
       phoneDetectionCount,
    };
 }
+
+export function computeExpectedMonitorLogCount(
+   roomTimeStarted: string | Date,
+   roomTimeEnded: string | Date,
+   monitorIntervalMs = 6000,
+): number {
+   const start =
+      roomTimeStarted instanceof Date
+         ? roomTimeStarted.getTime()
+         : new Date(roomTimeStarted).getTime();
+
+   const end =
+      roomTimeEnded instanceof Date
+         ? roomTimeEnded.getTime()
+         : new Date(roomTimeEnded).getTime();
+
+   if (!start || !end || end <= start) return 0;
+
+   const durationMs = end - start;
+
+   return Math.floor(durationMs / monitorIntervalMs);
+}
+
+export function createStudentsIndividualReports(
+   students: StudentInfo[],
+): Map<string, { zScore: number; explanation: string }> {
+   if (!students.length) return new Map();
+
+   const counts = students.map((s) => s.monitorLogCount);
+
+   const mean = counts.reduce((sum, c) => sum + c, 0) / counts.length;
+   const stdDev = computeStdDev(counts);
+
+   // Everyone logged the same amount (no meaningful comparison)
+   if (stdDev === 0) {
+      return new Map(
+         students.map((s) => [
+            s.id,
+            {
+               zScore: 0,
+               explanation:
+                  "All students produced similar activity logs; no abnormal behavior detected.",
+            },
+         ]),
+      );
+   }
+
+   return new Map(
+      students.map((s) => {
+         const z = (s.monitorLogCount - mean) / stdDev;
+
+         let explanation: string;
+
+         if (z < -3) {
+            explanation =
+               "Log activity is extremely low compared to the class, suggesting prolonged disconnection or monitoring avoidance.";
+         } else if (z < -2) {
+            explanation =
+               "Log activity is significantly lower than most students and may indicate intermittent disconnection.";
+         } else if (z < -1) {
+            explanation =
+               "Log activity is slightly below average but still within a normal range.";
+         } else {
+            explanation =
+               "Log activity falls within the normal range for this session.";
+         }
+
+         return [
+            s.id,
+            {
+               zScore: z,
+               explanation,
+            },
+         ];
+      }),
+   );
+}

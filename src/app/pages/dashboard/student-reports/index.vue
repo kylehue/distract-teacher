@@ -68,22 +68,26 @@ import {
    ref,
    useTemplateRef,
 } from "vue";
-import { RouterLink, useRoute } from "vue-router";
+import { useRoute } from "vue-router";
 import { useStore } from "@/app/composables/use-store";
 import { compareTimestamps } from "@/lib/datetime";
 import {
    MONITOR_LOGS_INJECTION_KEY,
    ROOM_INJECTION_KEY,
    STUDENT_INJECTION_KEY,
+   STUDENTS_MAP_INJECTION_KEY,
    TEACHER_INJECTION_KEY,
    THEME_INJECTION_KEY,
 } from "@/lib/injection-keys";
 import Dashboard from "./dashboard.vue";
 import { lightThemeOverrides } from "@/lib/theme-overrides";
-import { printElement, waitForSvg } from "@/lib/dom";
+import { printElement } from "@/lib/dom";
 import { useAuthStore } from "@/app/composables/use-auth-store";
 import { exportToExcel } from "@/lib/excel";
-import { createMonitorLogsReports } from "@/lib/reports";
+import {
+   createMonitorLogsReports,
+   createStudentsIndividualReports,
+} from "@/lib/reports";
 
 const store = useStore();
 const auth = useAuthStore();
@@ -94,6 +98,7 @@ const isLoading = computed(() => store.isLoadStudentLoading);
 const isPrintLoading = ref(false);
 
 // reports data
+const allStudents = computed(() => store.allStudents);
 const student = computed(
    () => store.allStudents.get(route.params.studentId as string) ?? null,
 );
@@ -132,6 +137,9 @@ function exportData() {
          data: {
             ...student.value,
             ...createMonitorLogsReports(monitorLogs.value),
+            ...createStudentsIndividualReports(
+               Array.from(allStudents.value.values()),
+            ).get(student.value.id)!,
          },
       },
       {
@@ -151,8 +159,10 @@ function exportData() {
 
 onMounted(async () => {
    await store.loadStudent(route.params.studentId as string);
+   await store.loadStudents(room.value?.id || "");
 });
 
+provide(STUDENTS_MAP_INJECTION_KEY, allStudents);
 provide(STUDENT_INJECTION_KEY, student);
 provide(ROOM_INJECTION_KEY, room);
 provide(TEACHER_INJECTION_KEY, teacher);

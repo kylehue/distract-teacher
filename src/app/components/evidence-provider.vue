@@ -34,6 +34,14 @@
                      {{ (monitorLog.integrityScore * 100).toFixed(2) }}%
                   </NText>
                </NStatistic>
+               <NStatistic label="Phone Detected">
+                  <NText
+                     :type="!monitorLog.isPhonePresent ? 'default' : 'error'"
+                     class="block max-w-[200px] text-lg!"
+                  >
+                     {{ (monitorLog.isPhonePresent ? "Yes" : "No") }}
+                  </NText>
+               </NStatistic>
                <NStatistic label="Warning Level">
                   <NTag
                      :type="warningLevelToComponentType(monitorLog.warningLevel)"

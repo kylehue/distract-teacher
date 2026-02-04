@@ -46,7 +46,10 @@ import Dashboard from "./dashboard.vue";
 import { lightThemeOverrides } from "@/lib/theme-overrides";
 import { printElement } from "@/lib/dom";
 import { exportToExcel } from "@/lib/excel";
-import { createMonitorLogsReports } from "@/lib/reports";
+import {
+   createMonitorLogsReports,
+   createStudentsIndividualReports,
+} from "@/lib/reports";
 import { useAuthStore } from "@/app/composables/use-auth-store";
 
 const store = useStore();
@@ -90,6 +93,9 @@ function exportData() {
       }
       monitorLogsGroupedByStudentId.get(log.studentId)!.push(log);
    }
+   const studentIndividualReports = createStudentsIndividualReports(
+      students.value,
+   );
 
    exportToExcel([
       {
@@ -116,6 +122,7 @@ function exportData() {
                ...createMonitorLogsReports(
                   monitorLogsGroupedByStudentId.get(student.id) || [],
                ),
+               ...studentIndividualReports.get(student.id)!,
             };
          }),
       },

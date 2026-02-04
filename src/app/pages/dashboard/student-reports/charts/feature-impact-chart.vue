@@ -101,7 +101,7 @@ const featureImpactChartOptions = computed(() =>
          },
       },
       stroke: {
-         curve: "smooth",
+         curve: "straight",
          width: [2, 1, 1, 1, 1, 1],
       },
       tooltip: {

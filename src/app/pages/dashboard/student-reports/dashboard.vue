@@ -42,51 +42,83 @@
             <NStatistic label="Room Code">
                {{ room.code }}
             </NStatistic>
-            <NStatistic label="Date">
+            <NStatistic label="Date Created">
                {{ timestampToDateString(room.createdAt) }}
             </NStatistic>
-            <NStatistic label="Time Joined">
+            <NStatistic label="Monitoring Start Time">
+               {{
+                  room.timeStarted
+                     ? timestampToTimeString(room.timeStarted)
+                     : "N/A"
+               }}
+            </NStatistic>
+            <NStatistic label="Monitoring End Time">
+               {{
+                  room.timeEnded ? timestampToTimeString(room.timeEnded) : "N/A"
+               }}
+            </NStatistic>
+            <NStatistic label="Student Join Time">
                {{ timestampToTimeString(student.timeJoined) }}
             </NStatistic>
-            <NStatistic label="Time Left">
+            <NStatistic label="Student Leave Time">
                {{
                   student.timeLeft
                      ? timestampToTimeString(student.timeLeft)
                      : "N/A"
                }}
             </NStatistic>
-            <NStatistic label="Time Spent">
-               {{ totalTime(student.timeJoined, student.timeLeft) }}
+            <NStatistic label="Time Spent In Room Session">
+               {{
+                  room.timeStarted && student.timeLeft
+                     ? totalTime(room.timeStarted, student.timeLeft)
+                     : "N/A"
+               }}
             </NStatistic>
          </NCard>
-         <div class="flex-1 grid grid-cols-2 grid-rows-2 gap-4">
-            <NCard :bordered="false">
-               <NStatistic label="Total Number of Warnings">
-                  {{ monitorLogs.length }}
-               </NStatistic>
-            </NCard>
-            <NCard :bordered="false">
-               <NStatistic label="Phone Activity Count">
-                  {{ reports.phoneDetectionCount }}
-               </NStatistic>
-            </NCard>
-            <NCard :bordered="false">
-               <NStatistic label="Average Integrity Score">
-                  {{ (reports.integrityScoreAverage * 100).toFixed(2) }}%
-               </NStatistic>
-               <NText :depth="3" class="text-xs">
-                  {{ reports.integritySummary }}
-               </NText>
-            </NCard>
-            <NCard :bordered="false">
-               <NStatistic label="Standard Deviation">
-                  {{ (reports.standardDeviation * 100).toFixed(2) }}%
-               </NStatistic>
-               <NText :depth="3" class="text-xs">
-                  {{ reports.standardDeviationSummary }}
-               </NText>
-            </NCard>
-         </div>
+      </div>
+      <NText class="text-xl font-medium mt-8">Statistics</NText>
+      <div class="flex-1 grid grid-cols-3 grid-rows-1 gap-4">
+         <NCard :bordered="false">
+            <NStatistic label="Total Number of Warnings">
+               {{ monitorLogs.length }}
+            </NStatistic>
+         </NCard>
+         <NCard :bordered="false">
+            <NStatistic label="Phone Activity Count">
+               {{ reports.phoneDetectionCount }}
+            </NStatistic>
+         </NCard>
+         <NCard :bordered="false">
+            <NStatistic label="Log Count / Expected Log Count Ratio">
+               {{ studentLogCountRatio }}
+            </NStatistic>
+         </NCard>
+      </div>
+      <div class="flex-1 grid lg:grid-cols-3 gap-4 grid-cols-1">
+         <NCard :bordered="false">
+            <NStatistic label="Average Integrity Score">
+               {{ (reports.integrityScoreAverage * 100).toFixed(2) }}%
+            </NStatistic>
+            <NText :depth="3" class="text-xs">
+               {{ reports.integritySummary }}
+            </NText>
+         </NCard>
+         <NCard :bordered="false">
+            <NStatistic label="Integrity Score Standard Deviation">
+               {{ (reports.standardDeviation * 100).toFixed(2) }}%
+            </NStatistic>
+            <NText :depth="3" class="text-xs">
+               {{ reports.standardDeviationSummary }}
+            </NText>
+         </NCard>
+         <NCard :bordered="false">
+            <NStatistic label="Log Count Z-Score">
+               {{ studentIndividualReport?.zScore.toFixed(2) ?? "N/A" }}
+            </NStatistic>
+            <NText v-if="studentIndividualReport" :depth="3" class="text-xs">
+               {{ studentIndividualReport.explanation }}
+            </NText>
+         </NCard>
       </div>
       <NText class="text-xl font-medium mt-8">Performance Analytics</NText>
       <div class="grid grid-cols-1 gap-4">
@@ -122,7 +154,11 @@ import {
    timestampToTimeString,
    totalTime,
 } from "@/lib/datetime";
-import { createMonitorLogsReports } from "@/lib/reports";
+import {
+   createStudentsIndividualReports,
+   createMonitorLogsReports,
+   computeExpectedMonitorLogCount,
+} from "@/lib/reports";
 import IntegrityScoreChart from "./charts/integrity-score-chart.vue";
 import FeatureImpactChart from "./charts/feature-impact-chart.vue";
 import WarningLevelChart from "./charts/warning-level-chart.vue";
@@ -130,6 +166,7 @@ import {
    MONITOR_LOGS_INJECTION_KEY,
    ROOM_INJECTION_KEY,
    STUDENT_INJECTION_KEY,
+   STUDENTS_MAP_INJECTION_KEY,
    TEACHER_INJECTION_KEY,
 } from "@/lib/injection-keys";
 
@@ -138,9 +175,26 @@ const props = defineProps<{
    static?: boolean;
 }>();
 
+const allStudents = inject(STUDENTS_MAP_INJECTION_KEY)!;
 const student = inject(STUDENT_INJECTION_KEY)!;
 const room = inject(ROOM_INJECTION_KEY)!;
 const teacher = inject(TEACHER_INJECTION_KEY)!;
 const monitorLogs = inject(MONITOR_LOGS_INJECTION_KEY)!;
 const reports = computed(() => createMonitorLogsReports(monitorLogs.value));
+const studentIndividualReport = computed(() =>
+   createStudentsIndividualReports(Array.from(allStudents.value.values())).get(
+      student.value!.id,
+   ),
+);
+const studentLogCountRatio = computed(() =>
+   student.value && room.value?.timeStarted && room.value?.timeEnded
+      ? (
+           student.value.monitorLogCount /
+           computeExpectedMonitorLogCount(
+              room.value.timeStarted,
+              room.value.timeEnded,
+           )
+        ).toFixed(2)
+      : "N/A",
+);
 </script>

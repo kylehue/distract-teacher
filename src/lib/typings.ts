@@ -65,6 +65,7 @@ export interface StudentInfo {
    active: boolean;
    permitted: boolean;
    lockMonitorLogId?: string;
+   monitorLogCount: number;
    createdAt: string;
 }
 

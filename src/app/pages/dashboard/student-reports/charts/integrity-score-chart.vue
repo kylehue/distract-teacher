@@ -76,7 +76,10 @@ const integrityOverTimeChartOptions = computed(() => {
             formatter: (val: number) => (val * 100).toFixed(0) + "%",
          },
       },
-      stroke: { curve: "smooth", width: 2 },
+      stroke: {
+         curve: "straight",
+         width: 2,
+      },
       tooltip: {
          x: { format: "HH:mm:ss" },
          y: { formatter: (val: number) => (val * 100).toFixed(2) + "%" },
