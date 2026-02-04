@@ -115,9 +115,9 @@ const links = reactive([
 
 const userMenuOptions = reactive([
    {
-      label: "Profile",
+      label: "Account",
       render({ node }: any) {
-         return h(RouterLink, { to: "/profile" }, { default: () => node });
+         return h(RouterLink, { to: "/account" }, { default: () => node });
       },
    },
    {

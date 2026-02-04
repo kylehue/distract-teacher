@@ -30,9 +30,9 @@ const routes: RouteRecordRaw[] = [
          { path: "login", component: LoginPage },
          { path: "register", component: RegisterPage },
          {
-            path: "profile",
+            path: "account",
             component: _defineAsyncComponent(
-               () => import("@/app/pages/profile.vue"),
+               () => import("@/app/pages/account.vue"),
             ),
          },
          {

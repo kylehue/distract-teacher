@@ -2,7 +2,7 @@
    <template v-if="auth.isLoading">
       <div class="flex items-center justify-center w-full h-full gap-2">
          <NSpin />
-         <NText>Loading profile...</NText>
+         <NText>Loading account settings...</NText>
       </div>
    </template>
    <template v-else-if="!auth.teacher">Nothing</template>
@@ -18,7 +18,7 @@
                   <PhArrowLeft />
                </template>
             </NButton>
-            <NText strong class="text-lg"> Profile Settings </NText>
+            <NText strong class="text-lg"> Account Settings </NText>
          </div>
          <NDivider class="m-0!" />
          <div class="flex flex-col h-full">
@@ -182,11 +182,7 @@
                         </NButton>
                      </NFormItem>
                      <RouterLink to="/trash">
-                        <NButton
-                           secondary
-                           :loading="postClearCache.isLoading"
-                           @click="postClearCache.execute()"
-                        >
+                        <NButton secondary @click="postClearCache.execute()">
                            View Trash
                         </NButton>
                      </RouterLink>
