@@ -1,8 +1,8 @@
 <template>
    <template v-if="!room">No room</template>
-   <div v-else class="flex flex-col gap-4">
+   <div v-else class="flex flex-col w-full h-full gap-4">
       <div class="flex items-center justify-between w-full gap-2">
-         <NBadge v-if="room.status === 'concluded'" :value="numberOfJoinRequests">
+         <NBadge v-if="room.status !== 'concluded'" :value="numberOfJoinRequests">
             <NCheckbox v-model:checked="showJoinRequests">
                Show Join Requests
             </NCheckbox>
