@@ -35,10 +35,6 @@
             :data="monitorLogsArray"
             :pagination="{ pageSize: 10 }"
             :single-line="false"
-            :row-class-name="
-               (row) =>
-                  !students.get(row.studentId)?.active ? 'opacity-50' : ''
-            "
             :scroll-x="900"
          />
          <NEmpty v-else class="m-auto" description="There are currently no warning logs." />
@@ -53,10 +49,6 @@
             :data="lockedStudents"
             :pagination="{ pageSize: 10 }"
             :single-line="false"
-            :row-class-name="
-               (row) =>
-                  !students.get(row.studentId)?.active ? 'opacity-50' : ''
-            "
             :scroll-x="900"
          />
          <NEmpty v-else class="m-auto" description="There are currently no locked students." />

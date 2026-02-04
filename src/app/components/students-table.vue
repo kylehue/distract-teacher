@@ -7,9 +7,6 @@
          :data="students"
          :pagination="static ? false : { pageSize: 10 }"
          :single-line="false"
-         :row-class-name="
-            (row) => (!row.active && !summary ? 'opacity-50' : '')
-         "
          :scroll-x="900"
       />
       <NEmpty
