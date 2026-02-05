@@ -59,6 +59,9 @@
             <RouterView></RouterView>
          </div>
       </div>
+      <Transition name="fade-zoom">
+         <LogoutLoadingOverlay v-if="auth.postLogout.isLoading" />
+      </Transition>
    </NLayout>
 </template>
 
@@ -68,11 +71,8 @@ import {
    NText,
    NDivider,
    NLayout,
-   NLayoutContent,
-   NLayoutHeader,
    NPopselect,
    useThemeVars,
-   NIcon,
 } from "naive-ui";
 import { computed, h, inject, reactive } from "vue";
 import { useRoute, RouterLink, RouterView } from "vue-router";
@@ -81,6 +81,7 @@ import { THEME_INJECTION_KEY } from "@/lib/injection-keys";
 import { PhUser, PhMoon, PhSunDim } from "@phosphor-icons/vue";
 import { SelectMixedOption } from "naive-ui/es/select/src/interface";
 import { useAuthStore } from "../composables/use-auth-store";
+import LogoutLoadingOverlay from "@/app/components/logout-loading-overlay.vue";
 
 const route = useRoute();
 const auth = useAuthStore();

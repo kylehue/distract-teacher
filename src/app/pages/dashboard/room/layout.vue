@@ -23,6 +23,7 @@
                      type="error"
                      secondary
                      circle
+                     :loading="patchStopMonitoring.isLoading"
                      @click="stopMonitoring()"
                   >
                      <template #icon>
@@ -38,6 +39,7 @@
                      type="warning"
                      secondary
                      circle
+                     :loading="patchPauseMonitoring.isLoading"
                      @click="pauseMonitoring()"
                      :disabled="room.status === 'paused'"
                   >
@@ -54,6 +56,7 @@
                      type="success"
                      secondary
                      circle
+                     :loading="patchStartMonitoring.isLoading"
                      @click="startMonitoring()"
                      :disabled="room.status === 'monitoring'"
                   >
