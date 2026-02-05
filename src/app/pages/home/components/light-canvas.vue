@@ -18,6 +18,7 @@ import { onMounted, onBeforeUnmount, ref, useTemplateRef } from "vue";
 const canvas = useTemplateRef("canvas");
 const themeVars = useThemeVars();
 const theme = inject(THEME_INJECTION_KEY)!;
+
 let ctx: CanvasRenderingContext2D | null = null;
 let raf = 0;
 let width = 0;
@@ -36,12 +37,18 @@ type Light = {
 };
 
 const lights: Light[] = [];
+
+// ---- GRID SETTINGS ----
+const gridGap = ref(48);          // adjustable
+const gridLineAlpha = ref(0.1);  // subtle
+
 const colors = [
    themeVars.value.primaryColor,
    themeVars.value.primaryColorHover,
    themeVars.value.primaryColorPressed,
    themeVars.value.successColor,
 ];
+
 const spawnInterval = 400;
 let spawnTimer = 0;
 
@@ -57,11 +64,60 @@ function hexToRgb(hex: string): [number, number, number] {
          .map((c) => c + c)
          .join("");
    }
-   if (hex.length !== 6) throw new Error("Invalid hex color");
    const r = parseInt(hex.slice(0, 2), 16);
    const g = parseInt(hex.slice(2, 4), 16);
    const b = parseInt(hex.slice(4, 6), 16);
    return [r, g, b];
+}
+
+function toRgba(color: string, alpha: number) {
+   const c = color.trim();
+
+   if (c.startsWith("rgba(")) {
+      return c.replace(/rgba\(([^)]+)\)/, (_m, inner) => {
+         const parts = inner.split(",").map((p: string) => p.trim());
+         return `rgba(${parts[0]}, ${parts[1]}, ${parts[2]}, ${alpha})`;
+      });
+   }
+
+   if (c.startsWith("rgb(")) {
+      return c.replace("rgb(", "rgba(").replace(")", `, ${alpha})`);
+   }
+
+   if (c.startsWith("#")) {
+      const [r, g, b] = hexToRgb(c);
+      return `rgba(${r},${g},${b},${alpha})`;
+   }
+
+   return c;
+}
+
+function drawGrid() {
+   if (!ctx) return;
+
+   const gap = Math.max(8, Math.floor(gridGap.value));
+   const color = toRgba(themeVars.value.textColor1, gridLineAlpha.value);
+
+   ctx.save();
+   ctx.globalCompositeOperation = "source-over";
+   ctx.filter = "none";
+   ctx.lineWidth = 1;
+   ctx.strokeStyle = color;
+
+   ctx.beginPath();
+
+   for (let x = -gap * 0.2; x <= width; x += gap) {
+      ctx.moveTo(x + 0.5, 0);
+      ctx.lineTo(x + 0.5, height);
+   }
+
+   for (let y = -gap * 0.2; y <= height; y += gap) {
+      ctx.moveTo(0, y + 0.5);
+      ctx.lineTo(width, y + 0.5);
+   }
+
+   ctx.stroke();
+   ctx.restore();
 }
 
 onMounted(() => {
@@ -71,10 +127,15 @@ onMounted(() => {
    const dpr = window.devicePixelRatio || 1;
 
    const resize = () => {
-      width = 800;
-      height = 600;
+      const rect = c.getBoundingClientRect();
+      width = Math.max(1, Math.floor(rect.width));
+      height = Math.max(1, Math.floor(rect.height));
+
+      gridGap.value = Math.max(48, width / 20);
+
       c.width = width * dpr;
       c.height = height * dpr;
+
       ctx = c.getContext("2d");
       ctx?.setTransform(dpr, 0, 0, dpr, 0, 0);
    };
@@ -90,21 +151,19 @@ onMounted(() => {
 
       ctx.clearRect(0, 0, width, height);
 
-      // spawn lights at intervals
       spawnTimer += delta;
       if (spawnTimer >= spawnInterval) {
          spawnTimer = 0;
          spawnLight();
       }
 
-      // update + draw lights
       for (let i = lights.length - 1; i >= 0; i--) {
          const light = lights[i];
 
          light.life += delta;
          light.decay += 1;
-         light.alpha = Math.sin((light.life / light.maxLife) * Math.PI); // fade in/out
-         light.y -= light.vy * (delta / 16); // drift upward, normalize to ~60fps
+         light.alpha = Math.sin((light.life / light.maxLife) * Math.PI);
+         light.y -= light.vy * (delta / 16);
 
          drawLight(light);
 
@@ -112,6 +171,9 @@ onMounted(() => {
             lights.splice(i, 1);
          }
       }
+
+      // grid first (background)
+      drawGrid();
 
       raf = requestAnimationFrame(animate);
    };
@@ -121,9 +183,9 @@ onMounted(() => {
    function spawnLight() {
       const radius = 200 + random(width * 0.25, width * 0.5);
       const x = random(0, width);
-      const y = height + radius / 2; // off-screen bottom
+      const y = height + radius / 2;
       const maxLife = spawnInterval + random(2000, 2500);
-      const vy = random(0.5, 1); // upward speed
+      const vy = random(0.5, 1);
       const colorHex = colors[Math.floor(Math.random() * colors.length)];
       const color = hexToRgb(colorHex);
 
@@ -142,8 +204,10 @@ onMounted(() => {
 
    function drawLight(light: Light) {
       if (!ctx) return;
-      ctx.filter = "blur(100px)";
+
       ctx.globalCompositeOperation = "color-dodge";
+      ctx.filter = "blur(100px)";
+
       const gradient = ctx.createRadialGradient(
          light.x,
          light.y,
@@ -152,8 +216,10 @@ onMounted(() => {
          light.y,
          light.radius + light.decay,
       );
+
       const [r, g, b] = light.color;
       const multiplier = theme.value === "light" ? 1 : 0.3;
+
       gradient.addColorStop(0, `rgba(255,255,255,${light.alpha * multiplier})`);
       gradient.addColorStop(
          0.4,
@@ -163,7 +229,9 @@ onMounted(() => {
 
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, width, height);
+
       ctx.globalCompositeOperation = "source-over";
+      ctx.filter = "none";
    }
 
    onBeforeUnmount(() => {

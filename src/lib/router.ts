@@ -4,7 +4,7 @@ import MainLayout from "@/app/pages/layout.vue";
 import ContentLoader from "@/app/components/content-loader.vue";
 
 // public pages
-import HomePage from "@/app/pages/home.vue";
+import HomePage from "@/app/pages/home/index.vue";
 import LoginPage from "@/app/pages/login.vue";
 import RegisterPage from "@/app/pages/register.vue";
 import UnauthorizedPage from "@/app/pages/error/unauthorized.vue";
