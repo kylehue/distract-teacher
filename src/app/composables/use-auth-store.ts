@@ -4,7 +4,7 @@ import { defineStore } from "pinia";
 import { useFetch } from "./use-fetch";
 import { useRouter } from "vue-router";
 import { useStore } from "./use-store";
-import { useSocket } from "./use-socket";
+import { getSocket } from "@/plugins/socket";
 
 export const useAuthStore = defineStore("auth-store", () => {
    const isAuthenticated = ref(false);
@@ -12,7 +12,12 @@ export const useAuthStore = defineStore("auth-store", () => {
    const teacher = ref<TeacherInfo | null>(null);
    const router = useRouter();
    const store = useStore();
-   const socket = useSocket();
+
+   function refreshSocket() {
+      const socket = getSocket();
+      if (socket.connected) socket.disconnect();
+      socket.connect();
+   }
 
    const postLogin = useFetch<{ teacher: TeacherInfo }>("/api/login", "POST");
    async function loginWithCredentials(username: string, password: string) {
@@ -24,8 +29,7 @@ export const useAuthStore = defineStore("auth-store", () => {
                password: password,
             },
          });
-         socket.socket.disconnect();
-         socket.socket.connect();
+         refreshSocket();
          teacher.value = data.data!.teacher;
          isAuthenticated.value = true;
 
@@ -37,13 +41,15 @@ export const useAuthStore = defineStore("auth-store", () => {
       }
    }
 
-   const postValidateSession = useFetch<{ teacher: TeacherInfo }>("/api/validate_session", "POST");
+   const postValidateSession = useFetch<{ teacher: TeacherInfo }>(
+      "/api/validate_session",
+      "POST",
+   );
    async function loginWithCookie() {
       isLoading.value = true;
       try {
          const data = await postValidateSession.execute();
-         socket.socket.disconnect();
-         socket.socket.connect();
+         refreshSocket();
          teacher.value = data.data!.teacher;
          isAuthenticated.value = true;
          openPage();
@@ -74,7 +80,8 @@ export const useAuthStore = defineStore("auth-store", () => {
       isLoading.value = true;
       try {
          await postLogout.execute();
-         socket.socket.disconnect();
+         const socket = getSocket();
+         socket.disconnect();
          teacher.value = null;
          isAuthenticated.value = false;
          closePage();
