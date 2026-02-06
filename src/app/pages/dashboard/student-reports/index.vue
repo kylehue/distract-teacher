@@ -104,13 +104,13 @@ const student = computed(
    () => store.allStudents.get(route.params.studentId as string) ?? null,
 );
 const room = computed(
-   () => store.allRooms.get(student.value?.roomId || -1) ?? null,
+   () => store.allRooms.get(student.value?.roomId ?? "") ?? null,
 );
 const teacher = computed(() => auth.teacher);
 const monitorLogs = computed(() =>
    Array.from(
       store.monitorLogsGroupedByStudentId
-         .get(student.value?.id || -1)
+         .get(student.value?.id ?? "")
          ?.values() ?? [],
    ).sort((a, b) => compareTimestamps(a.createdAt, b.createdAt)),
 );
