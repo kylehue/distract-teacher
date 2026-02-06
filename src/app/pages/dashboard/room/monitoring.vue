@@ -30,28 +30,40 @@
          class="flex flex-col w-full h-full overflow-hidden"
       >
          <NDataTable
-            v-if="monitorLogsArray.length > 0"
             :columns="monitorLogColumns"
             :data="monitorLogsArray"
             :pagination="{ pageSize: 10 }"
             :single-line="false"
-            :scroll-x="900"
-         />
-         <NEmpty v-else class="m-auto" description="There are currently no warning logs." />
+            :scroll-x="monitorLogsArray.length ? 900 : undefined"
+            :loading="isLoading"
+         >
+            <template #empty>
+               <NEmpty
+                  class="m-auto"
+                  description="There are currently no warning logs."
+               />
+            </template>
+         </NDataTable>
       </div>
       <div
          v-if="activeTab === 'lockedStudents'"
          class="flex flex-col w-full h-full overflow-hidden"
       >
          <NDataTable
-            v-if="lockedStudents.length > 0"
             :columns="lockedStudentColumns"
             :data="lockedStudents"
             :pagination="{ pageSize: 10 }"
             :single-line="false"
-            :scroll-x="900"
-         />
-         <NEmpty v-else class="m-auto" description="There are currently no locked students." />
+            :scroll-x="lockedStudents.length ? 900 : undefined"
+            :loading="isLoading"
+         >
+            <template #empty>
+               <NEmpty
+                  class="m-auto"
+                  description="There are currently no locked students."
+               />
+            </template>
+         </NDataTable>
       </div>
    </div>
 </template>
@@ -89,6 +101,7 @@ import {
    MONITOR_LOGS_MAP_INJECTION_KEY,
    ROOM_INJECTION_KEY,
    STUDENTS_MAP_INJECTION_KEY,
+   IS_LOADING_INJECTION_KEY,
 } from "@/lib/injection-keys";
 
 const route = useRoute();
@@ -100,6 +113,7 @@ const room = inject(ROOM_INJECTION_KEY)!;
 const students = inject(STUDENTS_MAP_INJECTION_KEY)!;
 const monitorLogsArray = inject(MONITOR_LOGS_INJECTION_KEY)!;
 const monitorLogs = inject(MONITOR_LOGS_MAP_INJECTION_KEY)!;
+const isLoading = inject(IS_LOADING_INJECTION_KEY)!;
 const activeTab = ref<"warningLogs" | "lockedStudents">("warningLogs");
 const monitorLogColumns: DataTableColumns<MonitorLog> = [
    reactive({

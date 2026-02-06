@@ -118,6 +118,7 @@
          ]"
          :actions="['view-reports', 'view-logs']"
          :students="studentsArrayPreprocessed"
+         :loading="isLoading"
          :room="room"
          summary
       />
@@ -141,6 +142,7 @@ import {
    TEACHER_INJECTION_KEY,
    ROOM_INJECTION_KEY,
    STUDENTS_MAP_INJECTION_KEY,
+   IS_LOADING_INJECTION_KEY,
 } from "@/lib/injection-keys";
 import WarningLevelChart from "./charts/warning-level-chart.vue";
 
@@ -153,6 +155,7 @@ const room = inject(ROOM_INJECTION_KEY)!;
 const teacher = inject(TEACHER_INJECTION_KEY)!;
 const students = inject(STUDENTS_MAP_INJECTION_KEY)!;
 const studentsArray = inject(STUDENTS_INJECTION_KEY)!;
+const isLoading = inject(IS_LOADING_INJECTION_KEY)!;
 const studentsArrayPreprocessed = computed(() =>
    studentsArray.value.filter((student) => student.permitted),
 );

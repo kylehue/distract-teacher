@@ -25,20 +25,22 @@
             <div class="w-full h-4 flex-none"></div>
             <div class="flex flex-col w-full h-full overflow-hidden">
                <NDataTable
-                  v-if="roomsArray.length > 0 || store.isLoadDeletedRoomsLoading"
                   ref="table"
                   :columns="columns"
                   :data="roomsArray"
                   :pagination="{ pageSize: 10 }"
                   :single-line="false"
                   :loading="store.isLoadDeletedRoomsLoading"
-                  :scroll-x="900"
-               />
-               <NEmpty v-else class="m-auto" description="Your trash is empty.">
-                  <template #icon>
-                     <PhTrash />
+                  :scroll-x="roomsArray.length ? 900 : undefined"
+               >
+                  <template #empty>
+                     <NEmpty class="m-auto" description="Your trash is empty.">
+                        <template #icon>
+                           <PhTrash />
+                        </template>
+                     </NEmpty>
                   </template>
-               </NEmpty>
+               </NDataTable>
             </div>
             <div class="w-full h-8 flex-none"></div>
          </div>

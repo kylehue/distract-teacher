@@ -138,6 +138,7 @@ import {
 } from "@phosphor-icons/vue";
 import { useStore } from "@/app/composables/use-store";
 import {
+   IS_LOADING_INJECTION_KEY,
    MONITOR_LOGS_INJECTION_KEY,
    MONITOR_LOGS_MAP_INJECTION_KEY,
    ROOM_INJECTION_KEY,
@@ -157,6 +158,7 @@ const store = useStore();
 const auth = useAuthStore();
 const announcement = useAnnouncement();
 const message = useMessage();
+const isLoading = computed(() => store.isLoadRoomLoading);
 const room = computed(
    () => store.allRooms.get(route.params.roomId as string) ?? null,
 );
@@ -268,4 +270,5 @@ provide(STUDENTS_MAP_INJECTION_KEY, students);
 provide(TEACHER_INJECTION_KEY, teacher);
 provide(MONITOR_LOGS_INJECTION_KEY, monitorLogsArray);
 provide(STUDENTS_INJECTION_KEY, studentsArray);
+provide(IS_LOADING_INJECTION_KEY, isLoading);
 </script>

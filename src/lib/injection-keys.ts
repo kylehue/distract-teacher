@@ -33,3 +33,6 @@ export const STUDENTS_MAP_INJECTION_KEY: InjectionKey<
 
 export const THEME_INJECTION_KEY: InjectionKey<Ref<"light" | "dark">> =
    Symbol("theme-mode");
+
+export const IS_LOADING_INJECTION_KEY: InjectionKey<Ref<boolean>> =
+   Symbol("is-loading");

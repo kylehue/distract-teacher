@@ -1,19 +1,21 @@
 <template>
    <div class="flex flex-col w-full h-full overflow-hidden">
       <NDataTable
-         v-if="students.length > 0"
          ref="table"
          :columns="columns"
          :data="students"
          :pagination="static ? false : { pageSize: 10 }"
          :single-line="false"
-         :scroll-x="900"
-      />
-      <NEmpty
-         v-else
-         class="m-auto"
-         description="There are currently no students."
-      />
+         :scroll-x="students.length ? 900 : undefined"
+         :loading="loading"
+      >
+         <template #empty>
+            <NEmpty
+               class="m-auto"
+               description="There are currently no students."
+            />
+         </template>
+      </NDataTable>
    </div>
 </template>
 
@@ -59,6 +61,7 @@ type StudentTableActions =
 const props = defineProps<{
    static?: boolean;
    summary?: boolean;
+   loading?: boolean;
    columns: StudentTableColumns[];
    actions: StudentTableActions[];
    students: StudentInfo[];
