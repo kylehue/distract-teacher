@@ -125,8 +125,8 @@ const router = createRouter({
 
 router.beforeEach((to, _from, next) => {
    const isAuthenticated = getSocket().connected; // TODO: replace with actual auth check
-   if (to.meta.requiresUnauth && isAuthenticated) return "/dashboard";
-   if (to.meta.requiresAuth && !isAuthenticated) return "/login";
+   if (to.meta.requiresUnauth && isAuthenticated) return next("/dashboard");
+   if (to.meta.requiresAuth && !isAuthenticated) return next("/login");
    next();
 });
 
