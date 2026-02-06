@@ -10,6 +10,9 @@ import { getWithDefault } from "@/lib/object";
 import { defineStore } from "pinia";
 import { useFetch } from "./use-fetch";
 
+// whether to only load data once and then rely on real-time updates
+// this is an optimization to reduce the number of fetch requests
+const LOAD_ONCE = true;
 export const useStore = defineStore("main-store", () => {
    // --- cache ---
    const deletedRooms = reactive(new Map<string, RoomInfo>());
@@ -51,8 +54,11 @@ export const useStore = defineStore("main-store", () => {
    const getRooms = useFetch<{
       rooms: RoomInfo[];
    }>("/api/rooms");
-
+   let isRoomsLoaded = false;
    async function loadRooms() {
+      if (LOAD_ONCE && isRoomsLoaded) return;
+      isRoomsLoaded = true;
+
       try {
          await getRooms.execute();
 
@@ -69,7 +75,11 @@ export const useStore = defineStore("main-store", () => {
       rooms: RoomInfo[];
    }>("/api/deleted_rooms");
 
+   let isDeletedRoomsLoaded = false;
    async function loadDeletedRooms() {
+      if (LOAD_ONCE && isDeletedRoomsLoaded) return;
+      isDeletedRoomsLoaded = true;
+
       try {
          await getDeletedRooms.execute();
 
@@ -90,6 +100,8 @@ export const useStore = defineStore("main-store", () => {
    }>("/api/students/:studentId");
 
    async function loadStudent(studentId: string) {
+      if (LOAD_ONCE && allStudents.has(studentId)) return;
+
       try {
          await getStudent.execute({ params: { studentId } });
 
@@ -109,6 +121,8 @@ export const useStore = defineStore("main-store", () => {
    }>("/api/rooms/:roomId/students");
 
    async function loadStudents(roomId: string) {
+      if (LOAD_ONCE && studentsGroupedByRoomId.has(roomId)) return;
+
       try {
          await getRoomStudents.execute({ params: { roomId } });
 
@@ -129,6 +143,8 @@ export const useStore = defineStore("main-store", () => {
    }>("/api/monitor_logs/:monitorLogId");
 
    async function loadMonitorLog(monitorLogId: string) {
+      if (LOAD_ONCE && allMonitorLogs.has(monitorLogId)) return;
+
       try {
          await getMonitorLog.execute({ params: { monitorLogId } });
 
@@ -148,6 +164,8 @@ export const useStore = defineStore("main-store", () => {
    }>("/api/rooms/:roomId/monitor_logs");
 
    async function loadMonitorLogs(roomId: string) {
+      if (LOAD_ONCE && monitorLogsGroupedByRoomId.has(roomId)) return;
+
       try {
          await getRoomMonitorLogs.execute({
             params: { roomId },
@@ -322,18 +340,12 @@ export const useStore = defineStore("main-store", () => {
       studentsGroupedByRoomId.clear();
       monitorLogsGroupedByRoomId.clear();
       monitorLogsGroupedByStudentId.clear();
+      deletedRooms.clear();
+      isRoomsLoaded = false;
+      isDeletedRoomsLoaded = false;
    }
 
    // --- count functions ---
-   function countStudentsOfRoom(roomId: string) {
-      const students = studentsGroupedByRoomId.get(roomId);
-      let count = 0;
-      for (let [_, student] of students ?? []) {
-         if (student.active && student.permitted) count++;
-      }
-      return count;
-   }
-
    function countMonitorLogsOfStudent(studentId: string) {
       let count = 0;
       let student = allStudents.get(studentId);
@@ -441,7 +453,6 @@ export const useStore = defineStore("main-store", () => {
       deleteDeletedRoom,
       deleteStudent,
       clear,
-      countStudentsOfRoom,
       countMonitorLogsOfStudent,
    };
 });
