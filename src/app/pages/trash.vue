@@ -23,7 +23,7 @@
          <NDivider class="m-0!" />
          <div class="flex flex-col h-full">
             <div class="w-full h-4 flex-none"></div>
-            <div class="flex flex-col w-full h-full overflow-hidden">
+            <div class="overflow-hidden">
                <NDataTable
                   ref="table"
                   :columns="columns"

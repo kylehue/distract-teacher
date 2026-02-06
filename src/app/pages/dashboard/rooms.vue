@@ -15,7 +15,7 @@
             "
          ></InputSearch>
       </div>
-      <div class="flex flex-col w-full h-full overflow-hidden">
+      <div class="overflow-hidden">
          <NDataTable
             ref="table"
             :columns="columns"

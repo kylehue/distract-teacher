@@ -27,7 +27,7 @@
       </div>
       <div
          v-if="activeTab === 'warningLogs'"
-         class="flex flex-col w-full h-full overflow-hidden"
+         class="overflow-hidden"
       >
          <NDataTable
             :columns="monitorLogColumns"
@@ -47,7 +47,7 @@
       </div>
       <div
          v-if="activeTab === 'lockedStudents'"
-         class="flex flex-col w-full h-full overflow-hidden"
+         class="overflow-hidden"
       >
          <NDataTable
             :columns="lockedStudentColumns"
