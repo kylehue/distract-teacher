@@ -73,14 +73,8 @@ export function useFetch<T = any>(url: string, method: string = "GET") {
       }
 
       try {
-         // wait for socket to be ready
-         const socket = await waitForSocket();
-         const sid = socket.id;
-
          const headers: HeadersInit = {
             ...options.headers,
-            // attach sid
-            "X-SID": sid ?? "",
          };
 
          let body: BodyInit | undefined;

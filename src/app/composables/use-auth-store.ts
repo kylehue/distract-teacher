@@ -14,16 +14,20 @@ export const useAuthStore = defineStore("auth-store", () => {
    const store = useStore();
    const socket = useSocket();
 
-   const postLogin = useFetch("/api/login", "POST");
+   const postLogin = useFetch<{ teacher: TeacherInfo }>("/api/login", "POST");
    async function loginWithCredentials(username: string, password: string) {
       isLoading.value = true;
       try {
-         await postLogin.execute({
+         const data = await postLogin.execute({
             body: {
                username: username,
                password: password,
             },
          });
+         socket.socket.disconnect();
+         socket.socket.connect();
+         teacher.value = data.data!.teacher;
+         isAuthenticated.value = true;
 
          router.push("/dashboard");
       } catch (e) {
@@ -33,11 +37,16 @@ export const useAuthStore = defineStore("auth-store", () => {
       }
    }
 
-   const postValidateSession = useFetch("/api/validate_session", "POST");
+   const postValidateSession = useFetch<{ teacher: TeacherInfo }>("/api/validate_session", "POST");
    async function loginWithCookie() {
       isLoading.value = true;
       try {
-         await postValidateSession.execute();
+         const data = await postValidateSession.execute();
+         socket.socket.disconnect();
+         socket.socket.connect();
+         teacher.value = data.data!.teacher;
+         isAuthenticated.value = true;
+         openPage();
       } catch (e) {
          throw e;
       } finally {
@@ -65,32 +74,16 @@ export const useAuthStore = defineStore("auth-store", () => {
       isLoading.value = true;
       try {
          await postLogout.execute();
+         socket.socket.disconnect();
+         teacher.value = null;
+         isAuthenticated.value = false;
+         closePage();
       } catch (e) {
          throw e;
       } finally {
          isLoading.value = false;
       }
    }
-
-   socket.on(
-      "teacher:set_account",
-      (data) => {
-         teacher.value = data.teacher;
-         isAuthenticated.value = true;
-         openPage();
-      },
-      { autoClean: false },
-   );
-
-   socket.on(
-      "teacher:unset_account",
-      () => {
-         teacher.value = null;
-         isAuthenticated.value = false;
-         closePage();
-      },
-      { autoClean: false },
-   );
 
    return {
       isAuthenticated,

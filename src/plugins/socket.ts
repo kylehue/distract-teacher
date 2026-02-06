@@ -3,7 +3,8 @@ import { router } from "@/lib/router";
 import type { App } from "vue";
 
 let socket: Socket = io(import.meta.env.VITE_API_URL, {
-   autoConnect: true,
+   autoConnect: false,
+   withCredentials: true,
 });
 
 export default {
