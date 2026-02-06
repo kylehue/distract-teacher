@@ -30,29 +30,6 @@ export const useStore = defineStore("main-store", () => {
    );
 
    // --- data loaders ---
-   const getRoom = useFetch<{
-      room: RoomInfo;
-      students: StudentInfo[];
-      monitorLogs: MonitorLog[];
-   }>("/api/rooms/:roomId");
-
-   async function loadRoom(roomId: string) {
-      if (LOAD_ONCE && allRooms.has(roomId)) return;
-
-      try {
-         await getRoom.execute({ params: { roomId } });
-
-         const data = getRoom.data?.data;
-         if (!data) throw new Error("No data");
-         upsertRooms([data.room]);
-         upsertStudents(data.students);
-         upsertMonitorLogs(data.monitorLogs);
-         return data;
-      } catch {
-         // ignore fetch errors
-      }
-   }
-
    const getRooms = useFetch<{
       rooms: RoomInfo[];
    }>("/api/rooms");
@@ -94,15 +71,40 @@ export const useStore = defineStore("main-store", () => {
       }
    }
 
+   const getRoom = useFetch<{
+      room: RoomInfo;
+      students: StudentInfo[];
+      monitorLogs: MonitorLog[];
+   }>("/api/rooms/:roomId");
+   const loadRoomSet = new Set<string>();
+   async function loadRoom(roomId: string) {
+      if (LOAD_ONCE && loadRoomSet.has(roomId)) return;
+      loadRoomSet.add(roomId);
+
+      try {
+         await getRoom.execute({ params: { roomId } });
+
+         const data = getRoom.data?.data;
+         if (!data) throw new Error("No data");
+         upsertRooms([data.room]);
+         upsertStudents(data.students);
+         upsertMonitorLogs(data.monitorLogs);
+         return data;
+      } catch {
+         // ignore fetch errors
+      }
+   }
+
    const getStudent = useFetch<{
       student: StudentInfo;
       monitorLogs: MonitorLog[];
       room: RoomInfo;
       teacher: TeacherInfo;
    }>("/api/students/:studentId");
-
+   const loadStudentSet = new Set<string>();
    async function loadStudent(studentId: string) {
-      if (LOAD_ONCE && allStudents.has(studentId)) return;
+      if (LOAD_ONCE && loadStudentSet.has(studentId)) return;
+      loadStudentSet.add(studentId);
 
       try {
          await getStudent.execute({ params: { studentId } });
@@ -121,9 +123,10 @@ export const useStore = defineStore("main-store", () => {
    const getRoomStudents = useFetch<{
       students: StudentInfo[];
    }>("/api/rooms/:roomId/students");
-
+   const loadRoomStudentsSet = new Set<string>();
    async function loadStudents(roomId: string) {
-      if (LOAD_ONCE && studentsGroupedByRoomId.has(roomId)) return;
+      if (LOAD_ONCE && loadRoomStudentsSet.has(roomId)) return;
+      loadRoomStudentsSet.add(roomId);
 
       try {
          await getRoomStudents.execute({ params: { roomId } });
@@ -143,9 +146,10 @@ export const useStore = defineStore("main-store", () => {
       student: StudentInfo;
       teacher: TeacherInfo;
    }>("/api/monitor_logs/:monitorLogId");
-
+   const loadMonitorLogSet = new Set<string>();
    async function loadMonitorLog(monitorLogId: string) {
-      if (LOAD_ONCE && allMonitorLogs.has(monitorLogId)) return;
+      if (LOAD_ONCE && loadMonitorLogSet.has(monitorLogId)) return;
+      loadMonitorLogSet.add(monitorLogId);
 
       try {
          await getMonitorLog.execute({ params: { monitorLogId } });
@@ -164,9 +168,10 @@ export const useStore = defineStore("main-store", () => {
    const getRoomMonitorLogs = useFetch<{
       monitorLogs: MonitorLog[];
    }>("/api/rooms/:roomId/monitor_logs");
-
+   const loadRoomMonitorLogsSet = new Set<string>();
    async function loadMonitorLogs(roomId: string) {
-      if (LOAD_ONCE && monitorLogsGroupedByRoomId.has(roomId)) return;
+      loadRoomMonitorLogsSet.add(roomId);
+      if (LOAD_ONCE && loadRoomMonitorLogsSet.has(roomId)) return;
 
       try {
          await getRoomMonitorLogs.execute({
@@ -345,6 +350,11 @@ export const useStore = defineStore("main-store", () => {
       deletedRooms.clear();
       isRoomsLoaded = false;
       isDeletedRoomsLoaded = false;
+      loadRoomSet.clear();
+      loadStudentSet.clear();
+      loadRoomStudentsSet.clear();
+      loadMonitorLogSet.clear();
+      loadRoomMonitorLogsSet.clear();
    }
 
    // --- count functions ---
