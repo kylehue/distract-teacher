@@ -123,11 +123,11 @@ const router = createRouter({
    routes,
 });
 
-router.beforeEach((to, _from, next) => {
-   const isAuthenticated = getSocket().connected; // TODO: replace with actual auth check
-   if (to.meta.requiresUnauth && isAuthenticated) return next("/dashboard");
-   if (to.meta.requiresAuth && !isAuthenticated) return next("/login");
-   next();
-});
+// router.beforeEach((to, _from, next) => {
+//    const isAuthenticated = getSocket().connected; // TODO: replace with actual auth check
+//    if (to.meta.requiresUnauth && isAuthenticated) return next("/dashboard");
+//    if (to.meta.requiresAuth && !isAuthenticated) return next("/login");
+//    next();
+// });
 
 export { router };
