@@ -37,6 +37,8 @@ export const useStore = defineStore("main-store", () => {
    }>("/api/rooms/:roomId");
 
    async function loadRoom(roomId: string) {
+      if (LOAD_ONCE && allRooms.has(roomId)) return;
+
       try {
          await getRoom.execute({ params: { roomId } });
 
