@@ -107,7 +107,7 @@ import {
 const route = useRoute();
 const message = useMessage();
 const patchUnlockStudent = useFetch("/api/students/:studentId/unlock", "PATCH");
-const filteredStudentIds = ref<(string | number)[]>([]);
+const filteredStudentIds = ref<string[]>([]);
 const themeVars = useThemeVars();
 const room = inject(ROOM_INJECTION_KEY)!;
 const students = inject(STUDENTS_MAP_INJECTION_KEY)!;
@@ -521,7 +521,7 @@ const lockedStudents = computed(() => {
    );
 });
 
-function filterByStudentIds(ids: (string | number)[]) {
+function filterByStudentIds(ids: string[]) {
    const studentNameColumn = monitorLogColumns.find(
       (col) => (col as any).key === "studentName",
    ) as DataTableBaseColumn<MonitorLog>;

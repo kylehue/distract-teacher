@@ -15,7 +15,7 @@ import FilterMenu from "./filter-menu.vue";
 import { ref, watch } from "vue";
 
 interface Props extends /* @vue-ignore */ SelectProps {
-   value?: (string | number)[];
+   value?: string[];
 }
 const props = defineProps<Props>();
 
@@ -26,9 +26,9 @@ defineOptions({
 const value = ref(props.value ?? []);
 
 const emit = defineEmits<{
-   (e: "confirm", data: (string | number)[]): void;
+   (e: "confirm", data: string[]): void;
    (e: "clear"): void;
-   (e: "update:value", value: (string | number)[]): void;
+   (e: "update:value", value: string[]): void;
 }>();
 
 watch(value, (newValues) => {
@@ -41,6 +41,6 @@ watch(
       if (newValues) {
          value.value = newValues;
       }
-   }
+   },
 );
 </script>

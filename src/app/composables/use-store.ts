@@ -12,18 +12,18 @@ import { useFetch } from "./use-fetch";
 
 export const useStore = defineStore("main-store", () => {
    // --- cache ---
-   const deletedRooms = reactive(new Map<string | number, RoomInfo>());
-   const allRooms = reactive(new Map<string | number, RoomInfo>());
-   const allStudents = reactive(new Map<string | number, StudentInfo>());
-   const allMonitorLogs = reactive(new Map<string | number, MonitorLog>());
+   const deletedRooms = reactive(new Map<string, RoomInfo>());
+   const allRooms = reactive(new Map<string, RoomInfo>());
+   const allStudents = reactive(new Map<string, StudentInfo>());
+   const allMonitorLogs = reactive(new Map<string, MonitorLog>());
    const studentsGroupedByRoomId = reactive(
-      new Map<string | number, Map<string | number, StudentInfo>>(),
+      new Map<string, Map<string, StudentInfo>>(),
    );
    const monitorLogsGroupedByRoomId = reactive(
-      new Map<string | number, Map<string | number, MonitorLog>>(),
+      new Map<string, Map<string, MonitorLog>>(),
    );
    const monitorLogsGroupedByStudentId = reactive(
-      new Map<string | number, Map<string | number, MonitorLog>>(),
+      new Map<string, Map<string, MonitorLog>>(),
    );
 
    // --- data loaders ---
@@ -33,7 +33,7 @@ export const useStore = defineStore("main-store", () => {
       monitorLogs: MonitorLog[];
    }>("/api/rooms/:roomId");
 
-   async function loadRoom(roomId: string | number) {
+   async function loadRoom(roomId: string) {
       try {
          await getRoom.execute({ params: { roomId } });
 
@@ -89,7 +89,7 @@ export const useStore = defineStore("main-store", () => {
       teacher: TeacherInfo;
    }>("/api/students/:studentId");
 
-   async function loadStudent(studentId: string | number) {
+   async function loadStudent(studentId: string) {
       try {
          await getStudent.execute({ params: { studentId } });
 
@@ -108,7 +108,7 @@ export const useStore = defineStore("main-store", () => {
       students: StudentInfo[];
    }>("/api/rooms/:roomId/students");
 
-   async function loadStudents(roomId: string | number) {
+   async function loadStudents(roomId: string) {
       try {
          await getRoomStudents.execute({ params: { roomId } });
 
@@ -128,7 +128,7 @@ export const useStore = defineStore("main-store", () => {
       teacher: TeacherInfo;
    }>("/api/monitor_logs/:monitorLogId");
 
-   async function loadMonitorLog(monitorLogId: string | number) {
+   async function loadMonitorLog(monitorLogId: string) {
       try {
          await getMonitorLog.execute({ params: { monitorLogId } });
 
@@ -147,7 +147,7 @@ export const useStore = defineStore("main-store", () => {
       monitorLogs: MonitorLog[];
    }>("/api/rooms/:roomId/monitor_logs");
 
-   async function loadMonitorLogs(roomId: string | number) {
+   async function loadMonitorLogs(roomId: string) {
       try {
          await getRoomMonitorLogs.execute({
             params: { roomId },
@@ -268,17 +268,17 @@ export const useStore = defineStore("main-store", () => {
    }
 
    // --- delete functions ---
-   function deleteRoom(roomId: string | number) {
+   function deleteRoom(roomId: string) {
       allRooms.delete(roomId);
       studentsGroupedByRoomId.delete(roomId);
       monitorLogsGroupedByRoomId.delete(roomId);
    }
 
-   function deleteDeletedRoom(roomId: string | number) {
+   function deleteDeletedRoom(roomId: string) {
       deletedRooms.delete(roomId);
    }
 
-   function deleteStudent(studentId: string | number) {
+   function deleteStudent(studentId: string) {
       // remove from studentsGroupedByRoomId
       for (let [_, studentsMap] of studentsGroupedByRoomId) {
          if (studentsMap.has(studentId)) {
@@ -325,7 +325,7 @@ export const useStore = defineStore("main-store", () => {
    }
 
    // --- count functions ---
-   function countStudentsOfRoom(roomId: string | number) {
+   function countStudentsOfRoom(roomId: string) {
       const students = studentsGroupedByRoomId.get(roomId);
       let count = 0;
       for (let [_, student] of students ?? []) {
@@ -334,7 +334,7 @@ export const useStore = defineStore("main-store", () => {
       return count;
    }
 
-   function countMonitorLogsOfStudent(studentId: string | number) {
+   function countMonitorLogsOfStudent(studentId: string) {
       let count = 0;
       let student = allStudents.get(studentId);
       if (!student) return count;

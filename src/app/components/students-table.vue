@@ -251,7 +251,7 @@ if (props.columns.includes("phoneDetections")) {
 
 if (props.columns.includes("averageIntegrityScore")) {
    const studentsIntegrityScoreAvgMap = computed(() => {
-      const map = new Map<string | number, number>();
+      const map = new Map<string, number>();
       for (const student of props.students) {
          let monitorLogs = store.monitorLogsGroupedByStudentId.get(student.id);
          if (!monitorLogs || monitorLogs.size === 0) {
@@ -289,7 +289,7 @@ if (props.columns.includes("averageIntegrityScore")) {
 
 if (props.columns.includes("standardDeviation")) {
    const studentsStdDevMap = computed(() => {
-      const map = new Map<string | number, number>();
+      const map = new Map<string, number>();
       for (const student of props.students) {
          let monitorLogs = store.monitorLogsGroupedByStudentId.get(student.id);
          if (!monitorLogs || monitorLogs.size === 0) {
