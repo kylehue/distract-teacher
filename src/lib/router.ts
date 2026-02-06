@@ -10,6 +10,7 @@ import RegisterPage from "@/app/pages/register.vue";
 import UnauthorizedPage from "@/app/pages/error/unauthorized.vue";
 import ForbiddenPage from "@/app/pages/error/forbidden.vue";
 import NotFoundPage from "@/app/pages/error/not-found.vue";
+import { getSocket } from "@/plugins/socket";
 
 function _defineAsyncComponent(loader: () => Promise<any>) {
    return defineAsyncComponent({
@@ -27,8 +28,16 @@ const routes: RouteRecordRaw[] = [
       component: MainLayout,
       children: [
          { path: "", component: HomePage },
-         { path: "login", component: LoginPage },
-         { path: "register", component: RegisterPage },
+         {
+            path: "login",
+            component: LoginPage,
+            meta: { requiresUnauth: true },
+         },
+         {
+            path: "register",
+            component: RegisterPage,
+            meta: { requiresUnauth: true },
+         },
          {
             path: "account",
             component: _defineAsyncComponent(
@@ -43,6 +52,7 @@ const routes: RouteRecordRaw[] = [
          },
          {
             path: "dashboard",
+            meta: { requiresAuth: true },
             children: [
                { path: "", redirect: "/dashboard/rooms" },
                {
@@ -111,6 +121,13 @@ const routes: RouteRecordRaw[] = [
 const router = createRouter({
    history: createWebHistory(import.meta.env.VITE_BASE_URL),
    routes,
+});
+
+router.beforeEach((to, _from, next) => {
+   const isAuthenticated = getSocket().connected; // TODO: replace with actual auth check
+   if (to.meta.requiresUnauth && isAuthenticated) return "/dashboard";
+   if (to.meta.requiresAuth && !isAuthenticated) return "/login";
+   next();
 });
 
 export { router };
