@@ -1,33 +1,29 @@
 <template>
-   <div
-      class="absolute left-0 flex justify-center w-screen h-[calc(100vh-4rem)]"
-   >
+   <div class="flex items-center justify-center w-full h-full">
       <LightCanvas />
-      <div class="container flex items-center">
-         <div
-            class="flex flex-col items-start justify-center gap-4 w-full h-full z-1"
-         >
-            <NText class="text-4xl md:text-5xl lg:text-6xl font-bold">
-               Supporting academic integrity through behavioral analysis.
-            </NText>
-            <NText class="text-xl md:text-2xl" :depth="3">
-               <span>Distract</span> helps institutions evaluate assessment
-               conduct with transparency.
-            </NText>
+      <div
+         class="flex flex-col items-center md:items-start justify-center gap-4 w-full h-full z-1"
+      >
+         <NText class="text-4xl md:text-5xl lg:text-6xl font-bold text-center md:text-start">
+            Supporting academic integrity through behavioral analysis.
+         </NText>
+         <NText class="text-xl md:text-2xl text-center md:text-start" :depth="3">
+            <span>Distract</span> helps institutions evaluate assessment conduct
+            with transparency.
+         </NText>
 
-            <div class="flex flex-col md:flex-row gap-2">
-               <RouterLink to="/register">
-                  <NButton type="primary" size="large"> Get Started </NButton>
-               </RouterLink>
-               <a :href="latestExeUrl || '#'">
-                  <NButton size="large">
-                     <template #icon>
-                        <PhDownloadSimple />
-                     </template>
-                     Download Student Client
-                  </NButton>
-               </a>
-            </div>
+         <div class="flex flex-col md:flex-row gap-2 items-start w-fit mt-8">
+            <RouterLink class="w-full md:w-auto" to="/register">
+               <NButton type="primary" size="large" class="w-full!"> Get Started </NButton>
+            </RouterLink>
+            <a class="w-full md:w-auto" :href="latestExeUrl || '#'">
+               <NButton size="large">
+                  <template #icon>
+                     <PhDownloadSimple />
+                  </template>
+                  Download Student Client
+               </NButton>
+            </a>
          </div>
       </div>
    </div>

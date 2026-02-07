@@ -21,6 +21,7 @@ body {
    page-break-before: always;
 }
 
+/* vue transitions */
 .fade-zoom-enter-active,
 .fade-zoom-leave-active {
    transition:
@@ -38,4 +39,28 @@ body {
 .fade-zoom-leave-from {
    opacity: 1;
    transform: scale(1);
+}
+
+/* override tailwind's container class */
+.container {
+   --padding: 2rem;
+   width: 100%;
+   @media (width < 40rem) {
+      max-width: calc(100% - var(--padding));
+   }
+   @media (width >= 40rem) {
+      max-width: calc(40rem - var(--padding));
+   }
+   @media (width >= 48rem) {
+      max-width: calc(48rem - var(--padding));
+   }
+   @media (width >= 64rem) {
+      max-width: calc(64rem - var(--padding));
+   }
+   @media (width >= 80rem) {
+      max-width: calc(80rem - var(--padding));
+   }
+   @media (width >= 96rem) {
+      max-width: calc(96rem - var(--padding));
+   }
 }
