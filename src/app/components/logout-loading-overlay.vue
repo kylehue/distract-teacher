@@ -6,9 +6,6 @@
       shadow="none"
    >
       <Loader text="Logging out..." />
-      <div class="flex items-center gap-2">
-         <NText> Logging out... </NText>
-      </div>
    </NCard>
 </template>
 

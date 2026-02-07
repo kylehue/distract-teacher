@@ -1,6 +1,8 @@
 <template>
    <template v-if="auth.isLoading">
-      <Loader text="Loading account settings..." />
+      <div class="flex items-center justify-center w-full h-full">
+         <Loader text="Loading account settings..." />
+      </div>
    </template>
    <template v-else-if="!auth.teacher">Nothing</template>
    <NLayout v-else class="w-full h-full" embedded>

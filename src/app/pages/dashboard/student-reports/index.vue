@@ -8,7 +8,12 @@
             <NText strong class="text-lg"> Student Report </NText>
          </div>
       </template>
-      <Loader v-if="isLoading" text="Loading student report..." />
+      <div
+         v-if="isLoading"
+         class="flex items-center justify-center w-full h-full"
+      >
+         <Loader text="Loading student report..." />
+      </div>
       <NEmpty
          v-else-if="!student || !room || !teacher"
          class="m-auto"
@@ -49,13 +54,7 @@
 <script setup lang="ts">
 import Layout from "../layout.vue";
 import { PhArrowLeft, PhPrinter, PhFileXls } from "@phosphor-icons/vue";
-import {
-   NButton,
-   NText,
-   NEmpty,
-   NConfigProvider,
-   lightTheme,
-} from "naive-ui";
+import { NButton, NText, NEmpty, NConfigProvider, lightTheme } from "naive-ui";
 import {
    computed,
    inject,
@@ -85,7 +84,7 @@ import {
    createMonitorLogsReports,
    createStudentsIndividualReports,
 } from "@/lib/reports";
-import Loader from "@/app/components/loader.vue"
+import Loader from "@/app/components/loader.vue";
 
 const store = useStore();
 const auth = useAuthStore();
