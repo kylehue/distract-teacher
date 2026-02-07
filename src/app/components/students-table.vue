@@ -71,8 +71,12 @@ const props = defineProps<{
 const table = useTemplateRef("table");
 const store = useStore();
 const theme = useThemeVars();
-const patchStudent = useFetch<{ student: StudentInfo }>(
-   "/api/students/:studentId",
+const patchDenyPermitStudent = useFetch(
+   "/api/students/:studentId/deny_permit",
+   "PATCH",
+);
+const patchGrantPermitStudent = useFetch(
+   "/api/students/:studentId/grant_permit",
    "PATCH",
 );
 const message = useMessage();
@@ -443,15 +447,25 @@ if (!props.static && props.columns.includes("actions")) {
                options: options,
                trigger: "click",
                async onUpdateValue(v) {
-                  if (v === "approve" || v == "reject" || v === "kick") {
+                  if (v == "reject" || v === "kick") {
                      try {
-                        await patchStudent.execute({
+                        await patchDenyPermitStudent.execute({
                            params: { studentId: row.id },
-                           body: { permitted: v === "approve" && v !== "kick" },
                         });
                      } catch {
                         message.error(
-                           patchStudent.error?.message ||
+                           patchDenyPermitStudent.error?.message ||
+                              "Failed to update student. Please try again.",
+                        );
+                     }
+                  } else if (v === "approve") {
+                     try {
+                        await patchGrantPermitStudent.execute({
+                           params: { studentId: row.id },
+                        });
+                     } catch {
+                        message.error(
+                           patchGrantPermitStudent.error?.message ||
                               "Failed to update student. Please try again.",
                         );
                      }
