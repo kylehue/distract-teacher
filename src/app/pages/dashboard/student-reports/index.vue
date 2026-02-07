@@ -8,10 +8,7 @@
             <NText strong class="text-lg"> Student Report </NText>
          </div>
       </template>
-      <div v-if="isLoading" class="m-auto flex items-center gap-2">
-         <NSpin />
-         <NText>Loading student report...</NText>
-      </div>
+      <Loader v-if="isLoading" text="Loading student report..." />
       <NEmpty
          v-else-if="!student || !room || !teacher"
          class="m-auto"
@@ -55,7 +52,6 @@ import { PhArrowLeft, PhPrinter, PhFileXls } from "@phosphor-icons/vue";
 import {
    NButton,
    NText,
-   NSpin,
    NEmpty,
    NConfigProvider,
    lightTheme,
@@ -89,6 +85,7 @@ import {
    createMonitorLogsReports,
    createStudentsIndividualReports,
 } from "@/lib/reports";
+import Loader from "@/app/components/loader.vue"
 
 const store = useStore();
 const auth = useAuthStore();

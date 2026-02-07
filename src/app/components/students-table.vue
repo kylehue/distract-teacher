@@ -15,6 +15,9 @@
                description="There are currently no students."
             />
          </template>
+         <template #loading>
+            <Loader text="" />
+         </template>
       </NDataTable>
    </div>
 </template>
@@ -42,6 +45,7 @@ import { compareTimestamps, timestampToTimeString } from "@/lib/datetime";
 import { SelectMixedOption } from "naive-ui/es/select/src/interface";
 import { useFetch } from "@/app/composables/use-fetch";
 import { computeStdDev } from "@/lib/reports";
+import Loader from "@/app/components/loader.vue";
 
 type StudentTableColumns =
    | "studentName"

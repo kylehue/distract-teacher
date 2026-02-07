@@ -81,10 +81,7 @@
          </NTooltip>
       </template>
       <div v-if="!room" class="flex items-center justify-center w-full h-full">
-         <div v-if="store.isLoadRoomLoading" class="flex gap-2 items-center">
-            <NSpin></NSpin>
-            <NText>Loading...</NText>
-         </div>
+         <Loader v-if="store.isLoadRoomLoading" />
          <div v-else class="flex gap-2 items-center">
             <NText>Room not found</NText>
          </div>
@@ -114,7 +111,6 @@ import {
    NButton,
    NTabs,
    NTab,
-   NSpin,
    NText,
    NDivider,
    NTooltip,
@@ -151,6 +147,7 @@ import { getWithDefault } from "@/lib/object";
 import { useAnnouncement } from "@/app/composables/use-announcement";
 import { useAuthStore } from "@/app/composables/use-auth-store";
 import { useFetch } from "@/app/composables/use-fetch";
+import Loader from "@/app/components/loader.vue"
 
 const router = useRouter();
 const route = useRoute();

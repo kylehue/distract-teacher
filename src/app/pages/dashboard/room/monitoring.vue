@@ -25,10 +25,7 @@
             </NButton>
          </NButtonGroup>
       </div>
-      <div
-         v-if="activeTab === 'warningLogs'"
-         class="overflow-hidden"
-      >
+      <div v-if="activeTab === 'warningLogs'" class="overflow-hidden">
          <NDataTable
             :columns="monitorLogColumns"
             :data="monitorLogsArray"
@@ -43,12 +40,12 @@
                   description="There are currently no warning logs."
                />
             </template>
+            <template #loading>
+               <Loader text="" />
+            </template>
          </NDataTable>
       </div>
-      <div
-         v-if="activeTab === 'lockedStudents'"
-         class="overflow-hidden"
-      >
+      <div v-if="activeTab === 'lockedStudents'" class="overflow-hidden">
          <NDataTable
             :columns="lockedStudentColumns"
             :data="lockedStudents"
@@ -62,6 +59,9 @@
                   class="m-auto"
                   description="There are currently no locked students."
                />
+            </template>
+            <template #loading>
+               <Loader text="" />
             </template>
          </NDataTable>
       </div>
@@ -103,6 +103,7 @@ import {
    STUDENTS_MAP_INJECTION_KEY,
    IS_LOADING_INJECTION_KEY,
 } from "@/lib/injection-keys";
+import Loader from "@/app/components/loader.vue";
 
 const route = useRoute();
 const message = useMessage();

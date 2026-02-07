@@ -1,9 +1,6 @@
 <template>
    <template v-if="auth.isLoading">
-      <div class="flex items-center justify-center w-full h-full gap-2">
-         <NSpin />
-         <NText>Loading trash...</NText>
-      </div>
+      <Loader />
    </template>
    <template v-else-if="!auth.teacher">Nothing</template>
    <NLayout v-else class="w-full h-full" embedded>
@@ -40,6 +37,9 @@
                         </template>
                      </NEmpty>
                   </template>
+                  <template #loading>
+                     <Loader text="" />
+                  </template>
                </NDataTable>
             </div>
             <div class="w-full h-8 flex-none"></div>
@@ -57,7 +57,6 @@ import {
    NEmpty,
    NLayout,
    NLayoutContent,
-   NSpin,
    NText,
    useMessage,
 } from "naive-ui";
@@ -69,6 +68,7 @@ import { PhArrowLeft, PhTrash } from "@phosphor-icons/vue";
 import { useAuthStore } from "../composables/use-auth-store";
 import { UnauthorizedError } from "@/lib/errors";
 import { timestampToDateString, compareTimestamps } from "@/lib/datetime";
+import Loader from "@/app/components/loader.vue";
 
 const auth = useAuthStore();
 const store = useStore();

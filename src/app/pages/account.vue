@@ -1,9 +1,6 @@
 <template>
    <template v-if="auth.isLoading">
-      <div class="flex items-center justify-center w-full h-full gap-2">
-         <NSpin />
-         <NText>Loading account settings...</NText>
-      </div>
+      <Loader text="Loading account settings..." />
    </template>
    <template v-else-if="!auth.teacher">Nothing</template>
    <NLayout v-else class="w-full h-full" embedded>
@@ -205,27 +202,20 @@ import {
    NInput,
    NLayout,
    NLayoutContent,
-   NSpin,
    NText,
    useMessage,
 } from "naive-ui";
-import { RoomInfo, TeacherInfo } from "@/lib/typings";
+import { TeacherInfo } from "@/lib/typings";
 import {
-   computed,
-   h,
-   inject,
-   nextTick,
    onMounted,
    reactive,
-   ref,
-   Ref,
 } from "vue";
 import { RouterLink } from "vue-router";
 import { useFetch } from "@/app/composables/use-fetch";
-import { useStore } from "@/app/composables/use-store";
 import { PhArrowLeft } from "@phosphor-icons/vue";
 import { useAuthStore } from "../composables/use-auth-store";
 import { UnauthorizedError } from "@/lib/errors";
+import Loader from "@/app/components/loader.vue"
 
 const auth = useAuthStore();
 

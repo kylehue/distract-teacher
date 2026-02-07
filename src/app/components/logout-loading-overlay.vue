@@ -5,13 +5,14 @@
       :bordered="false"
       shadow="none"
    >
+      <Loader text="Logging out..." />
       <div class="flex items-center gap-2">
-         <NSpin />
          <NText> Logging out... </NText>
       </div>
    </NCard>
 </template>
 
 <script setup lang="ts">
-import { NCard, NText, NSpin } from "naive-ui";
+import { NCard, NText } from "naive-ui";
+import Loader from "@/app/components/loader.vue"
 </script>

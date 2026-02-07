@@ -31,6 +31,9 @@
                   description="You haven't created any rooms yet."
                />
             </template>
+            <template #loading>
+               <Loader text="" />
+            </template>
          </NDataTable>
       </div>
       <template #header-extra>
@@ -60,6 +63,7 @@ import {
    timestampToDateString,
    timestampToTimeString,
 } from "@/lib/datetime";
+import Loader from "@/app/components/loader.vue";
 
 const store = useStore();
 const createRoom = useCreateRoom();

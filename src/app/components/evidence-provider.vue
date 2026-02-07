@@ -52,17 +52,13 @@
                </NStatistic>
             </div>
          </template>
-         <div
+         <Loader
             v-if="
                store.isLoadMonitorLogLoading ||
                store.isLoadStudentLoading ||
                store.isLoadRoomLoading
             "
-            class="flex items-center gap-2"
-         >
-            <NSpin />
-            Loading...
-         </div>
+         />
          <NEmpty v-else-if="!monitorLog" description="Not found" size="huge" />
          <div v-else class="flex flex-wrap justify-around w-full h-full gap-8">
             <!-- feature impact grouped rank bar chart -->
@@ -99,7 +95,6 @@
 import {
    NModal,
    NCard,
-   NSpin,
    NEmpty,
    NStatistic,
    NTag,
@@ -113,6 +108,7 @@ import { PhVideoCameraSlash } from "@phosphor-icons/vue";
 import { timestampToDateString, timestampToTimeString } from "@/lib/datetime";
 import { warningLevelToComponentType } from "@/lib/ui";
 import FeatureImpactRankChart from "./feature-impact-rank-chart.vue";
+import Loader from "@/app/components/loader.vue"
 
 const show = ref(false);
 const store = useStore();

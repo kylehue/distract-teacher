@@ -121,6 +121,7 @@ function rebuildGridPattern() {
    gridCanvas.width = tileW;
    gridCanvas.height = tileH;
 
+   // @ts-ignore
    gridCtx = gridCanvas.getContext("2d")!;
    if (!gridCtx) return;
 
