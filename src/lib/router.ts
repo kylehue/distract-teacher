@@ -31,12 +31,10 @@ const routes: RouteRecordRaw[] = [
          {
             path: "login",
             component: LoginPage,
-            meta: { requiresUnauth: true },
          },
          {
             path: "register",
             component: RegisterPage,
-            meta: { requiresUnauth: true },
          },
          {
             path: "account",
@@ -52,7 +50,6 @@ const routes: RouteRecordRaw[] = [
          },
          {
             path: "dashboard",
-            meta: { requiresAuth: true },
             children: [
                { path: "", redirect: "/dashboard/rooms" },
                {
@@ -122,12 +119,5 @@ const router = createRouter({
    history: createWebHistory(import.meta.env.VITE_BASE_URL),
    routes,
 });
-
-// router.beforeEach((to, _from, next) => {
-//    const isAuthenticated = getSocket().connected; // TODO: replace with actual auth check
-//    if (to.meta.requiresUnauth && isAuthenticated) return next("/dashboard");
-//    if (to.meta.requiresAuth && !isAuthenticated) return next("/login");
-//    next();
-// });
 
 export { router };

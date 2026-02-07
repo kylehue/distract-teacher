@@ -49,13 +49,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, onBeforeMount } from "vue";
 import { NCard, NForm, NFormItem, NInput, NButton, useMessage } from "naive-ui";
-import { RouterLink } from "vue-router";
+import { RouterLink, useRouter } from "vue-router";
 import { useStore } from "../composables/use-store";
 import { useAuthStore } from "../composables/use-auth-store";
 
 const auth = useAuthStore();
+const router = useRouter();
 const message = useMessage();
 const store = useStore();
 const username = ref("");
@@ -96,6 +97,13 @@ async function login() {
 
    store.clear();
 }
+
+onBeforeMount(() => {
+   if (auth.isAuthenticated) {
+      console.log(123)
+      router.replace("/dashboard");
+   }
+});
 </script>
 
 <style scoped></style>

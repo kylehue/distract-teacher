@@ -33,7 +33,7 @@ export const useAuthStore = defineStore("auth-store", () => {
          teacher.value = data.data!.teacher;
          isAuthenticated.value = true;
 
-         router.push("/dashboard");
+         router.replace("/dashboard");
       } catch (e) {
          throw e;
       } finally {
@@ -63,14 +63,14 @@ export const useAuthStore = defineStore("auth-store", () => {
    function openPage() {
       const unsafePaths = new Set(["/login", "/register"]);
       if (unsafePaths.has(router.currentRoute.value.path)) {
-         router.push("/");
+         router.replace("/dashboard");
       }
    }
 
    function closePage() {
       const safePaths = new Set(["/", "/home", "/login", "/register"]);
       if (!safePaths.has(router.currentRoute.value.path)) {
-         router.push("/login");
+         router.replace("/login");
       }
       store.clear();
    }

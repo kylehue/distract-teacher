@@ -67,13 +67,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, onBeforeMount } from "vue";
 import { NCard, NForm, NFormItem, NInput, NButton, useMessage } from "naive-ui";
-import { useSocket } from "../composables/use-socket";
+import { useAuthStore } from "../composables/use-auth-store";
 import { useRouter, RouterLink } from "vue-router";
 import { useFetch } from "../composables/use-fetch";
 
-const socket = useSocket();
+const auth = useAuthStore();
 const router = useRouter();
 const username = ref("");
 const password1 = ref("");
@@ -131,6 +131,10 @@ async function register() {
       }
    }
 }
-</script>
 
-<style scoped></style>
+onBeforeMount(() => {
+   if (auth.isAuthenticated) {
+      router.replace("/dashboard");
+   }
+});
+</script>
