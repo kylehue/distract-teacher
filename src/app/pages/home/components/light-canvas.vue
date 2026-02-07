@@ -12,7 +12,7 @@
 <script setup lang="ts">
 import { THEME_INJECTION_KEY } from "@/lib/injection-keys";
 import { useThemeVars } from "naive-ui";
-import { inject, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { inject, onBeforeUnmount, onMounted, watch } from "vue";
 import { useTemplateRef } from "vue";
 
 const canvas = useTemplateRef<HTMLCanvasElement>("canvas");
@@ -22,8 +22,8 @@ const theme = inject(THEME_INJECTION_KEY)!;
 let ctx: CanvasRenderingContext2D | null = null;
 let raf = 0;
 
-let width = 0; // CSS px
-let height = 0; // CSS px
+let width = 0;
+let height = 0;
 let dpr = 1;
 
 type Light = {
@@ -40,17 +40,17 @@ type Light = {
 
 const lights: Light[] = [];
 
-// ---- GRID SETTINGS ----
-const gridGap = ref(48);
-const gridLineAlpha = ref(0.1);
+let gridGap = 80;
+let gridLineAlpha = 0.12;
+let gridLineWidth = 40;
 
-// cached grid pattern
 let gridCanvas: HTMLCanvasElement | OffscreenCanvas | null = null;
-let gridCtx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null =
-   null;
+let gridCtx:
+   | CanvasRenderingContext2D
+   | OffscreenCanvasRenderingContext2D
+   | null = null;
 let gridPattern: CanvasPattern | null = null;
 
-// spawn config
 const colors = [
    themeVars.value.primaryColor,
    themeVars.value.primaryColorHover,
@@ -101,22 +101,16 @@ function toRgba(color: string, alpha: number) {
    return c;
 }
 
-/**
- * Create/update cached grid pattern.
- * This makes zoom/resizes waaay cheaper because we don't re-stroke thousands of lines every frame.
- */
 function rebuildGridPattern() {
    const c = canvas.value;
    if (!c || !ctx) return;
 
-   const gap = Math.max(8, Math.floor(gridGap.value));
-   const stroke = toRgba(themeVars.value.textColor1, gridLineAlpha.value);
+   const gap = Math.max(8, Math.floor(gridGap));
+   const stroke = toRgba(themeVars.value.textColor1, gridLineAlpha);
 
-   // use 2x gap tile so pattern doesn't look too repetitive with half-pixel offsets
-   const tileW = gap * 2;
-   const tileH = gap * 2;
+   const tileW = gap;
+   const tileH = gap;
 
-   // OffscreenCanvas if available (better), fallback to normal canvas
    if (!gridCanvas) {
       gridCanvas =
          typeof OffscreenCanvas !== "undefined"
@@ -130,33 +124,24 @@ function rebuildGridPattern() {
    gridCtx = gridCanvas.getContext("2d")!;
    if (!gridCtx) return;
 
-   // clear tile
    gridCtx.clearRect(0, 0, tileW, tileH);
 
    gridCtx.save();
    gridCtx.globalCompositeOperation = "source-over";
-   gridCtx.lineWidth = 1;
+   gridCtx.lineWidth = gridLineWidth;
    gridCtx.strokeStyle = stroke;
 
-   // crisp lines: draw at .5 in tile space
    gridCtx.beginPath();
 
-   // vertical lines at x=0 and x=gap
-   for (const x of [0, gap]) {
-      gridCtx.moveTo(x + 0.5, 0);
-      gridCtx.lineTo(x + 0.5, tileH);
-   }
+   gridCtx.moveTo(0.5, 0);
+   gridCtx.lineTo(0.5, tileH);
 
-   // horizontal lines at y=0 and y=gap
-   for (const y of [0, gap]) {
-      gridCtx.moveTo(0, y + 0.5);
-      gridCtx.lineTo(tileW, y + 0.5);
-   }
+   gridCtx.moveTo(0, 0.5);
+   gridCtx.lineTo(tileW, 0.5);
 
    gridCtx.stroke();
    gridCtx.restore();
 
-   // create pattern on main ctx
    gridPattern = ctx.createPattern(gridCanvas as any, "repeat");
 }
 
@@ -164,17 +149,13 @@ function drawGrid() {
    if (!ctx || !gridPattern) return;
 
    ctx.save();
-   ctx.globalCompositeOperation = "source-over";
    ctx.filter = "none";
    ctx.fillStyle = gridPattern;
-
-   // fill entire viewport with the cached pattern
    ctx.fillRect(0, 0, width, height);
    ctx.restore();
 }
 
 function spawnLight() {
-   // keep it heavy but sane
    const radius = 200 + random(width * 0.25, width * 0.5);
    const x = random(0, width);
    const y = height + radius / 2;
@@ -199,11 +180,9 @@ function spawnLight() {
 function drawLight(light: Light) {
    if (!ctx) return;
 
-   // cap blur relative to DPR so zoom doesn't murder perf
    const blurPx = Math.min(100, 100 / Math.max(1, dpr));
 
    ctx.save();
-   ctx.globalCompositeOperation = "color-dodge";
    ctx.filter = `blur(${blurPx}px)`;
 
    const gradient = ctx.createRadialGradient(
@@ -218,17 +197,12 @@ function drawLight(light: Light) {
    const [r, g, b] = light.color;
    const multiplier = theme.value === "light" ? 1 : 0.3;
 
-   gradient.addColorStop(0, `rgba(255,255,255,${light.alpha * multiplier})`);
-   gradient.addColorStop(
-      0.4,
-      `rgba(${r},${g},${b},${light.alpha * multiplier})`,
-   );
+   gradient.addColorStop(0, `rgba(${r},${g},${b},${light.alpha * multiplier})`);
    gradient.addColorStop(1, `rgba(${r},${g},${b},0)`);
 
    ctx.fillStyle = gradient;
 
-   // don't fill the whole canvas; only fill the affected region (+pad for blur).
-   const pad = blurPx * 3; // conservative padding to avoid clipped blur edges
+   const pad = blurPx * 3;
    const x0 = Math.max(0, light.x - (light.radius + light.decay + pad));
    const y0 = Math.max(0, light.y - (light.radius + light.decay + pad));
    const x1 = Math.min(width, light.x + (light.radius + light.decay + pad));
@@ -237,6 +211,18 @@ function drawLight(light: Light) {
    ctx.fillRect(x0, y0, x1 - x0, y1 - y0);
 
    ctx.restore();
+}
+
+function clamp(n: number, min: number, max: number) {
+   return Math.min(max, Math.max(min, n));
+}
+
+function updateGridParams() {
+   gridGap = Math.max(80, width / 20);
+
+   const base = gridGap / 2;
+   const scale = 1 / Math.max(1, dpr);
+   gridLineWidth = clamp(base * scale, 1, gridGap / 2);
 }
 
 onMounted(() => {
@@ -248,14 +234,13 @@ onMounted(() => {
       cancelAnimationFrame(resizeRaf);
       resizeRaf = requestAnimationFrame(() => {
          lights.length = 0;
+
          const rect = c.getBoundingClientRect();
          width = Math.max(1, Math.floor(rect.width));
          height = Math.max(1, Math.floor(rect.height));
 
-         // dynamic DPR: zooming changes this
          dpr = window.devicePixelRatio || 1;
 
-         // avoid reallocating if same size
          const nextW = Math.max(1, Math.floor(width * dpr));
          const nextH = Math.max(1, Math.floor(height * dpr));
 
@@ -263,34 +248,19 @@ onMounted(() => {
          if (c.height !== nextH) c.height = nextH;
 
          ctx = c.getContext("2d", { alpha: true });
-
-         // draw in CSS pixel space
          ctx?.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-         // update responsive gap
-         gridGap.value = Math.max(48, width / 20);
-
-         // rebuild cached grid whenever dimensions/theme vars change
+         updateGridParams();
          rebuildGridPattern();
       });
    };
 
-   // run once
    resize();
-
-   // resize & zoom: resize fires a lot; throttled above
    window.addEventListener("resize", resize, { passive: true });
 
-   // also rebuild grid if theme vars / theme change (colors/line color changes)
    const stopWatch = watch(
-      () => [
-         theme.value,
-         themeVars.value.textColor1,
-         gridGap.value,
-         gridLineAlpha.value,
-      ],
+      () => [theme.value, themeVars.value.textColor1, gridLineAlpha],
       () => {
-         // just rebuild the pattern; super cheap
          rebuildGridPattern();
       },
       { flush: "post" },
@@ -304,7 +274,6 @@ onMounted(() => {
       const delta = time - lastTime;
       lastTime = time;
 
-      // clear in CSS pixels (transform handles DPR)
       ctx.clearRect(0, 0, width, height);
 
       spawnTimer += delta;
@@ -313,27 +282,36 @@ onMounted(() => {
          spawnLight();
       }
 
-      // draw lights first
       for (let i = lights.length - 1; i >= 0; i--) {
          const light = lights[i];
 
          light.life += delta;
          light.decay += 1;
 
-         // avoid NaN if maxLife is weird
-         const t = Math.min(1, Math.max(0, light.life / Math.max(1, light.maxLife)));
+         const t = Math.min(
+            1,
+            Math.max(0, light.life / Math.max(1, light.maxLife)),
+         );
          light.alpha = Math.sin(t * Math.PI);
 
          light.y -= light.vy * (delta / 16);
-
-         drawLight(light);
 
          if (light.life >= light.maxLife || light.y + light.radius < 0) {
             lights.splice(i, 1);
          }
       }
 
+      ctx.globalCompositeOperation = "source-over";
+      for (let i = 0; i < lights.length; i++) drawLight(lights[i]);
+
+      ctx.globalCompositeOperation = "source-in";
       drawGrid();
+
+      ctx.globalCompositeOperation = "color-dodge";
+      for (let i = 0; i < lights.length; i++) drawLight(lights[i]);
+
+      ctx.globalCompositeOperation = "source-over";
+      ctx.filter = "none";
 
       raf = requestAnimationFrame(animate);
    };
@@ -346,7 +324,6 @@ onMounted(() => {
       window.removeEventListener("resize", resize);
       stopWatch();
 
-      // help GC
       lights.length = 0;
       ctx = null;
       gridCtx = null;
