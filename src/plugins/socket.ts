@@ -5,6 +5,7 @@ import type { App } from "vue";
 let socket: Socket = io(import.meta.env.VITE_API_URL, {
    autoConnect: false,
    withCredentials: true,
+   transports: ["websocket", "polling", "webtransport"],
 });
 
 export default {
