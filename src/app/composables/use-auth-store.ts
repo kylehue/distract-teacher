@@ -21,6 +21,7 @@ export const useAuthStore = defineStore("auth-store", () => {
 
    const postLogin = useFetch<{ teacher: TeacherInfo }>("/api/login", "POST");
    async function loginWithCredentials(username: string, password: string) {
+      if (isAuthenticated.value) return;
       isLoading.value = true;
       try {
          const data = await postLogin.execute({
@@ -46,6 +47,7 @@ export const useAuthStore = defineStore("auth-store", () => {
       "POST",
    );
    async function loginWithCookie() {
+      if (isAuthenticated.value) return;
       isLoading.value = true;
       try {
          const data = await postValidateSession.execute();
