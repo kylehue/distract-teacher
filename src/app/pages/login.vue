@@ -22,6 +22,7 @@
                <NInput
                   v-model:value="password"
                   type="password"
+                  autocomplete="current-password"
                   placeholder="Enter your password"
                   show-password-on="click"
                   :disabled="auth.isLoading"

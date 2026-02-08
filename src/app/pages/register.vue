@@ -26,6 +26,7 @@
                <NInput
                   v-model:value="password1"
                   type="password"
+                  autocomplete="new-password"
                   placeholder="Enter your password"
                   show-password-on="click"
                   :disabled="postAccount.isLoading"
@@ -40,6 +41,7 @@
                <NInput
                   v-model:value="password2"
                   type="password"
+                  autocomplete="new-password"
                   placeholder="Confirm your password"
                   show-password-on="click"
                   :disabled="postAccount.isLoading"

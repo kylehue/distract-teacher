@@ -125,6 +125,7 @@
                            :disabled="patchAccount.isLoading"
                            show-password-on="click"
                            type="password"
+                           autocomplete="new-password"
                         />
                      </NFormItem>
                      <NFormItem
@@ -139,6 +140,7 @@
                            :disabled="patchAccount.isLoading"
                            show-password-on="click"
                            type="password"
+                           autocomplete="new-password"
                         />
                      </NFormItem>
                   </NForm>
