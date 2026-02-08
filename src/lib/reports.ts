@@ -134,7 +134,7 @@ export function createMonitorLogsReports(monitorLogs: MonitorLog[]) {
 export function computeExpectedMonitorLogCount(
    roomTimeStarted: string | Date,
    roomTimeEnded: string | Date,
-   monitorIntervalMs = 6000,
+   monitorIntervalMs = 6000, // TODO: always sync to student client
 ): number {
    const start =
       roomTimeStarted instanceof Date

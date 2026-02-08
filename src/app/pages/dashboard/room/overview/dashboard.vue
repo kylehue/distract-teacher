@@ -92,7 +92,7 @@
          </div>
       </div>
       <NText class="text-xl font-medium mt-8">Analytics</NText>
-      <div class="grid grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
          <NCard title="Warning Level Distribution" :bordered="false">
             <WarningLevelChart
                ref="warningLevelChart"

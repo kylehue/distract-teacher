@@ -131,7 +131,7 @@
             <FeatureImpactChart :theme="props.theme" :static="props.static" />
          </NCard>
       </div>
-      <div class="grid grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
          <NCard title="Warning Distribution" :bordered="false">
             <WarningLevelChart :theme="props.theme" :static="props.static" />
          </NCard>
