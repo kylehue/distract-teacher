@@ -4,7 +4,7 @@ import { defineStore } from "pinia";
 import { useFetch } from "./use-fetch";
 import { useRouter } from "vue-router";
 import { useStore } from "./use-store";
-import { getSocket } from "@/plugins/socket";
+import { useSocket } from "./use-socket";
 
 export const useAuthStore = defineStore("auth-store", () => {
    const isAuthenticated = ref(false);
@@ -12,11 +12,11 @@ export const useAuthStore = defineStore("auth-store", () => {
    const teacher = ref<TeacherInfo | null>(null);
    const router = useRouter();
    const store = useStore();
+   const socket = useSocket();
 
    function refreshSocket() {
-      const socket = getSocket();
-      if (socket.connected) socket.disconnect();
-      socket.connect();
+      if (socket.socket.connected) socket.socket.disconnect();
+      socket.socket.connect();
    }
 
    const postLogin = useFetch<{ teacher: TeacherInfo }>("/api/login", "POST");
@@ -82,8 +82,7 @@ export const useAuthStore = defineStore("auth-store", () => {
       isLoading.value = true;
       try {
          await postLogout.execute();
-         const socket = getSocket();
-         socket.disconnect();
+         if (socket.socket.connected) socket.socket.disconnect();
          teacher.value = null;
          isAuthenticated.value = false;
          closePage();
@@ -93,6 +92,12 @@ export const useAuthStore = defineStore("auth-store", () => {
          isLoading.value = false;
       }
    }
+
+   socket.on("teacher:update_account", (data) => {
+      if (teacher.value && data.teacher.id === teacher.value.id) {
+         teacher.value = data.teacher;
+      }
+   });
 
    return {
       isAuthenticated,
