@@ -52,10 +52,11 @@ const warningLevelDistributionSeries = computed(() => [
    },
 ]);
 
+const chartId = crypto.randomUUID();
 const warningLevelDistributionChartOptions = computed(() =>
    deepMerge(apexChartOverrides, {
       chart: {
-         id: "warning-level-distribution-chart",
+         id: chartId,
          type: "bar",
          toolbar: { show: props.static ? false : true },
          zoom: { allowMouseWheelZoom: false },

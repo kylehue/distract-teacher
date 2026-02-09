@@ -37,10 +37,11 @@ const integrityOverTimeSeries = computed(() => [
    },
 ]);
 
+const chartId = crypto.randomUUID();
 const integrityOverTimeChartOptions = computed(() => {
    return deepMerge(apexChartOverrides, {
       chart: {
-         id: "integrity-score-chart",
+         id: chartId,
          type: "line",
          zoom: { allowMouseWheelZoom: false },
          toolbar: { show: props.static ? false : true },

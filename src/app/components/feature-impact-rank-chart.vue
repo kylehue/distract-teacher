@@ -42,42 +42,45 @@ const groupedFeatureData = computed(() => {
       series: [
          {
             name: "Impact %",
-            data: sortedGroups.map((g) => g.percentage.toFixed(2)),
+            data: sortedGroups.map((g) => Number(g.percentage.toFixed(2))),
          },
       ],
    };
 });
 
+const chartId = crypto.randomUUID();
 const featureImpactChartOptions = computed(() =>
    deepMerge(apexChartOverrides, {
       chart: {
+         id: chartId,
          type: "bar",
          toolbar: { show: false },
-         animations: { enabled: true },
       },
       plotOptions: {
          bar: {
             horizontal: true,
             barHeight: "50%",
-            dataLabels: { position: "top" },
          },
-      },
-      dataLabels: {
-         enabled: true,
-         formatter: (val: number) => `${val.toFixed(1)}%`,
-         style: { fontSize: "12px" },
       },
       xaxis: {
          categories: groupedFeatureData.value.categories,
          title: { text: "Impact %" },
-         min: 0,
+         labels: {
+            formatter: (v: number) => `${v.toFixed(0)}%`,
+         },
       },
       yaxis: {
-         title: { text: undefined },
+         labels: {
+            formatter: undefined as any,
+         },
+      },
+      dataLabels: {
+         enabled: true,
+         formatter: (v: number) => `${v.toFixed(2)}%`,
       },
       tooltip: {
          y: {
-            formatter: (val: number) => `${val.toFixed(2)}%`,
+            formatter: (v: number) => `${v.toFixed(2)}%`,
          },
       },
       theme: { mode: theme.value },

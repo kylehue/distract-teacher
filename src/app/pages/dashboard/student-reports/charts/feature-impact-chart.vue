@@ -63,10 +63,11 @@ const featureImpactSeries = computed(() => {
    return [integrityOverTimeSeries, ...featureSeries];
 });
 
+const chartId = crypto.randomUUID();
 const featureImpactChartOptions = computed(() =>
    deepMerge(apexChartOverrides, {
       chart: {
-         id: "feature-impact-over-time",
+         id: chartId,
          type: "area",
          stacked: true,
          toolbar: { show: props.static ? false : true },

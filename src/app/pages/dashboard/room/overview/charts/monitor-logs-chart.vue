@@ -42,10 +42,11 @@ const scatterSeries = computed(() => [
    },
 ]);
 
+const chartId = crypto.randomUUID();
 const scatterChartOptions = computed(() => {
    return deepMerge(apexChartOverrides, {
       chart: {
-         id: "integrity-scatter-chart",
+         id: chartId,
          type: "scatter",
          zoom: { allowMouseWheelZoom: false },
          toolbar: { show: props.static ? false : true },
