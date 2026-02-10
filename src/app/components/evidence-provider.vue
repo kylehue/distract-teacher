@@ -59,14 +59,11 @@
                </NStatistic>
             </div>
          </template>
-         <Loader
-            v-if="
-               store.isLoadMonitorLogLoading ||
-               store.isLoadStudentLoading ||
-               store.isLoadRoomLoading
-            "
+         <Loader v-if="store.isLoadMonitorLogLoading" />
+         <NEmpty
+            v-else-if="!monitorLog || !student || !room"
+            description="Not found"
          />
-         <NEmpty v-else-if="!monitorLog" description="Not found" size="huge" />
          <div v-else class="flex flex-wrap justify-around w-full h-full gap-8">
             <!-- feature impact grouped rank bar chart -->
             <div class="flex-1 flex items-center justify-center flex-col gap-2">
@@ -80,13 +77,22 @@
                v-if="!monitorLog.recordingUrl"
                class="flex-1 flex items-center justify-center"
             >
-               <NEmpty
-                  description="Recording is either still being processed or unavailable. Please try again later."
-                  align="center"
-                  class="max-w-[300px]"
-                  size="huge"
-               >
+               <NEmpty align="center" class="max-w-[300px]">
                   <template #icon><PhVideoCameraSlash /></template>
+                  <template #default>
+                     <div class="flex flex-col gap-2">
+                        <NText>
+                           Recording is either unavailable or still being
+                           processed. Please try again later.
+                        </NText>
+                        <NText class="text-xs" :depth="3">
+                           Note: Only logs with
+                           {{ room.evidenceWarningLevel }} warning level (or
+                           higher) have recordings. You can modify this
+                           threshold in the room settings.
+                        </NText>
+                     </div>
+                  </template>
                </NEmpty>
             </div>
             <video
