@@ -124,11 +124,15 @@ watch(
       if (newId) {
          show.value = true;
 
-         const data = await store.loadMonitorLog(newId as string);
-         if (!data) return;
-         room.value = data.room;
-         student.value = data.student;
-         monitorLog.value = data.monitorLog;
+         // load monitor log, student, and room
+         await store.loadMonitorLog(newId as string);
+         const _monitorLog = store.allMonitorLogs.get(newId as string);
+         if (!_monitorLog) return;
+         const _student = store.allStudents.get(_monitorLog.studentId)!;
+         const _room = store.allRooms.get(_monitorLog.roomId)!;
+         room.value = _room;
+         student.value = _student;
+         monitorLog.value = _monitorLog;
          // monitorLog.value.recordingUrl = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
       } else {
          show.value = false;
