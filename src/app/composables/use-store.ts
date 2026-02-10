@@ -38,16 +38,11 @@ export const useStore = defineStore("main-store", () => {
       if (LOAD_ONCE && isRoomsLoaded) return;
       isRoomsLoaded = true;
 
-      try {
-         await getRooms.execute();
+      await getRooms.execute();
 
-         const data = getRooms.data?.data;
-         if (!data) throw new Error("No data");
-         upsertRooms(data.rooms);
-         return data;
-      } catch {
-         // ignore fetch errors
-      }
+      const data = getRooms.data?.data;
+      if (!data) throw new Error("No data");
+      upsertRooms(data.rooms);
    }
 
    const getDeletedRooms = useFetch<{
@@ -59,16 +54,11 @@ export const useStore = defineStore("main-store", () => {
       if (LOAD_ONCE && isDeletedRoomsLoaded) return;
       isDeletedRoomsLoaded = true;
 
-      try {
-         await getDeletedRooms.execute();
+      await getDeletedRooms.execute();
 
-         const data = getDeletedRooms.data?.data;
-         if (!data) throw new Error("No data");
-         upsertDeletedRooms(data.rooms);
-         return data;
-      } catch {
-         // ignore fetch errors
-      }
+      const data = getDeletedRooms.data?.data;
+      if (!data) throw new Error("No data");
+      upsertDeletedRooms(data.rooms);
    }
 
    const getRoom = useFetch<{
@@ -81,18 +71,13 @@ export const useStore = defineStore("main-store", () => {
       if (LOAD_ONCE && loadRoomSet.has(roomId)) return;
       loadRoomSet.add(roomId);
 
-      try {
-         await getRoom.execute({ params: { roomId } });
+      await getRoom.execute({ params: { roomId } });
 
-         const data = getRoom.data?.data;
-         if (!data) throw new Error("No data");
-         upsertRooms([data.room]);
-         upsertStudents(data.students);
-         upsertMonitorLogs(data.monitorLogs);
-         return data;
-      } catch {
-         // ignore fetch errors
-      }
+      const data = getRoom.data?.data;
+      if (!data) throw new Error("No data");
+      upsertRooms([data.room]);
+      upsertStudents(data.students);
+      upsertMonitorLogs(data.monitorLogs);
    }
 
    const getStudent = useFetch<{
@@ -106,18 +91,13 @@ export const useStore = defineStore("main-store", () => {
       if (LOAD_ONCE && loadStudentSet.has(studentId)) return;
       loadStudentSet.add(studentId);
 
-      try {
-         await getStudent.execute({ params: { studentId } });
+      await getStudent.execute({ params: { studentId } });
 
-         const data = getStudent.data?.data;
-         if (!data) throw new Error("No data");
-         upsertStudents([data.student]);
-         upsertMonitorLogs(data.monitorLogs);
-         upsertRooms([data.room]);
-         return data;
-      } catch {
-         // ignore fetch errors
-      }
+      const data = getStudent.data?.data;
+      if (!data) throw new Error("No data");
+      upsertStudents([data.student]);
+      upsertMonitorLogs(data.monitorLogs);
+      upsertRooms([data.room]);
    }
 
    const getRoomStudents = useFetch<{
@@ -128,16 +108,11 @@ export const useStore = defineStore("main-store", () => {
       if (LOAD_ONCE && loadRoomStudentsSet.has(roomId)) return;
       loadRoomStudentsSet.add(roomId);
 
-      try {
-         await getRoomStudents.execute({ params: { roomId } });
+      await getRoomStudents.execute({ params: { roomId } });
 
-         const data = getRoomStudents.data?.data;
-         if (!data) throw new Error("No data");
-         upsertStudents(data.students);
-         return data;
-      } catch {
-         // ignore fetch errors
-      }
+      const data = getRoomStudents.data?.data;
+      if (!data) throw new Error("No data");
+      upsertStudents(data.students);
    }
 
    const getMonitorLog = useFetch<{
@@ -151,18 +126,13 @@ export const useStore = defineStore("main-store", () => {
       if (LOAD_ONCE && loadMonitorLogSet.has(monitorLogId)) return;
       loadMonitorLogSet.add(monitorLogId);
 
-      try {
-         await getMonitorLog.execute({ params: { monitorLogId } });
+      await getMonitorLog.execute({ params: { monitorLogId } });
 
-         const data = getMonitorLog.data?.data;
-         if (!data) throw new Error("No data");
-         upsertRooms([data.room]);
-         upsertMonitorLogs([data.monitorLog]);
-         upsertStudents([data.student]);
-         return data;
-      } catch {
-         // ignore fetch errors
-      }
+      const data = getMonitorLog.data?.data;
+      if (!data) throw new Error("No data");
+      upsertRooms([data.room]);
+      upsertMonitorLogs([data.monitorLog]);
+      upsertStudents([data.student]);
    }
 
    const getRoomMonitorLogs = useFetch<{
@@ -173,19 +143,14 @@ export const useStore = defineStore("main-store", () => {
       loadRoomMonitorLogsSet.add(roomId);
       if (LOAD_ONCE && loadRoomMonitorLogsSet.has(roomId)) return;
 
-      try {
-         await getRoomMonitorLogs.execute({
-            params: { roomId },
-         });
+      await getRoomMonitorLogs.execute({
+         params: { roomId },
+      });
 
-         const data = getRoomMonitorLogs.data?.data;
-         if (!data) throw new Error("No data");
+      const data = getRoomMonitorLogs.data?.data;
+      if (!data) throw new Error("No data");
 
-         upsertMonitorLogs(data.monitorLogs);
-         return data;
-      } catch {
-         // ignore fetch errors
-      }
+      upsertMonitorLogs(data.monitorLogs);
    }
 
    // --- upsert functions ---
