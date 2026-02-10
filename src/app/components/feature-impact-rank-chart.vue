@@ -3,6 +3,7 @@
       type="bar"
       :options="featureImpactChartOptions"
       :series="groupedFeatureData.series"
+      v-bind="$attrs"
    />
 </template>
 

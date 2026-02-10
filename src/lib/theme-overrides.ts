@@ -49,6 +49,8 @@ export const apexChartOverrides: ApexOptions = {
    chart: {
       fontFamily: "Inter, sans-serif",
       background: "transparent",
+      redrawOnWindowResize: true,
+      redrawOnParentResize: true,
    },
    xaxis: {
       labels: { style: { fontFamily: "Inter, sans-serif" } },
