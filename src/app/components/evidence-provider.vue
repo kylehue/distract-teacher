@@ -145,6 +145,9 @@ watch(
          // monitorLog.value.recordingUrl = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
       } else {
          show.value = false;
+         monitorLog.value = undefined;
+         student.value = undefined;
+         room.value = undefined;
       }
    },
 );
