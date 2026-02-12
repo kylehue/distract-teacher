@@ -71,7 +71,6 @@ const integrityOverTimeChartOptions = computed(() => {
       },
       yaxis: {
          min: 0,
-         max: 1,
          title: { text: "Integrity Score" },
          labels: {
             formatter: (val: number) => (val * 100).toFixed(0) + "%",
