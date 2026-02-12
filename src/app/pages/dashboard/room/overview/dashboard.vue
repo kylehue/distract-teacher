@@ -59,7 +59,16 @@
          </NCard>
          <div class="w-full flex flex-wrap gap-4">
             <NCard class="md:flex-1" :bordered="false">
-               <NStatistic label="Average Integrity Score">
+               <NStatistic>
+                  <template #label>
+                     <div class="flex items-center gap-2">
+                        Average Integrity Score
+                        <InfoTooltip>
+                           The integrity score mean across all students in this
+                           room.
+                        </InfoTooltip>
+                     </div>
+                  </template>
                   {{ (integrityScoreAvg * 100).toFixed(2) }}%
                </NStatistic>
                <NText :depth="3" class="text-xs">
@@ -67,12 +76,30 @@
                </NText>
             </NCard>
             <NCard class="md:flex-1" :bordered="false">
-               <NStatistic label="Total Number of Warnings">
+               <NStatistic>
+                  <template #label>
+                     <div class="flex items-center gap-2">
+                        Total Number of Warnings
+                        <InfoTooltip>
+                           The total number of warnings received across all
+                           students in this room.
+                        </InfoTooltip>
+                     </div>
+                  </template>
                   {{ monitorLogsArrayPreprocessed.length }}
                </NStatistic>
             </NCard>
             <NCard class="md:flex-1" :bordered="false">
-               <NStatistic label="Active Students">
+               <NStatistic>
+                  <template #label>
+                     <div class="flex items-center gap-2">
+                        Active Students
+                        <InfoTooltip>
+                           The number of students currently active in the
+                           session.
+                        </InfoTooltip>
+                     </div>
+                  </template>
                   {{
                      studentsArrayPreprocessed.filter(
                         (student) => student.active,
@@ -81,7 +108,17 @@
                </NStatistic>
             </NCard>
             <NCard class="md:flex-1" :bordered="false">
-               <NStatistic label="Inactive Students">
+               <NStatistic>
+                  <template #label>
+                     <div class="flex items-center gap-2">
+                        Inactive Students
+                        <InfoTooltip>
+                           The number of students that have left the session or
+                           were removed. This doesn't include the students that
+                           have no monitor log data.
+                        </InfoTooltip>
+                     </div>
+                  </template>
                   {{
                      studentsArrayPreprocessed.filter(
                         (student) => !student.active,
@@ -145,6 +182,7 @@ import {
    IS_LOADING_INJECTION_KEY,
 } from "@/lib/injection-keys";
 import WarningLevelChart from "./charts/warning-level-chart.vue";
+import InfoTooltip from "@/app/components/info-tooltip.vue";
 
 const props = defineProps<{
    theme: "light" | "dark";

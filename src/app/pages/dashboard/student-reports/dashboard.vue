@@ -77,26 +77,18 @@
          </NCard>
       </div>
       <NText class="text-xl font-medium mt-8">Statistics</NText>
-      <div class="flex-1 grid grid-cols-3 grid-rows-1 gap-4">
+      <div class="flex-1 grid grid-cols-1 lg:grid-cols-3 grid-rows-1 gap-4">
          <NCard :bordered="false">
-            <NStatistic label="Total Number of Warnings">
-               {{ monitorLogs.length }}
-            </NStatistic>
-         </NCard>
-         <NCard :bordered="false">
-            <NStatistic label="Phone Activity Count">
-               {{ reports.phoneDetectionCount }}
-            </NStatistic>
-         </NCard>
-         <NCard :bordered="false">
-            <NStatistic label="Log Count / Expected Log Count Ratio">
-               {{ studentLogCountRatio }}
-            </NStatistic>
-         </NCard>
-      </div>
-      <div class="flex-1 grid lg:grid-cols-3 gap-4 grid-cols-1">
-         <NCard :bordered="false">
-            <NStatistic label="Average Integrity Score">
+            <NStatistic>
+               <template #label>
+                  <div class="flex items-center gap-2">
+                     Integrity Score Average
+                     <InfoTooltip>
+                        The mean integrity score across all monitor logs for
+                        this student.
+                     </InfoTooltip>
+                  </div>
+               </template>
                {{ (reports.integrityScoreAverage * 100).toFixed(2) }}%
             </NStatistic>
             <NText :depth="3" class="text-xs">
@@ -104,7 +96,19 @@
             </NText>
          </NCard>
          <NCard :bordered="false">
-            <NStatistic label="Integrity Score Standard Deviation">
+            <NStatistic>
+               <template #label>
+                  <div class="flex items-center gap-2">
+                     Integrity Score Standard Deviation
+                     <InfoTooltip>
+                        The standard deviation of integrity scores across all
+                        monitor logs for this student. A lower value indicates
+                        more consistent performance. E.g., a standard deviation
+                        of 0% means the student had the same integrity score for
+                        all logs.
+                     </InfoTooltip>
+                  </div>
+               </template>
                {{ (reports.standardDeviation * 100).toFixed(2) }}%
             </NStatistic>
             <NText :depth="3" class="text-xs">
@@ -112,12 +116,68 @@
             </NText>
          </NCard>
          <NCard :bordered="false">
-            <NStatistic label="Log Count Z-Score">
-               {{ studentIndividualReport?.zScore.toFixed(2) ?? "N/A" }}
+            <NStatistic>
+               <template #label>
+                  <div class="flex items-center gap-2">
+                     Phone Activity Count
+                     <InfoTooltip>
+                        The total number of times phone activity was detected
+                        for this student.
+                     </InfoTooltip>
+                  </div>
+               </template>
+               {{ reports.phoneDetectionCount }}
             </NStatistic>
-            <NText v-if="studentIndividualReport" :depth="3" class="text-xs">
-               {{ studentIndividualReport.explanation }}
-            </NText>
+         </NCard>
+      </div>
+      <div class="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4">
+         <div
+            class="flex-1 grid grid-cols-2 lg:grid-cols-1 lg:grid-rows-2 gap-4"
+         >
+            <NCard :bordered="false">
+               <NStatistic>
+                  <template #label>
+                     <div class="flex items-center gap-2">
+                        Total Number of Warnings
+                        <InfoTooltip>
+                           The total number of warnings for this student.
+                        </InfoTooltip>
+                     </div>
+                  </template>
+                  {{ monitorLogs.length }}
+               </NStatistic>
+            </NCard>
+            <NCard :bordered="false">
+               <NStatistic>
+                  <template #label>
+                     <div class="flex items-center gap-2">
+                        Log Count / Expected Log Count Ratio
+                        <InfoTooltip>
+                           The ratio of the student's actual monitor log count
+                           to the expected monitor log count based on the
+                           duration of the room session. A ratio close to 1
+                           suggests that the number of logs recorded aligns with
+                           expectations, while a significantly lower ratio may
+                           indicate unusual disconnects, technical issues, or
+                           atypical student behavior.
+                        </InfoTooltip>
+                     </div>
+                  </template>
+                  {{ studentLogCountRatio }}
+               </NStatistic>
+            </NCard>
+         </div>
+         <NCard title="Log Count Z-Score" :bordered="false">
+            <template #header-extra>
+               <InfoTooltip>
+                  The Z-score indicates how many standard deviations the
+                  student's log count is from the mean log count of all students
+                  in the session. A positive Z-score means the student has more
+                  logs than average, while a negative Z-score indicates fewer
+                  logs than average.
+               </InfoTooltip>
+            </template>
+            <LogCountChart :theme="props.theme" :static="props.static" />
          </NCard>
       </div>
       <NText class="text-xl font-medium mt-8">Performance Analytics</NText>
@@ -146,7 +206,7 @@
 
 <script setup lang="ts">
 import { PhArrowSquareOut } from "@phosphor-icons/vue";
-import { NButton, NText, NStatistic, NCard } from "naive-ui";
+import { NButton, NText, NStatistic, NCard, NTooltip, NIcon } from "naive-ui";
 import { computed, inject, useTemplateRef } from "vue";
 import { RouterLink } from "vue-router";
 import {
@@ -169,6 +229,8 @@ import {
    STUDENTS_MAP_INJECTION_KEY,
    TEACHER_INJECTION_KEY,
 } from "@/lib/injection-keys";
+import LogCountChart from "./charts/log-count-chart.vue";
+import InfoTooltip from "@/app/components/info-tooltip.vue";
 
 const props = defineProps<{
    theme: "light" | "dark";
