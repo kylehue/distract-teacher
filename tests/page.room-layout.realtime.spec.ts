@@ -56,7 +56,14 @@ vi.mock("@/app/composables/use-fetch", () => ({
 
 vi.mock("naive-ui", () => ({
    NButton: {
-      props: ["disabled", "loading", "type", "secondary", "circle", "quaternary"],
+      props: [
+         "disabled",
+         "loading",
+         "type",
+         "secondary",
+         "circle",
+         "quaternary",
+      ],
       emits: ["click"],
       template:
          "<button type='button' :disabled='disabled' @click=\"$emit('click')\"><slot /></button>",
@@ -197,13 +204,19 @@ describe("Dashboard Room Layout Page", () => {
       await buttons[4].trigger("click");
       await Promise.resolve();
 
-      expect(state.fetchByUrl["/api/start_monitoring/:roomId"].execute).toHaveBeenCalledWith({
+      expect(
+         state.fetchByUrl["/api/start_monitoring/:roomId"].execute,
+      ).toHaveBeenCalledWith({
          params: { roomId: "r1" },
       });
-      expect(state.fetchByUrl["/api/pause_monitoring/:roomId"].execute).toHaveBeenCalledWith({
+      expect(
+         state.fetchByUrl["/api/pause_monitoring/:roomId"].execute,
+      ).toHaveBeenCalledWith({
          params: { roomId: "r1" },
       });
-      expect(state.fetchByUrl["/api/stop_monitoring/:roomId"].execute).toHaveBeenCalledWith({
+      expect(
+         state.fetchByUrl["/api/stop_monitoring/:roomId"].execute,
+      ).toHaveBeenCalledWith({
          params: { roomId: "r1" },
       });
       expect(state.announcementShow).toHaveBeenCalled();

@@ -23,7 +23,9 @@ export function listSourceFiles(): string[] {
 }
 
 export function nonPageSourceFiles(): string[] {
-   return listSourceFiles().filter((file) => !file.startsWith("src/app/pages/"));
+   return listSourceFiles().filter(
+      (file) => !file.startsWith("src/app/pages/"),
+   );
 }
 
 export function pageAndComponentVueFiles(): string[] {

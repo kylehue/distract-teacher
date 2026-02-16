@@ -81,10 +81,14 @@ describe("Misc UI Components", () => {
    it("content loader renders nested loader", () => {
       const wrapper = mount(ContentLoader, {
          global: {
-            stubs: { Loader: { template: "<div data-testid='loader'>loader</div>" } },
+            stubs: {
+               Loader: { template: "<div data-testid='loader'>loader</div>" },
+            },
          },
       });
-      expect(wrapper.get("[data-testid='loader']").exists()).toBe(true);
+      expect((wrapper.get("[data-testid='loader']") as any).exists()).toBe(
+         true,
+      );
    });
 
    it("info tooltip renders slot and themed icon color", () => {
@@ -120,14 +124,14 @@ describe("Misc UI Components", () => {
       });
 
       expect(wrapper.text()).toContain("Monitoring");
-      expect(wrapper.get('[data-type="warning"]').exists()).toBe(true);
+      expect((wrapper.get('[data-type="warning"]') as any).exists()).toBe(true);
 
       await wrapper.setProps({
          room: { status: "concluded" },
          type: "general",
       });
       expect(wrapper.text()).toContain("Concluded");
-      expect(wrapper.get('[data-type="error"]').exists()).toBe(true);
+      expect((wrapper.get('[data-type="error"]') as any).exists()).toBe(true);
    });
 
    it("logout overlay includes logging out indicator", () => {

@@ -11,7 +11,8 @@ vi.mock("naive-ui", () => ({
       name: "NButton",
       emits: ["click"],
       setup(_, { slots, emit }) {
-         return () => h("button", { onClick: () => emit("click") }, slots.default?.());
+         return () =>
+            h("button", { onClick: () => emit("click") }, slots.default?.());
       },
    }),
    NText: defineComponent({
@@ -72,6 +73,8 @@ describe("CopyButton", () => {
       await wrapper.get("button").trigger("click");
       await Promise.resolve();
 
-      expect(errorSpy).toHaveBeenCalledWith("Failed to copy text to clipboard.");
+      expect(errorSpy).toHaveBeenCalledWith(
+         "Failed to copy text to clipboard.",
+      );
    });
 });

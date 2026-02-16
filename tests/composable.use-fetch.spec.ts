@@ -33,7 +33,9 @@ describe("useFetch", () => {
          "fetch",
          vi.fn().mockResolvedValue({
             ok: false,
-            json: async () => ({ detail: { message: "Bad", field_errors: { a: "b" } } }),
+            json: async () => ({
+               detail: { message: "Bad", field_errors: { a: "b" } },
+            }),
          }),
       );
 
@@ -46,7 +48,10 @@ describe("useFetch", () => {
    it("resolves url params", async () => {
       vi.stubGlobal(
          "fetch",
-         vi.fn().mockResolvedValue({ ok: true, json: async () => ({ message: "ok" }) }),
+         vi.fn().mockResolvedValue({
+            ok: true,
+            json: async () => ({ message: "ok" }),
+         }),
       );
 
       const api = useFetch("/api/rooms/:roomId", "GET");
@@ -58,13 +63,18 @@ describe("useFetch", () => {
    it("encodes unsafe url params", async () => {
       vi.stubGlobal(
          "fetch",
-         vi.fn().mockResolvedValue({ ok: true, json: async () => ({ message: "ok" }) }),
+         vi.fn().mockResolvedValue({
+            ok: true,
+            json: async () => ({ message: "ok" }),
+         }),
       );
 
       const api = useFetch("/api/rooms/:roomId/students/:studentId", "GET");
       await api.execute({ params: { roomId: "a/b", studentId: "x y" } });
 
-      expect((fetch as any).mock.calls[0][0]).toContain("/api/rooms/a%2Fb/students/x%20y");
+      expect((fetch as any).mock.calls[0][0]).toContain(
+         "/api/rooms/a%2Fb/students/x%20y",
+      );
    });
 
    it("handles fetch rejection and resets loading state", async () => {
@@ -85,12 +95,19 @@ describe("useFetch", () => {
    it("sends FormData without forcing json content type", async () => {
       vi.stubGlobal(
          "fetch",
-         vi.fn().mockResolvedValue({ ok: true, json: async () => ({ message: "ok" }) }),
+         vi.fn().mockResolvedValue({
+            ok: true,
+            json: async () => ({ message: "ok" }),
+         }),
       );
 
       const api = useFetch("/api/upload", "POST");
       const form = new FormData();
-      form.append("file", new Blob(["test"], { type: "text/plain" }), "test.txt");
+      form.append(
+         "file",
+         new Blob(["test"], { type: "text/plain" }),
+         "test.txt",
+      );
 
       await api.execute({ body: form });
 

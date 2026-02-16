@@ -50,7 +50,11 @@ vi.mock("naive-ui", () => ({
          feedback: { type: String, default: "" },
       },
       setup(props, { slots }) {
-         return () => h("div", [slots.default?.(), h("p", { class: "feedback" }, props.feedback)]);
+         return () =>
+            h("div", [
+               slots.default?.(),
+               h("p", { class: "feedback" }, props.feedback),
+            ]);
       },
    }),
    NInput: defineComponent({
@@ -70,7 +74,12 @@ vi.mock("naive-ui", () => ({
       name: "NButton",
       emits: ["click"],
       setup(_, { slots, emit }) {
-         return () => h("button", { type: "button", onClick: () => emit("click") }, slots.default?.());
+         return () =>
+            h(
+               "button",
+               { type: "button", onClick: () => emit("click") },
+               slots.default?.(),
+            );
       },
    }),
    useMessage: () => ({ error: messageErrorSpy, success: messageSuccessSpy }),
@@ -142,7 +151,9 @@ describe("Auth Pages", () => {
       await wrapper.findAll("button")[0].trigger("click");
 
       expect(registerFetch.execute).toHaveBeenCalled();
-      expect(messageSuccessSpy).toHaveBeenCalledWith("Registration successful!");
+      expect(messageSuccessSpy).toHaveBeenCalledWith(
+         "Registration successful!",
+      );
       expect(pushSpy).toHaveBeenCalledWith("/login");
    });
 

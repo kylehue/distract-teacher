@@ -35,8 +35,8 @@ vi.mock("@/lib/dom", () => ({
 
 vi.mock("@/lib/reports", () => ({
    createMonitorLogsReports: vi.fn(() => ({ integrityScoreAverage: 0.9 })),
-   createStudentsIndividualReports: vi.fn(() =>
-      new Map([["s1", { zScore: 0.2, explanation: "ok" }]]),
+   createStudentsIndividualReports: vi.fn(
+      () => new Map([["s1", { zScore: 0.2, explanation: "ok" }]]),
    ),
 }));
 
@@ -48,7 +48,10 @@ vi.mock("naive-ui", () => ({
          "<button type='button' :disabled='disabled' @click=\"$emit('click')\"><slot /></button>",
    },
    NText: { template: "<span><slot /></span>" },
-   NEmpty: { props: ["description"], template: "<div>{{ description }}<slot /></div>" },
+   NEmpty: {
+      props: ["description"],
+      template: "<div>{{ description }}<slot /></div>",
+   },
    NConfigProvider: { template: "<div><slot /></div>" },
    lightTheme: {},
 }));

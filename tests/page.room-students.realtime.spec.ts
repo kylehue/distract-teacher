@@ -74,7 +74,10 @@ describe("Dashboard Room Students Page", () => {
       const wrapper = mount(RoomStudentsPage, {
          global: {
             provide: {
-               [ROOM_INJECTION_KEY as symbol]: ref({ id: "r1", status: "monitoring" }),
+               [ROOM_INJECTION_KEY as symbol]: ref({
+                  id: "r1",
+                  status: "monitoring",
+               }),
                [IS_LOADING_INJECTION_KEY as symbol]: ref(false),
                [STUDENTS_INJECTION_KEY as symbol]: allStudents,
             },
@@ -91,7 +94,9 @@ describe("Dashboard Room Students Page", () => {
 
       await wrapper.get("button[data-checked='false']").trigger("click");
       await nextTick();
-      expect(wrapper.get('[data-testid="students-table"]').attributes("data-count")).toBe("2");
+      expect(
+         wrapper.get('[data-testid="students-table"]').attributes("data-count"),
+      ).toBe("2");
 
       await wrapper.get('[data-testid="trigger-search"]').trigger("click");
       expect(filtersSpy).toHaveBeenCalledWith({ name: ["s2"] });
@@ -101,7 +106,10 @@ describe("Dashboard Room Students Page", () => {
       const wrapper = mount(RoomStudentsPage, {
          global: {
             provide: {
-               [ROOM_INJECTION_KEY as symbol]: ref({ id: "r1", status: "concluded" }),
+               [ROOM_INJECTION_KEY as symbol]: ref({
+                  id: "r1",
+                  status: "concluded",
+               }),
                [IS_LOADING_INJECTION_KEY as symbol]: ref(false),
                [STUDENTS_INJECTION_KEY as symbol]: ref([
                   { id: "s1", name: "Alice", permitted: true, active: true },
@@ -116,7 +124,11 @@ describe("Dashboard Room Students Page", () => {
       });
 
       expect(wrapper.find("button[data-checked='false']").exists()).toBe(false);
-      expect(wrapper.find('[data-testid="students-table"]').attributes("data-count")).toBe("1");
+      expect(
+         wrapper
+            .find('[data-testid="students-table"]')
+            .attributes("data-count"),
+      ).toBe("1");
    });
 
    it("renders no-room state when room injection is null", () => {

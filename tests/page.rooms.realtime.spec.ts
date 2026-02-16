@@ -69,7 +69,8 @@ vi.mock("naive-ui", () => ({
       name: "NButton",
       emits: ["click"],
       setup(_, { slots, emit }) {
-         return () => h("button", { onClick: () => emit("click") }, slots.default?.());
+         return () =>
+            h("button", { onClick: () => emit("click") }, slots.default?.());
       },
    }),
    NText: defineComponent({
@@ -87,7 +88,7 @@ vi.mock("naive-ui", () => ({
    NDataTable: defineComponent({
       name: "NDataTable",
       props: {
-        data: { type: Array, default: () => [] },
+         data: { type: Array, default: () => [] },
       },
       setup(props) {
          return () =>
@@ -95,7 +96,11 @@ vi.mock("naive-ui", () => ({
                "div",
                { "data-testid": "rooms-table" },
                (props.data as any[]).map((r) =>
-                  h("p", { class: "room-row" }, `${r.title}|${r.code}|${r.status}`),
+                  h(
+                     "p",
+                     { class: "room-row" },
+                     `${r.title}|${r.code}|${r.status}`,
+                  ),
                ),
             );
       },
@@ -242,7 +247,9 @@ describe("Dashboard Rooms Page (real-time)", () => {
          "Deleted Realtime Room|DEL1|ongoing",
       );
 
-      socketHandlers.get("teacher:delete_room")?.({ room: { ...room, isDeleted: true } });
+      socketHandlers.get("teacher:delete_room")?.({
+         room: { ...room, isDeleted: true },
+      });
       await nextTick();
       expect(wrapper.findAll(".room-row").length).toBe(0);
    });

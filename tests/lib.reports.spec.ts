@@ -21,7 +21,9 @@ describe("lib/reports", () => {
       expect(explainIntegrity(0.95)).toMatch(/Excellent/);
       expect(explainStdDev(0.25)).toMatch(/highly variable/);
       expect(explainStdDev(0.2)).toMatch(/highly variable/);
-      expect(explainIntegrityAndStdDev(0.1, 0.9)).toContain("overall integrity score");
+      expect(explainIntegrityAndStdDev(0.1, 0.9)).toContain(
+         "overall integrity score",
+      );
    });
 
    it("groups feature impacts", () => {
@@ -74,9 +76,13 @@ describe("lib/reports", () => {
             6000,
          ),
       ).toBe(2);
-      expect(computeExpectedMonitorLogCount(new Date(0), new Date(12000), 6000)).toBe(2);
+      expect(
+         computeExpectedMonitorLogCount(new Date(0), new Date(12000), 6000),
+      ).toBe(2);
       expect(computeExpectedMonitorLogCount("invalid", "2025-01-01")).toBe(0);
-      expect(computeExpectedMonitorLogCount("2025-01-01", "2024-01-01")).toBe(0);
+      expect(computeExpectedMonitorLogCount("2025-01-01", "2024-01-01")).toBe(
+         0,
+      );
    });
 
    it("returns 0 expected monitor logs for non-positive intervals", () => {

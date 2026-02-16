@@ -44,7 +44,9 @@ vi.mock("@/app/composables/use-fetch", () => ({
             } else if (url === "/api/rooms") {
                state.data = { data: { rooms: [] } };
             } else if (url === "/api/rooms/:roomId") {
-               state.data = { data: { room: {}, students: [], monitorLogs: [] } };
+               state.data = {
+                  data: { room: {}, students: [], monitorLogs: [] },
+               };
             } else if (url === "/api/students/:studentId") {
                state.data = {
                   data: { student: {}, monitorLogs: [], room: {}, teacher: {} },
@@ -73,17 +75,34 @@ vi.mock("@phosphor-icons/vue", () => ({
 }));
 
 vi.mock("naive-ui", () => ({
-   NLayout: defineComponent({ setup(_, { slots }) { return () => h("div", slots.default?.()); } }),
-   NLayoutContent: defineComponent({ setup(_, { slots }) { return () => h("div", slots.default?.()); } }),
+   NLayout: defineComponent({
+      setup(_, { slots }) {
+         return () => h("div", slots.default?.());
+      },
+   }),
+   NLayoutContent: defineComponent({
+      setup(_, { slots }) {
+         return () => h("div", slots.default?.());
+      },
+   }),
    NDivider: defineComponent({ setup: () => () => h("hr") }),
-   NText: defineComponent({ setup(_, { slots }) { return () => h("span", slots.default?.()); } }),
+   NText: defineComponent({
+      setup(_, { slots }) {
+         return () => h("span", slots.default?.());
+      },
+   }),
    NButton: defineComponent({
       emits: ["click"],
       setup(_, { slots, emit }) {
-         return () => h("button", { onClick: () => emit("click") }, slots.default?.());
+         return () =>
+            h("button", { onClick: () => emit("click") }, slots.default?.());
       },
    }),
-   NEmpty: defineComponent({ setup(_, { slots }) { return () => h("div", slots.default?.() ?? "empty"); } }),
+   NEmpty: defineComponent({
+      setup(_, { slots }) {
+         return () => h("div", slots.default?.() ?? "empty");
+      },
+   }),
    NDataTable: defineComponent({
       props: { data: { type: Array, default: () => [] } },
       setup(props) {
@@ -91,7 +110,9 @@ vi.mock("naive-ui", () => ({
             h(
                "div",
                { "data-testid": "trash-table" },
-               (props.data as any[]).map((r) => h("p", { class: "trash-row" }, `${r.title}|${r.code}`)),
+               (props.data as any[]).map((r) =>
+                  h("p", { class: "trash-row" }, `${r.title}|${r.code}`),
+               ),
             );
       },
    }),

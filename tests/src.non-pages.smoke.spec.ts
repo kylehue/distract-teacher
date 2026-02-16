@@ -9,8 +9,7 @@ describe("src non-page module syntax coverage", () => {
    it("parses all non-page ts/vue files", () => {
       const files = nonPageSourceFiles().filter(
          (f) =>
-            (f.endsWith(".ts") || f.endsWith(".vue")) &&
-            !f.endsWith(".d.ts"),
+            (f.endsWith(".ts") || f.endsWith(".vue")) && !f.endsWith(".d.ts"),
       );
 
       for (const file of files) {

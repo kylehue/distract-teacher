@@ -35,39 +35,109 @@ vi.mock("@/app/composables/use-fetch", () => ({
                throw new Error(`transient ${url}`);
             }
             if (url === "/api/rooms") {
-               state.data = { data: { rooms: [{ id: "r1", title: "Room", teacherAccountId: "t1" }] } };
+               state.data = {
+                  data: {
+                     rooms: [
+                        { id: "r1", title: "Room", teacherAccountId: "t1" },
+                     ],
+                  },
+               };
             } else if (url === "/api/deleted_rooms") {
-               state.data = { data: { rooms: [{ id: "r2", title: "Trash", teacherAccountId: "t1" }] } };
+               state.data = {
+                  data: {
+                     rooms: [
+                        { id: "r2", title: "Trash", teacherAccountId: "t1" },
+                     ],
+                  },
+               };
             } else if (url === "/api/rooms/:roomId") {
                state.data = {
                   data: {
-                     room: { id: args?.params?.roomId, title: "Room", teacherAccountId: "t1" },
-                     students: [{ id: "s1", roomId: args?.params?.roomId, monitorLogCount: 0 }],
-                     monitorLogs: [{ id: "m1", roomId: args?.params?.roomId, studentId: "s1", integrityScore: 0.8, isPhonePresent: false }],
+                     room: {
+                        id: args?.params?.roomId,
+                        title: "Room",
+                        teacherAccountId: "t1",
+                     },
+                     students: [
+                        {
+                           id: "s1",
+                           roomId: args?.params?.roomId,
+                           monitorLogCount: 0,
+                        },
+                     ],
+                     monitorLogs: [
+                        {
+                           id: "m1",
+                           roomId: args?.params?.roomId,
+                           studentId: "s1",
+                           integrityScore: 0.8,
+                           isPhonePresent: false,
+                        },
+                     ],
                   },
                };
             } else if (url === "/api/students/:studentId") {
                state.data = {
                   data: {
-                     student: { id: args?.params?.studentId, roomId: "r1", monitorLogCount: 1 },
-                     monitorLogs: [{ id: "m2", roomId: "r1", studentId: args?.params?.studentId, integrityScore: 0.4, isPhonePresent: true }],
+                     student: {
+                        id: args?.params?.studentId,
+                        roomId: "r1",
+                        monitorLogCount: 1,
+                     },
+                     monitorLogs: [
+                        {
+                           id: "m2",
+                           roomId: "r1",
+                           studentId: args?.params?.studentId,
+                           integrityScore: 0.4,
+                           isPhonePresent: true,
+                        },
+                     ],
                      room: { id: "r1", title: "Room", teacherAccountId: "t1" },
                      teacher: { id: "t1" },
                   },
                };
             } else if (url === "/api/rooms/:roomId/students") {
-               state.data = { data: { students: [{ id: "s2", roomId: args?.params?.roomId, monitorLogCount: 0 }] } };
+               state.data = {
+                  data: {
+                     students: [
+                        {
+                           id: "s2",
+                           roomId: args?.params?.roomId,
+                           monitorLogCount: 0,
+                        },
+                     ],
+                  },
+               };
             } else if (url === "/api/monitor_logs/:monitorLogId") {
                state.data = {
                   data: {
-                     monitorLog: { id: args?.params?.monitorLogId, roomId: "r1", studentId: "s1", integrityScore: 0.1, isPhonePresent: false },
+                     monitorLog: {
+                        id: args?.params?.monitorLogId,
+                        roomId: "r1",
+                        studentId: "s1",
+                        integrityScore: 0.1,
+                        isPhonePresent: false,
+                     },
                      room: { id: "r1", title: "Room", teacherAccountId: "t1" },
                      student: { id: "s1", roomId: "r1", monitorLogCount: 1 },
                      teacher: { id: "t1" },
                   },
                };
             } else if (url === "/api/rooms/:roomId/monitor_logs") {
-               state.data = { data: { monitorLogs: [{ id: "m3", roomId: args?.params?.roomId, studentId: "s1", integrityScore: 0.3, isPhonePresent: false }] } };
+               state.data = {
+                  data: {
+                     monitorLogs: [
+                        {
+                           id: "m3",
+                           roomId: args?.params?.roomId,
+                           studentId: "s1",
+                           integrityScore: 0.3,
+                           isPhonePresent: false,
+                        },
+                     ],
+                  },
+               };
             }
 
             return state.data;
@@ -111,9 +181,15 @@ describe("useStore", () => {
    it("handles realtime handlers for upsert/delete/restore", () => {
       const store = useStore();
 
-      socketHandlers.get("teacher:upsert_room")?.({ room: { id: "r1", title: "R" } });
-      socketHandlers.get("teacher:upsert_student")?.({ student: { id: "s1", roomId: "r1", monitorLogCount: 0 } });
-      socketHandlers.get("teacher:upsert_monitor_log")?.({ monitorLog: { id: "m1", roomId: "r1", studentId: "s1" } });
+      socketHandlers.get("teacher:upsert_room")?.({
+         room: { id: "r1", title: "R" },
+      });
+      socketHandlers.get("teacher:upsert_student")?.({
+         student: { id: "s1", roomId: "r1", monitorLogCount: 0 },
+      });
+      socketHandlers.get("teacher:upsert_monitor_log")?.({
+         monitorLog: { id: "m1", roomId: "r1", studentId: "s1" },
+      });
 
       expect(store.allRooms.has("r1")).toBe(true);
       expect(store.allStudents.has("s1")).toBe(true);
@@ -122,7 +198,9 @@ describe("useStore", () => {
       socketHandlers.get("teacher:delete_student")?.({ student: { id: "s1" } });
       expect(store.allStudents.has("s1")).toBe(false);
 
-      socketHandlers.get("teacher:delete_room")?.({ room: { id: "r1", title: "R" } });
+      socketHandlers.get("teacher:delete_room")?.({
+         room: { id: "r1", title: "R" },
+      });
       expect(store.allRooms.has("r1")).toBe(false);
       expect(store.deletedRooms.has("r1")).toBe(true);
 
@@ -160,7 +238,9 @@ describe("useStore", () => {
       expect(store.allRooms.has("r-fail")).toBe(true);
 
       failOnce.set("/api/rooms/:roomId/monitor_logs", 1);
-      await expect(store.loadMonitorLogs("r-fail")).rejects.toThrow(/transient/);
+      await expect(store.loadMonitorLogs("r-fail")).rejects.toThrow(
+         /transient/,
+      );
       await store.loadMonitorLogs("r-fail");
       expect(fetchCallCount.get("/api/rooms/:roomId/monitor_logs")).toBe(2);
       expect(store.allMonitorLogs.has("m3")).toBe(true);

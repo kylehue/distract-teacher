@@ -17,7 +17,9 @@ describe("lib/string", () => {
    });
 
    it("handles edge formatting in camel case conversion", () => {
-      expect(toCamelCase("___HELLO-world__TEST  value")).toBe("helloWorldTestValue");
+      expect(toCamelCase("___HELLO-world__TEST  value")).toBe(
+         "helloWorldTestValue",
+      );
       expect(toCamelCase("   ")).toBe("");
       expect(toCamelCase("--")).toBe("");
    });

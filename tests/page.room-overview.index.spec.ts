@@ -33,8 +33,8 @@ vi.mock("@/lib/dom", () => ({
 
 vi.mock("@/lib/reports", () => ({
    createMonitorLogsReports: vi.fn(() => ({ integrityScoreAverage: 0.9 })),
-   createStudentsIndividualReports: vi.fn(() =>
-      new Map([["s1", { zScore: 0.2, explanation: "ok" }]]),
+   createStudentsIndividualReports: vi.fn(
+      () => new Map([["s1", { zScore: 0.2, explanation: "ok" }]]),
    ),
 }));
 
@@ -135,7 +135,11 @@ describe("Room Overview Index Page", () => {
          global: {
             provide: {
                [THEME_INJECTION_KEY as symbol]: ref("light"),
-               [ROOM_INJECTION_KEY as symbol]: ref({ id: "r1", code: "RM01", title: "Room 1" } as any),
+               [ROOM_INJECTION_KEY as symbol]: ref({
+                  id: "r1",
+                  code: "RM01",
+                  title: "Room 1",
+               } as any),
                [STUDENTS_INJECTION_KEY as symbol]: ref([
                   { id: "s1", name: "Alice", monitorLogCount: 1 },
                ] as any[]),

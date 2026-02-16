@@ -53,7 +53,10 @@ vi.mock("naive-ui", () => ({
 }));
 
 vi.mock("@phosphor-icons/vue", () => ({
-   PhMagnifyingGlass: defineComponent({ name: "PhMagnifyingGlass", setup: () => () => h("i") }),
+   PhMagnifyingGlass: defineComponent({
+      name: "PhMagnifyingGlass",
+      setup: () => () => h("i"),
+   }),
 }));
 
 describe("InputSearch", () => {
