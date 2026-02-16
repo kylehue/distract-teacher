@@ -61,11 +61,11 @@ export const FEATURE_GROUPS_MAP: Record<
    keyof MonitorLog["featureImpacts"],
    string
 > = {
-   faceX: "Face Position",
-   faceY: "Face Position",
-   faceW: "Face Position",
-   faceH: "Face Position",
-   faceConf: "Face Position",
+   faceX: "Face Bounds",
+   faceY: "Face Bounds",
+   faceW: "Face Bounds",
+   faceH: "Face Bounds",
+   faceConf: "Face Bounds",
    eyeGazeX: "Eye Gaze",
    eyeGazeY: "Eye Gaze",
    headPitch: "Head Orientation",

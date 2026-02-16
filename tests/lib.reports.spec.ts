@@ -46,7 +46,7 @@ describe("lib/reports", () => {
          handCount: 0,
          facePresent: 0,
       });
-      expect(grouped["Face Position"]).toBeCloseTo(0.3);
+      expect(grouped["Face Bounds"]).toBeCloseTo(0.3);
       expect(grouped["Eye Gaze"]).toBeCloseTo(0.5);
    });
 
