@@ -29,7 +29,7 @@ export function getWithDefault<K, V>(
 export function keysToCamel<T>(obj: T): T {
    if (Array.isArray(obj)) {
       return obj.map((item) => keysToCamel(item)) as any;
-   } else if (obj !== null && typeof obj === "object") {
+   } else if (isObject(obj)) {
       const newObj: any = {};
       for (const [key, value] of Object.entries(obj)) {
          newObj[toCamelCase(key)] = keysToCamel(value);
@@ -40,20 +40,26 @@ export function keysToCamel<T>(obj: T): T {
 }
 
 export function deepMerge(target: any, source: any): any {
-   const output = { ...target };
-   if (isObject(target) && isObject(source)) {
-      Object.keys(source).forEach((key) => {
-         if (isObject(source[key])) {
-            if (!(key in target)) Object.assign(output, { [key]: source[key] });
-            else output[key] = deepMerge(target[key], source[key]);
-         } else {
-            Object.assign(output, { [key]: source[key] });
-         }
-      });
+   if (!isObject(target) && isObject(source)) {
+      return deepMerge({}, source);
    }
+   if (!isObject(target)) return source;
+   if (!isObject(source)) return { ...target };
+
+   const output = { ...target };
+   Object.keys(source).forEach((key) => {
+      if (isObject(source[key])) {
+         if (!(key in target)) Object.assign(output, { [key]: source[key] });
+         else output[key] = deepMerge(target[key], source[key]);
+      } else {
+         Object.assign(output, { [key]: source[key] });
+      }
+   });
    return output;
 }
 
 export function isObject(item: any): boolean {
-   return item && typeof item === "object" && !Array.isArray(item);
+   if (!item || typeof item !== "object" || Array.isArray(item)) return false;
+   const proto = Object.getPrototypeOf(item);
+   return proto === Object.prototype || proto === null;
 }

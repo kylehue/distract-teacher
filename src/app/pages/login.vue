@@ -72,8 +72,10 @@ async function login() {
    passwordStatus.value = "success";
    usernameFeedback.value = "";
    passwordFeedback.value = "";
+   let loginSucceeded = false;
    try {
       await auth.loginWithCredentials(username.value, password.value);
+      loginSucceeded = true;
    } catch {
       if (!auth.postLogin.error) {
          message.error("An unknown error occurred during login.");
@@ -96,7 +98,9 @@ async function login() {
       }
    }
 
-   store.clear();
+   if (loginSucceeded) {
+      store.clear();
+   }
 }
 
 onBeforeMount(() => {

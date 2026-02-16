@@ -36,13 +36,13 @@ export const useStore = defineStore("main-store", () => {
    let isRoomsLoaded = false;
    async function loadRooms() {
       if (LOAD_ONCE && isRoomsLoaded) return;
-      isRoomsLoaded = true;
 
       await getRooms.execute();
 
       const data = getRooms.data?.data;
       if (!data) throw new Error("No data");
       upsertRooms(data.rooms);
+      isRoomsLoaded = true;
    }
 
    const getDeletedRooms = useFetch<{
@@ -52,13 +52,13 @@ export const useStore = defineStore("main-store", () => {
    let isDeletedRoomsLoaded = false;
    async function loadDeletedRooms() {
       if (LOAD_ONCE && isDeletedRoomsLoaded) return;
-      isDeletedRoomsLoaded = true;
 
       await getDeletedRooms.execute();
 
       const data = getDeletedRooms.data?.data;
       if (!data) throw new Error("No data");
       upsertDeletedRooms(data.rooms);
+      isDeletedRoomsLoaded = true;
    }
 
    const getRoom = useFetch<{
@@ -69,7 +69,6 @@ export const useStore = defineStore("main-store", () => {
    const loadRoomSet = new Set<string>();
    async function loadRoom(roomId: string) {
       if (LOAD_ONCE && loadRoomSet.has(roomId)) return;
-      loadRoomSet.add(roomId);
 
       await getRoom.execute({ params: { roomId } });
 
@@ -78,6 +77,7 @@ export const useStore = defineStore("main-store", () => {
       upsertRooms([data.room]);
       upsertStudents(data.students);
       upsertMonitorLogs(data.monitorLogs);
+      loadRoomSet.add(roomId);
    }
 
    const getStudent = useFetch<{
@@ -89,7 +89,6 @@ export const useStore = defineStore("main-store", () => {
    const loadStudentSet = new Set<string>();
    async function loadStudent(studentId: string) {
       if (LOAD_ONCE && loadStudentSet.has(studentId)) return;
-      loadStudentSet.add(studentId);
 
       await getStudent.execute({ params: { studentId } });
 
@@ -98,6 +97,7 @@ export const useStore = defineStore("main-store", () => {
       upsertStudents([data.student]);
       upsertMonitorLogs(data.monitorLogs);
       upsertRooms([data.room]);
+      loadStudentSet.add(studentId);
    }
 
    const getRoomStudents = useFetch<{
@@ -106,13 +106,13 @@ export const useStore = defineStore("main-store", () => {
    const loadRoomStudentsSet = new Set<string>();
    async function loadStudents(roomId: string) {
       if (LOAD_ONCE && loadRoomStudentsSet.has(roomId)) return;
-      loadRoomStudentsSet.add(roomId);
 
       await getRoomStudents.execute({ params: { roomId } });
 
       const data = getRoomStudents.data?.data;
       if (!data) throw new Error("No data");
       upsertStudents(data.students);
+      loadRoomStudentsSet.add(roomId);
    }
 
    const getMonitorLog = useFetch<{
@@ -124,7 +124,6 @@ export const useStore = defineStore("main-store", () => {
    const loadMonitorLogSet = new Set<string>();
    async function loadMonitorLog(monitorLogId: string) {
       if (LOAD_ONCE && loadMonitorLogSet.has(monitorLogId)) return;
-      loadMonitorLogSet.add(monitorLogId);
 
       await getMonitorLog.execute({ params: { monitorLogId } });
 
@@ -133,6 +132,7 @@ export const useStore = defineStore("main-store", () => {
       upsertRooms([data.room]);
       upsertMonitorLogs([data.monitorLog]);
       upsertStudents([data.student]);
+      loadMonitorLogSet.add(monitorLogId);
    }
 
    const getRoomMonitorLogs = useFetch<{
@@ -140,7 +140,6 @@ export const useStore = defineStore("main-store", () => {
    }>("/api/rooms/:roomId/monitor_logs");
    const loadRoomMonitorLogsSet = new Set<string>();
    async function loadMonitorLogs(roomId: string) {
-      loadRoomMonitorLogsSet.add(roomId);
       if (LOAD_ONCE && loadRoomMonitorLogsSet.has(roomId)) return;
 
       await getRoomMonitorLogs.execute({
@@ -151,6 +150,7 @@ export const useStore = defineStore("main-store", () => {
       if (!data) throw new Error("No data");
 
       upsertMonitorLogs(data.monitorLogs);
+      loadRoomMonitorLogsSet.add(roomId);
    }
 
    // --- upsert functions ---

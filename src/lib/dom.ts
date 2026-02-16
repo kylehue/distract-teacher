@@ -3,6 +3,12 @@ import { jsPDF } from "jspdf";
 
 export function waitForSvg(el: HTMLElement) {
    return new Promise<void>((resolve) => {
+      // Resolve immediately when SVG is already present to avoid deadlocks.
+      if (el.querySelector("svg")) {
+         resolve();
+         return;
+      }
+
       const observer = new MutationObserver(() => {
          if (el.querySelector("svg")) {
             observer.disconnect();

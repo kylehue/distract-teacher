@@ -5,9 +5,16 @@ export function compareTimestamps(
    if (!timestampA && !timestampB) return 0;
    if (!timestampA) return -1;
    if (!timestampB) return 1;
-   const dateA = new Date(timestampA);
-   const dateB = new Date(timestampB);
-   return dateA.getTime() - dateB.getTime();
+   const dateA = Date.parse(timestampA);
+   const dateB = Date.parse(timestampB);
+   const isAValid = Number.isFinite(dateA);
+   const isBValid = Number.isFinite(dateB);
+
+   if (!isAValid && !isBValid) return 0;
+   if (!isAValid) return -1;
+   if (!isBValid) return 1;
+
+   return dateA - dateB;
 }
 
 export function timestampToTimeString(
@@ -74,6 +81,7 @@ export function totalTime(start: string, end?: string): string {
    let totalSeconds = Math.floor(
       (endDate.getTime() - startDate.getTime()) / 1000,
    );
+   if (!Number.isFinite(totalSeconds) || totalSeconds <= 0) return "0s";
 
    const hours = Math.floor(totalSeconds / 3600);
    totalSeconds %= 3600;

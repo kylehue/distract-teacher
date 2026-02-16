@@ -52,7 +52,7 @@ export function explainStdDev(std: number): string {
    if (std < 0.05) return "Student's behavior is very consistent.";
    if (std < 0.1) return "Student's behavior is mostly consistent.";
    if (std < 0.2) return "Student's behavior is somewhat inconsistent.";
-   if (std > 0.2)
+   if (std >= 0.2)
       return "Student's behavior is highly variable during sessions.";
    return "Insufficient data to determine variability.";
 }
@@ -109,8 +109,8 @@ export function createMonitorLogsReports(monitorLogs: MonitorLog[]) {
    );
 
    const findings = explainIntegrityAndStdDev(
-      integrityScoreAverage,
       standardDeviation,
+      integrityScoreAverage,
    );
 
    const integritySummary = explainIntegrity(integrityScoreAverage);
@@ -146,7 +146,14 @@ export function computeExpectedMonitorLogCount(
          ? roomTimeEnded.getTime()
          : new Date(roomTimeEnded).getTime();
 
-   if (!start || !end || end <= start) return 0;
+   if (
+      !Number.isFinite(start) ||
+      !Number.isFinite(end) ||
+      !Number.isFinite(monitorIntervalMs) ||
+      monitorIntervalMs <= 0 ||
+      end <= start
+   )
+      return 0;
 
    const durationMs = end - start;
 
