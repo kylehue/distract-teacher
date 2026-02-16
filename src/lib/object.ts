@@ -30,11 +30,11 @@ export function keysToCamel<T>(obj: T): T {
    if (Array.isArray(obj)) {
       return obj.map((item) => keysToCamel(item)) as any;
    } else if (isObject(obj)) {
-      const newObj: any = {};
+      const newObj: Record<string, unknown> = {};
       for (const [key, value] of Object.entries(obj)) {
          newObj[toCamelCase(key)] = keysToCamel(value);
       }
-      return newObj;
+      return newObj as T;
    }
    return obj;
 }
@@ -58,7 +58,7 @@ export function deepMerge(target: any, source: any): any {
    return output;
 }
 
-export function isObject(item: any): boolean {
+export function isObject(item: unknown): item is Record<string, unknown> {
    if (!item || typeof item !== "object" || Array.isArray(item)) return false;
    const proto = Object.getPrototypeOf(item);
    return proto === Object.prototype || proto === null;
