@@ -75,3 +75,12 @@ export interface TeacherInfo {
    username: string;
    createdAt: string;
 }
+
+export interface NotificationInfo {
+   id: string;
+   title: string;
+   body: string;
+   isRead: boolean;
+   url?: string;
+   createdAt: string;
+}

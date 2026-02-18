@@ -6,6 +6,7 @@
       :options="searchResults.options"
       width="trigger"
       @update:value="onSelect($event)"
+      scrollable
    >
       <NInput
          v-bind="$attrs"
@@ -43,11 +44,13 @@ const props = defineProps<{
    class?: string;
    searchOnInput?: boolean;
    label?: (item: Pick<T, F[number] | K>) => string;
+   maxSuggestions?: number;
 }>();
 
 defineOptions({ inheritAttrs: false });
 
 const showOptions = ref(false);
+const isSelecting = ref(false);
 const searchQuery = defineModel("searchQuery", {
    type: String,
    default: "",
@@ -60,10 +63,13 @@ const miniSearch = new MiniSearch<T>({
 });
 
 const searchResults = computed(() => {
-   const results = miniSearch.search(searchQuery.value, {
+   let results = miniSearch.search(searchQuery.value, {
       fuzzy: 0.5,
       prefix: true,
    });
+   if ((props.maxSuggestions ?? 0) > 0) {
+      results = results.slice(0, props.maxSuggestions);
+   }
 
    const options: { label: string; value: T[K] }[] = [];
    const ids: T[K][] = [];
@@ -100,6 +106,8 @@ watch(
 );
 
 watch(searchQuery, (value) => {
+   if (isSelecting.value) return;
+
    // open when typing
    showOptions.value = !!value && searchResults.value.options.length > 0;
 
@@ -123,13 +131,16 @@ function onBlur() {
 }
 
 function onSelect(value: T[K]) {
+   isSelecting.value = true;
+   const selected = props.documents.find((doc) => doc[props.idField] === value);
+
+   searchQuery.value = selected?.[props.labelField] as string;
    emit("select", value);
    emit("search", [value]);
-   searchQuery.value = props.documents.find(
-      (doc) => doc[props.idField] === value
-   )?.[props.labelField] as string;
+
    nextTick(() => {
       showOptions.value = false;
+      isSelecting.value = false;
    });
 }
 </script>

@@ -1,6 +1,7 @@
 import { computed, reactive } from "vue";
 import type {
    MonitorLog,
+   NotificationInfo,
    RoomInfo,
    StudentInfo,
    TeacherInfo,
@@ -15,6 +16,7 @@ import { useFetch } from "./use-fetch";
 const LOAD_ONCE = true;
 export const useStore = defineStore("main-store", () => {
    // --- cache ---
+   const allNotifications = reactive(new Map<string, NotificationInfo>());
    const deletedRooms = reactive(new Map<string, RoomInfo>());
    const allRooms = reactive(new Map<string, RoomInfo>());
    const allStudents = reactive(new Map<string, StudentInfo>());
@@ -30,6 +32,22 @@ export const useStore = defineStore("main-store", () => {
    );
 
    // --- data loaders ---
+   const getNotifications = useFetch<{
+      notifications: NotificationInfo[];
+   }>("/api/notifications");
+   let isNotificationsLoaded = false;
+   async function loadNotifications() {
+      if (LOAD_ONCE && isNotificationsLoaded) return;
+      await getNotifications.execute();
+
+      const data = getNotifications.data?.data;
+      if (!data) throw new Error("No data");
+      for (const notification of data.notifications) {
+         upsertNotifications([notification]);
+      }
+      isNotificationsLoaded = true;
+   }
+
    const getRooms = useFetch<{
       rooms: RoomInfo[];
    }>("/api/rooms");
@@ -154,6 +172,26 @@ export const useStore = defineStore("main-store", () => {
    }
 
    // --- upsert functions ---
+   function upsertNotifications(notifications: NotificationInfo[]) {
+      for (const incoming of notifications) {
+         const existing = allNotifications.get(incoming.id);
+
+         if (!existing) {
+            // new notification
+            allNotifications.set(incoming.id, incoming);
+         } else {
+            // notification already exists so just mutate in place
+            for (const key in incoming) {
+               // @ts-ignore
+               if (existing[key] !== incoming[key]) {
+                  // @ts-ignore
+                  existing[key] = incoming[key];
+               }
+            }
+         }
+      }
+   }
+
    function upsertRooms(rooms: RoomInfo[]) {
       for (const incoming of rooms) {
          const existing = allRooms.get(incoming.id);
@@ -258,6 +296,10 @@ export const useStore = defineStore("main-store", () => {
    }
 
    // --- delete functions ---
+   function deleteNotification(notificationId: string) {
+      allNotifications.delete(notificationId);
+   }
+
    function deleteRoom(roomId: string) {
       allRooms.delete(roomId);
       studentsGroupedByRoomId.delete(roomId);
@@ -306,6 +348,7 @@ export const useStore = defineStore("main-store", () => {
    }
 
    function clear() {
+      allNotifications.clear();
       allRooms.clear();
       allStudents.clear();
       allMonitorLogs.clear();
@@ -313,6 +356,7 @@ export const useStore = defineStore("main-store", () => {
       monitorLogsGroupedByRoomId.clear();
       monitorLogsGroupedByStudentId.clear();
       deletedRooms.clear();
+      isNotificationsLoaded = false;
       isRoomsLoaded = false;
       isDeletedRoomsLoaded = false;
       loadRoomSet.clear();
@@ -323,6 +367,14 @@ export const useStore = defineStore("main-store", () => {
    }
 
    // --- count functions ---
+   function countUnreadNotifications() {
+      let count = 0;
+      for (let [_, notification] of allNotifications) {
+         if (!notification.isRead) count++;
+      }
+      return count;
+   }
+
    function countMonitorLogsOfStudent(studentId: string) {
       let count = 0;
       let student = allStudents.get(studentId);
@@ -340,6 +392,45 @@ export const useStore = defineStore("main-store", () => {
 
    // --- real-time update listeners ---
    const socket = useSocket();
+
+   socket.on(
+      "teacher:upsert_notification",
+      (data) => {
+         const notification = data.notification as NotificationInfo;
+         upsertNotifications([notification]);
+      },
+      { autoClean: false },
+   );
+
+   socket.on(
+      "teacher:upsert_notifications",
+      (data) => {
+         const notifications = data.notifications as NotificationInfo[];
+         upsertNotifications(notifications);
+      },
+      { autoClean: false },
+   );
+
+   socket.on(
+      "teacher:delete_notification",
+      (data) => {
+         const notification = data.notification as NotificationInfo;
+         deleteNotification(notification.id);
+      },
+      { autoClean: false },
+   );
+
+   socket.on(
+      "teacher:delete_notifications",
+      (data) => {
+         const notifications = data.notifications as NotificationInfo[];
+         for (const notification of notifications) {
+            deleteNotification(notification.id);
+         }
+      },
+      { autoClean: false },
+   );
+
    socket.on(
       "teacher:upsert_room",
       (data) => {
@@ -401,6 +492,7 @@ export const useStore = defineStore("main-store", () => {
    );
 
    return {
+      allNotifications,
       allRooms,
       deletedRooms,
       allStudents,
@@ -408,6 +500,8 @@ export const useStore = defineStore("main-store", () => {
       studentsGroupedByRoomId,
       monitorLogsGroupedByRoomId,
       monitorLogsGroupedByStudentId,
+      loadNotifications,
+      isLoadNotificationsLoading: computed(() => getNotifications.isLoading),
       loadRoom,
       isLoadRoomLoading: computed(() => getRoom.isLoading),
       loadRooms,
@@ -422,14 +516,17 @@ export const useStore = defineStore("main-store", () => {
       isLoadMonitorLogLoading: computed(() => getMonitorLog.isLoading),
       loadMonitorLogs,
       isLoadMonitorLogsLoading: computed(() => getRoomMonitorLogs.isLoading),
+      upsertNotifications,
       upsertRooms,
       upsertDeletedRooms,
       upsertStudents,
       upsertMonitorLogs,
+      deleteNotification,
       deleteRoom,
       deleteDeletedRoom,
       deleteStudent,
       clear,
       countMonitorLogsOfStudent,
+      countUnreadNotifications,
    };
 });

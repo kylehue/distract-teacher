@@ -30,8 +30,18 @@
                         </NButton>
                      </RouterLink>
                   </template>
-                  <div v-if="auth.isAuthenticated" class="flex items-center">
-                     <NDivider vertical class="mx-4!" />
+                  <NDivider vertical class="mx-4!" />
+                  <div
+                     v-if="auth.isAuthenticated"
+                     class="flex items-center gap-2"
+                  >
+                     <NBadge :value="store.countUnreadNotifications()">
+                        <NButton circle @click="notification.show()">
+                           <template #icon>
+                              <PhBell />
+                           </template>
+                        </NButton>
+                     </NBadge>
                      <NPopselect
                         trigger="click"
                         :options="userMenuOptions"
@@ -73,18 +83,23 @@ import {
    NLayout,
    NPopselect,
    useThemeVars,
+   NBadge,
 } from "naive-ui";
 import { computed, h, inject, reactive } from "vue";
 import { useRoute, RouterLink, RouterView } from "vue-router";
 import { isUrlRelatedToParent } from "@/lib/url";
 import { THEME_INJECTION_KEY } from "@/lib/injection-keys";
-import { PhUser, PhMoon, PhSunDim } from "@phosphor-icons/vue";
+import { PhUser, PhMoon, PhSunDim, PhBell } from "@phosphor-icons/vue";
 import { SelectMixedOption } from "naive-ui/es/select/src/interface";
 import { useAuthStore } from "../composables/use-auth-store";
 import LogoutLoadingOverlay from "@/app/components/logout-loading-overlay.vue";
+import { useStore } from "../composables/use-store";
+import { useNotification } from "../composables/use-notification";
 
 const route = useRoute();
+const store = useStore();
 const auth = useAuthStore();
+const notification = useNotification();
 const themeVars = useThemeVars();
 const theme = inject(THEME_INJECTION_KEY)!;
 

@@ -91,7 +91,7 @@ import {
    PhStop,
    PhDotsThreeVertical,
 } from "@phosphor-icons/vue";
-import { RouterLink, useRoute } from "vue-router";
+import { RouterLink, useRoute, useRouter } from "vue-router";
 import { renderIcon, warningLevelToComponentType } from "@/lib/ui";
 import FilterMenuMultiselect from "@/app/components/filter-menu-multiselect.vue";
 import { useFetch } from "@/app/composables/use-fetch";
@@ -105,7 +105,10 @@ import {
 } from "@/lib/injection-keys";
 import Loader from "@/app/components/loader.vue";
 
+const TABS = ["warningLogs", "lockedStudents"] as const;
+
 const route = useRoute();
+const router = useRouter();
 const message = useMessage();
 const patchUnlockStudent = useFetch("/api/students/:studentId/unlock", "PATCH");
 const filteredStudentIds = ref<string[]>([]);
@@ -115,7 +118,7 @@ const students = inject(STUDENTS_MAP_INJECTION_KEY)!;
 const monitorLogsArray = inject(MONITOR_LOGS_INJECTION_KEY)!;
 const monitorLogs = inject(MONITOR_LOGS_MAP_INJECTION_KEY)!;
 const isLoading = inject(IS_LOADING_INJECTION_KEY)!;
-const activeTab = ref<"warningLogs" | "lockedStudents">("warningLogs");
+const activeTab = ref<(typeof TABS)[number]>("warningLogs");
 const monitorLogColumns: DataTableColumns<MonitorLog> = [
    reactive({
       title: "Student Name",
@@ -529,6 +532,23 @@ function filterByStudentIds(ids: string[]) {
    filteredStudentIds.value = ids;
    studentNameColumn.filterOptionValues = ids;
 }
+
+watch(
+   () => route.query.tab,
+   (newTab: any) => {
+      if (TABS.includes(newTab)) {
+         activeTab.value = newTab;
+      }
+   },
+   { immediate: true },
+);
+
+watch(activeTab, (newTab) => {
+   if (route.query.tab !== newTab) {
+      const query = { ...route.query, tab: newTab };
+      router.replace({ query });
+   }
+});
 
 onMounted(() => {
    if (route.query.filterByStudent) {

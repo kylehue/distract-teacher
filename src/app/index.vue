@@ -17,6 +17,7 @@
             <EvidenceProvider />
             <CreateRoomProvider />
             <AnnouncementProvider />
+            <NotificationProvider />
          </NMessageProvider>
       </NDialogProvider>
       <NGlobalStyle />
@@ -39,6 +40,7 @@ import { darkThemeOverrides, lightThemeOverrides } from "@/lib/theme-overrides";
 import EvidenceProvider from "./components/evidence-provider.vue";
 import CreateRoomProvider from "./components/create-room-provider.vue";
 import AnnouncementProvider from "./components/announcement-provider.vue";
+import NotificationProvider from "./components/notification-provider.vue";
 import { THEME_INJECTION_KEY } from "@/lib/injection-keys";
 import { useAuthStore } from "./composables/use-auth-store";
 
