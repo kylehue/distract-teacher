@@ -1,33 +1,11 @@
 import { mount } from "@vue/test-utils";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { defineComponent, h } from "vue";
+import { h } from "vue";
 import CopyButton from "@/app/components/copy-button.vue";
+import { naiveUiMockState } from "./support/naive-ui-mock";
 
-const createSpy = vi.fn();
-const errorSpy = vi.fn();
-
-vi.mock("naive-ui", () => ({
-   NButton: defineComponent({
-      name: "NButton",
-      emits: ["click"],
-      setup(_, { slots, emit }) {
-         return () =>
-            h("button", { onClick: () => emit("click") }, slots.default?.());
-      },
-   }),
-   NText: defineComponent({
-      name: "NText",
-      props: { class: { type: String, default: "" } },
-      setup(props, { slots }) {
-         return () => h("span", { class: props.class }, slots.default?.());
-      },
-   }),
-   useMessage: () => ({ create: createSpy, error: errorSpy }),
-}));
-
-vi.mock("@phosphor-icons/vue", () => ({
-   PhCopy: defineComponent({ name: "PhCopy", setup: () => () => h("i") }),
-}));
+const createSpy = naiveUiMockState.message.create;
+const errorSpy = naiveUiMockState.message.error;
 
 vi.mock("@/lib/ui", () => ({
    renderIcon: vi.fn(() => () => h("i")),

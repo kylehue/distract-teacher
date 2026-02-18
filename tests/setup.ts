@@ -1,4 +1,12 @@
-import { afterEach, vi } from "vitest";
+import { afterEach, beforeEach, vi } from "vitest";
+import {
+   installNaiveUiMock,
+   resetNaiveUiMockState,
+} from "./support/naive-ui-mock";
+import { installPhosphorMock } from "./support/phosphor-mock";
+
+installNaiveUiMock();
+installPhosphorMock();
 
 // Keep test output deterministic and avoid noisy console logs from socket/plugin modules.
 vi.spyOn(console, "log").mockImplementation(() => undefined);
@@ -26,4 +34,8 @@ Object.defineProperty(document, "fonts", {
 
 afterEach(() => {
    vi.clearAllMocks();
+});
+
+beforeEach(() => {
+   resetNaiveUiMockState();
 });

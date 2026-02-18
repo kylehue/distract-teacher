@@ -1,63 +1,7 @@
 import { mount } from "@vue/test-utils";
-import { defineComponent, h, nextTick } from "vue";
-import { describe, expect, it, vi } from "vitest";
+import { nextTick } from "vue";
+import { describe, expect, it } from "vitest";
 import InputSearch from "@/app/components/input-search.vue";
-
-vi.mock("naive-ui", () => ({
-   NInput: defineComponent({
-      name: "NInput",
-      props: {
-         value: { type: String, default: "" },
-         placeholder: { type: String, default: "" },
-         class: { type: String, default: "" },
-      },
-      emits: ["update:value", "focus", "blur", "keydown.enter", "clear"],
-      setup(props, { emit, slots }) {
-         return () =>
-            h("div", [
-               slots.prefix?.(),
-               h("input", {
-                  value: props.value,
-                  placeholder: props.placeholder,
-                  class: props.class,
-                  onInput: (e: Event) =>
-                     emit("update:value", (e.target as HTMLInputElement).value),
-                  onFocus: () => emit("focus"),
-                  onBlur: () => emit("blur"),
-                  onKeydown: (e: KeyboardEvent) => {
-                     if (e.key === "Enter") emit("keydown.enter");
-                  },
-               }),
-               h(
-                  "button",
-                  {
-                     type: "button",
-                     onClick: () => emit("clear"),
-                  },
-                  "clear",
-               ),
-            ]);
-      },
-   }),
-   NPopselect: defineComponent({
-      name: "NPopselect",
-      props: {
-         show: { type: Boolean, default: false },
-         options: { type: Array, default: () => [] },
-      },
-      emits: ["update:show", "update:value"],
-      setup(_, { slots }) {
-         return () => h("div", slots.default?.());
-      },
-   }),
-}));
-
-vi.mock("@phosphor-icons/vue", () => ({
-   PhMagnifyingGlass: defineComponent({
-      name: "PhMagnifyingGlass",
-      setup: () => () => h("i"),
-   }),
-}));
 
 describe("InputSearch", () => {
    it("emits live search results and clears search on empty query", async () => {

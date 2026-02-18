@@ -2,6 +2,7 @@ import { mount } from "@vue/test-utils";
 import { createPinia } from "pinia";
 import { defineComponent, h, nextTick } from "vue";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { PageLayoutStub, RouterLinkStub } from "./support/component-stubs";
 
 const socketHandlers = new Map<string, Function>();
 
@@ -64,49 +65,6 @@ vi.mock("@/app/composables/use-create-room", () => ({
    }),
 }));
 
-vi.mock("naive-ui", () => ({
-   NButton: defineComponent({
-      name: "NButton",
-      emits: ["click"],
-      setup(_, { slots, emit }) {
-         return () =>
-            h("button", { onClick: () => emit("click") }, slots.default?.());
-      },
-   }),
-   NText: defineComponent({
-      name: "NText",
-      setup(_, { slots }) {
-         return () => h("span", slots.default?.());
-      },
-   }),
-   NEmpty: defineComponent({
-      name: "NEmpty",
-      setup(_, { slots }) {
-         return () => h("div", slots.default?.() ?? "empty");
-      },
-   }),
-   NDataTable: defineComponent({
-      name: "NDataTable",
-      props: {
-         data: { type: Array, default: () => [] },
-      },
-      setup(props) {
-         return () =>
-            h(
-               "div",
-               { "data-testid": "rooms-table" },
-               (props.data as any[]).map((r) =>
-                  h(
-                     "p",
-                     { class: "room-row" },
-                     `${r.title}|${r.code}|${r.status}`,
-                  ),
-               ),
-            );
-      },
-   }),
-}));
-
 vi.mock("@/app/components/input-search.vue", () => ({
    default: defineComponent({
       name: "InputSearch",
@@ -128,6 +86,18 @@ vi.mock("@/app/components/copy-button.vue", () => ({
 import RoomsPage from "@/app/pages/dashboard/rooms.vue";
 import { useStore } from "@/app/composables/use-store";
 
+function mountRoomsPage() {
+   return mount(RoomsPage, {
+      global: {
+         plugins: [createPinia()],
+         stubs: {
+            Layout: PageLayoutStub,
+            RouterLink: RouterLinkStub,
+         },
+      },
+   });
+}
+
 describe("Dashboard Rooms Page (real-time)", () => {
    beforeEach(() => {
       vi.clearAllMocks();
@@ -136,32 +106,7 @@ describe("Dashboard Rooms Page (real-time)", () => {
    });
 
    it("updates rendered rooms when socket upserts a room in store", async () => {
-      const pinia = createPinia();
-      const wrapper = mount(RoomsPage, {
-         global: {
-            plugins: [pinia],
-            stubs: {
-               Layout: defineComponent({
-                  name: "Layout",
-                  props: { title: { type: String, default: "" } },
-                  setup(props, { slots }) {
-                     return () =>
-                        h("section", [
-                           h("h1", props.title),
-                           h("div", slots["header-extra"]?.()),
-                           h("div", slots.default?.()),
-                        ]);
-                  },
-               }),
-               RouterLink: defineComponent({
-                  name: "RouterLink",
-                  setup(_, { slots }) {
-                     return () => h("a", slots.default?.());
-                  },
-               }),
-            },
-         },
-      });
+      const wrapper = mountRoomsPage();
 
       const store = useStore();
       await store.loadRooms();
@@ -193,32 +138,7 @@ describe("Dashboard Rooms Page (real-time)", () => {
    });
 
    it("updates rendered rooms when socket deletes a room in store", async () => {
-      const pinia = createPinia();
-      const wrapper = mount(RoomsPage, {
-         global: {
-            plugins: [pinia],
-            stubs: {
-               Layout: defineComponent({
-                  name: "Layout",
-                  props: { title: { type: String, default: "" } },
-                  setup(props, { slots }) {
-                     return () =>
-                        h("section", [
-                           h("h1", props.title),
-                           h("div", slots["header-extra"]?.()),
-                           h("div", slots.default?.()),
-                        ]);
-                  },
-               }),
-               RouterLink: defineComponent({
-                  name: "RouterLink",
-                  setup(_, { slots }) {
-                     return () => h("a", slots.default?.());
-                  },
-               }),
-            },
-         },
-      });
+      const wrapper = mountRoomsPage();
 
       const store = useStore();
       await store.loadRooms();
@@ -255,32 +175,7 @@ describe("Dashboard Rooms Page (real-time)", () => {
    });
 
    it("opens create-room modal when header action is clicked", async () => {
-      const pinia = createPinia();
-      const wrapper = mount(RoomsPage, {
-         global: {
-            plugins: [pinia],
-            stubs: {
-               Layout: defineComponent({
-                  name: "Layout",
-                  props: { title: { type: String, default: "" } },
-                  setup(props, { slots }) {
-                     return () =>
-                        h("section", [
-                           h("h1", props.title),
-                           h("div", slots["header-extra"]?.()),
-                           h("div", slots.default?.()),
-                        ]);
-                  },
-               }),
-               RouterLink: defineComponent({
-                  name: "RouterLink",
-                  setup(_, { slots }) {
-                     return () => h("a", slots.default?.());
-                  },
-               }),
-            },
-         },
-      });
+      const wrapper = mountRoomsPage();
 
       const createButton = wrapper
          .findAll("button")
@@ -292,32 +187,7 @@ describe("Dashboard Rooms Page (real-time)", () => {
    });
 
    it("renders empty-state placeholder when no rooms are available", async () => {
-      const pinia = createPinia();
-      const wrapper = mount(RoomsPage, {
-         global: {
-            plugins: [pinia],
-            stubs: {
-               Layout: defineComponent({
-                  name: "Layout",
-                  props: { title: { type: String, default: "" } },
-                  setup(props, { slots }) {
-                     return () =>
-                        h("section", [
-                           h("h1", props.title),
-                           h("div", slots["header-extra"]?.()),
-                           h("div", slots.default?.()),
-                        ]);
-                  },
-               }),
-               RouterLink: defineComponent({
-                  name: "RouterLink",
-                  setup(_, { slots }) {
-                     return () => h("a", slots.default?.());
-                  },
-               }),
-            },
-         },
-      });
+      const wrapper = mountRoomsPage();
 
       await nextTick();
       expect(wrapper.find('[data-testid="rooms-table"]').exists()).toBe(true);

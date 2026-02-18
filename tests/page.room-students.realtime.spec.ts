@@ -51,19 +51,6 @@ const InputSearchStub = defineComponent({
    },
 });
 
-vi.mock("naive-ui", () => ({
-   NBadge: {
-      props: ["value"],
-      template: "<span class='badge'>{{ value }}<slot /></span>",
-   },
-   NCheckbox: {
-      props: ["checked"],
-      emits: ["update:checked"],
-      template:
-         "<button type='button' :data-checked='String(checked)' @click=\"$emit('update:checked', !checked)\"><slot /></button>",
-   },
-}));
-
 describe("Dashboard Room Students Page", () => {
    it("filters students, updates join-request count, and passes search filters to table", async () => {
       const allStudents = ref([

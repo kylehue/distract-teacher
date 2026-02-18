@@ -40,28 +40,6 @@ vi.mock("@/lib/reports", () => ({
    ),
 }));
 
-vi.mock("naive-ui", () => ({
-   NButton: {
-      props: ["disabled", "loading", "secondary"],
-      emits: ["click"],
-      template:
-         "<button type='button' :disabled='disabled' @click=\"$emit('click')\"><slot /></button>",
-   },
-   NText: { template: "<span><slot /></span>" },
-   NEmpty: {
-      props: ["description"],
-      template: "<div>{{ description }}<slot /></div>",
-   },
-   NConfigProvider: { template: "<div><slot /></div>" },
-   lightTheme: {},
-}));
-
-vi.mock("@phosphor-icons/vue", () => ({
-   PhArrowLeft: { template: "<i />" },
-   PhPrinter: { template: "<i />" },
-   PhFileXls: { template: "<i />" },
-}));
-
 import StudentReportsIndexPage from "@/app/pages/dashboard/student-reports/index.vue";
 
 function setDefaultStoreState() {

@@ -1,6 +1,6 @@
 import { mount } from "@vue/test-utils";
-import { describe, expect, it, vi } from "vitest";
-import { defineComponent, h, nextTick, ref } from "vue";
+import { describe, expect, it } from "vitest";
+import { nextTick, ref } from "vue";
 import ContentLoader from "@/app/components/content-loader.vue";
 import InfoTooltip from "@/app/components/info-tooltip.vue";
 import ThemeSwitch from "@/app/components/theme-switch.vue";
@@ -8,64 +8,6 @@ import RoomStatusTag from "@/app/components/room-status-tag.vue";
 import Loader from "@/app/components/loader.vue";
 import LogoutLoadingOverlay from "@/app/components/logout-loading-overlay.vue";
 import { THEME_INJECTION_KEY } from "@/lib/injection-keys";
-
-vi.mock("naive-ui", () => ({
-   NText: defineComponent({
-      name: "NText",
-      setup(_, { slots }) {
-         return () => h("span", slots.default?.());
-      },
-   }),
-   NTooltip: defineComponent({
-      name: "NTooltip",
-      setup(_, { slots }) {
-         return () => h("div", [slots.trigger?.(), slots.default?.()]);
-      },
-   }),
-   NIcon: defineComponent({
-      name: "NIcon",
-      setup(_, { slots }) {
-         return () => h("i", slots.default?.());
-      },
-   }),
-   NSwitch: defineComponent({
-      name: "NSwitch",
-      props: { value: { type: Boolean, default: false } },
-      emits: ["update-value"],
-      setup(props, { emit }) {
-         return () =>
-            h("button", {
-               type: "button",
-               "data-is-dark": String(props.value),
-               onClick: () => emit("update-value", !props.value),
-            });
-      },
-   }),
-   NTag: defineComponent({
-      name: "NTag",
-      props: { type: { type: String, default: "" } },
-      setup(props, { slots }) {
-         return () => h("span", { "data-type": props.type }, slots.default?.());
-      },
-   }),
-   NCard: defineComponent({
-      name: "NCard",
-      setup(_, { slots }) {
-         return () => h("section", slots.default?.());
-      },
-   }),
-   useThemeVars: () => ({ textColor3: "#888" }),
-}));
-
-vi.mock("@phosphor-icons/vue", () => ({
-   PhInfo: defineComponent({
-      name: "PhInfo",
-      props: { color: { type: String, default: "" } },
-      setup(props) {
-         return () => h("svg", { "data-color": props.color });
-      },
-   }),
-}));
 
 describe("Misc UI Components", () => {
    it("loader renders fallback and custom props", async () => {

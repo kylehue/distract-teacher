@@ -1,11 +1,13 @@
 import { mount } from "@vue/test-utils";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { defineComponent, h, nextTick } from "vue";
+import { nextTick } from "vue";
+import { createRouterLinkStub } from "./support/component-stubs";
+import { naiveUiMockState } from "./support/naive-ui-mock";
 
 const pushSpy = vi.fn();
 const replaceSpy = vi.fn();
-const messageErrorSpy = vi.fn();
-const messageSuccessSpy = vi.fn();
+const messageErrorSpy = naiveUiMockState.message.error;
+const messageSuccessSpy = naiveUiMockState.message.success;
 const clearStoreSpy = vi.fn();
 
 const authState = {
@@ -23,66 +25,7 @@ const registerFetch = {
 
 vi.mock("vue-router", () => ({
    useRouter: () => ({ push: pushSpy, replace: replaceSpy }),
-   RouterLink: defineComponent({
-      name: "RouterLink",
-      setup(_, { slots }) {
-         return () => h("a", slots.default?.());
-      },
-   }),
-}));
-
-vi.mock("naive-ui", () => ({
-   NCard: defineComponent({
-      name: "NCard",
-      setup(_, { slots }) {
-         return () => h("section", slots.default?.());
-      },
-   }),
-   NForm: defineComponent({
-      name: "NForm",
-      setup(_, { slots }) {
-         return () => h("form", slots.default?.());
-      },
-   }),
-   NFormItem: defineComponent({
-      name: "NFormItem",
-      props: {
-         feedback: { type: String, default: "" },
-      },
-      setup(props, { slots }) {
-         return () =>
-            h("div", [
-               slots.default?.(),
-               h("p", { class: "feedback" }, props.feedback),
-            ]);
-      },
-   }),
-   NInput: defineComponent({
-      name: "NInput",
-      props: { value: { type: String, default: "" } },
-      emits: ["update:value"],
-      setup(props, { emit }) {
-         return () =>
-            h("input", {
-               value: props.value,
-               onInput: (e: Event) =>
-                  emit("update:value", (e.target as HTMLInputElement).value),
-            });
-      },
-   }),
-   NButton: defineComponent({
-      name: "NButton",
-      emits: ["click"],
-      setup(_, { slots, emit }) {
-         return () =>
-            h(
-               "button",
-               { type: "button", onClick: () => emit("click") },
-               slots.default?.(),
-            );
-      },
-   }),
-   useMessage: () => ({ error: messageErrorSpy, success: messageSuccessSpy }),
+   RouterLink: createRouterLinkStub(),
 }));
 
 vi.mock("@/app/composables/use-auth-store", () => ({

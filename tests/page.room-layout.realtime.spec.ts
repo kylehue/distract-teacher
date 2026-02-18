@@ -1,6 +1,7 @@
 import { mount } from "@vue/test-utils";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { reactive, nextTick } from "vue";
+import { naiveUiMockState } from "./support/naive-ui-mock";
 
 const state = vi.hoisted(() => ({
    route: {
@@ -10,9 +11,6 @@ const state = vi.hoisted(() => ({
    routerPush: vi.fn(),
    loadRoom: vi.fn(),
    announcementShow: vi.fn(),
-   messageSuccess: vi.fn(),
-   messageWarning: vi.fn(),
-   messageError: vi.fn(),
    fetchByUrl: {} as Record<string, any>,
    store: {} as any,
 }));
@@ -52,64 +50,6 @@ vi.mock("@/app/composables/use-fetch", () => ({
       }
       return state.fetchByUrl[url];
    },
-}));
-
-vi.mock("naive-ui", () => ({
-   NButton: {
-      props: [
-         "disabled",
-         "loading",
-         "type",
-         "secondary",
-         "circle",
-         "quaternary",
-      ],
-      emits: ["click"],
-      template:
-         "<button type='button' :disabled='disabled' @click=\"$emit('click')\"><slot /></button>",
-   },
-   NTabs: {
-      props: ["value", "type"],
-      emits: ["update:value"],
-      template: "<div><slot /></div>",
-   },
-   NTab: {
-      props: ["name"],
-      template: "<div><slot /></div>",
-   },
-   NText: {
-      template: "<span><slot /></span>",
-   },
-   NDivider: {
-      template: "<hr />",
-   },
-   NTooltip: {
-      template: "<div><slot name='trigger' /><slot /></div>",
-   },
-   NBadge: {
-      props: ["value"],
-      template: "<span class='badge'>{{ value }}<slot /></span>",
-   },
-   NIcon: {
-      template: "<i><slot /></i>",
-   },
-   useMessage: () => ({
-      success: state.messageSuccess,
-      warning: state.messageWarning,
-      error: state.messageError,
-   }),
-}));
-
-vi.mock("@phosphor-icons/vue", () => ({
-   PhPause: { template: "<i />" },
-   PhPlay: { template: "<i />" },
-   PhStop: { template: "<i />" },
-   PhArrowLeft: { template: "<i />" },
-   PhGear: { template: "<i />" },
-   PhHouse: { template: "<i />" },
-   PhMegaphoneSimple: { template: "<i />" },
-   PhUserFocus: { template: "<i />" },
-   PhUsers: { template: "<i />" },
 }));
 
 import RoomLayoutPage from "@/app/pages/dashboard/room/layout.vue";
@@ -220,9 +160,9 @@ describe("Dashboard Room Layout Page", () => {
          params: { roomId: "r1" },
       });
       expect(state.announcementShow).toHaveBeenCalled();
-      expect(state.messageSuccess).toHaveBeenCalled();
-      expect(state.messageWarning).toHaveBeenCalled();
-      expect(state.messageError).toHaveBeenCalled();
+      expect(naiveUiMockState.message.success).toHaveBeenCalled();
+      expect(naiveUiMockState.message.warning).toHaveBeenCalled();
+      expect(naiveUiMockState.message.error).toHaveBeenCalled();
    });
 
    it("updates header actions when room status changes from store", async () => {

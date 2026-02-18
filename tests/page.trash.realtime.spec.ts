@@ -1,7 +1,8 @@
 import { mount } from "@vue/test-utils";
 import { createPinia } from "pinia";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { defineComponent, h, nextTick } from "vue";
+import { nextTick } from "vue";
+import { LoaderStub } from "./support/component-stubs";
 
 const socketHandlers = new Map<string, Function>();
 const socketApi = {
@@ -69,57 +70,21 @@ vi.mock("@/app/composables/use-fetch", () => ({
    },
 }));
 
-vi.mock("@phosphor-icons/vue", () => ({
-   PhArrowLeft: defineComponent({ setup: () => () => h("i") }),
-   PhTrash: defineComponent({ setup: () => () => h("i") }),
-}));
-
-vi.mock("naive-ui", () => ({
-   NLayout: defineComponent({
-      setup(_, { slots }) {
-         return () => h("div", slots.default?.());
-      },
-   }),
-   NLayoutContent: defineComponent({
-      setup(_, { slots }) {
-         return () => h("div", slots.default?.());
-      },
-   }),
-   NDivider: defineComponent({ setup: () => () => h("hr") }),
-   NText: defineComponent({
-      setup(_, { slots }) {
-         return () => h("span", slots.default?.());
-      },
-   }),
-   NButton: defineComponent({
-      emits: ["click"],
-      setup(_, { slots, emit }) {
-         return () =>
-            h("button", { onClick: () => emit("click") }, slots.default?.());
-      },
-   }),
-   NEmpty: defineComponent({
-      setup(_, { slots }) {
-         return () => h("div", slots.default?.() ?? "empty");
-      },
-   }),
-   NDataTable: defineComponent({
-      props: { data: { type: Array, default: () => [] } },
-      setup(props) {
-         return () =>
-            h(
-               "div",
-               { "data-testid": "trash-table" },
-               (props.data as any[]).map((r) =>
-                  h("p", { class: "trash-row" }, `${r.title}|${r.code}`),
-               ),
-            );
-      },
-   }),
-   useMessage: () => ({ success: vi.fn(), error: vi.fn() }),
-}));
-
 import TrashPage from "@/app/pages/trash.vue";
+
+function mountTrashPage() {
+   return mount(TrashPage, {
+      global: {
+         plugins: [createPinia()],
+         mocks: {
+            $router: { back: vi.fn() },
+         },
+         stubs: {
+            Loader: LoaderStub,
+         },
+      },
+   });
+}
 
 describe("Trash Page (real-time)", () => {
    beforeEach(() => {
@@ -131,17 +96,7 @@ describe("Trash Page (real-time)", () => {
    });
 
    it("updates table when rooms are deleted/restored via socket events", async () => {
-      const wrapper = mount(TrashPage, {
-         global: {
-            plugins: [createPinia()],
-            mocks: {
-               $router: { back: vi.fn() },
-            },
-            stubs: {
-               Loader: { template: "<div>loading</div>" },
-            },
-         },
-      });
+      const wrapper = mountTrashPage();
 
       await nextTick();
       expect(wrapper.findAll(".trash-row").length).toBe(0);
@@ -173,17 +128,7 @@ describe("Trash Page (real-time)", () => {
    it("shows loading state while auth is initializing", () => {
       authState.isLoading = true;
 
-      const wrapper = mount(TrashPage, {
-         global: {
-            plugins: [createPinia()],
-            mocks: {
-               $router: { back: vi.fn() },
-            },
-            stubs: {
-               Loader: { template: "<div>loading</div>" },
-            },
-         },
-      });
+      const wrapper = mountTrashPage();
 
       expect(wrapper.text()).toContain("loading");
    });
@@ -191,17 +136,7 @@ describe("Trash Page (real-time)", () => {
    it("renders nothing state when teacher session is unavailable", () => {
       authState.teacher = null;
 
-      const wrapper = mount(TrashPage, {
-         global: {
-            plugins: [createPinia()],
-            mocks: {
-               $router: { back: vi.fn() },
-            },
-            stubs: {
-               Loader: { template: "<div>loading</div>" },
-            },
-         },
-      });
+      const wrapper = mountTrashPage();
 
       expect(wrapper.text()).toContain("Nothing");
    });
