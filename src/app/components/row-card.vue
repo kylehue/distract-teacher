@@ -5,71 +5,82 @@
       class="w-full"
       size="small"
    >
-      <div
-         class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"
-      >
-         <div class="flex min-w-0 flex-1 items-start gap-3 sm:gap-4">
+      <div class="flex flex-row gap-2">
+         <div class="flex min-w-0 flex-1 items-start gap-2 sm:gap-4">
             <div v-if="$slots.icon" class="shrink-0 pt-0.5">
                <NIcon :size="props.iconSize">
                   <slot name="icon" />
                </NIcon>
             </div>
 
-            <div class="min-w-0 flex-1">
+            <div class="min-w-0 flex-1 flex flex-col gap-2">
                <div
                   v-if="hasTitle || resolvedTagPlacement === 'after-title'"
                   class="flex flex-wrap items-start gap-2"
                >
-                  <NText
-                     v-if="hasTitle"
-                     strong
-                     class="min-w-0 flex-1 wrap-break-word leading-snug"
-                  >
+                  <div class="flex-1">
                      <slot name="title">
-                        {{ props.title }}
+                        <NText
+                           class="min-w-0 flex-1 wrap-break-word leading-snug"
+                           strong
+                        >
+                           {{ props.title }}
+                        </NText>
                      </slot>
-                  </NText>
+                  </div>
 
                   <div
+                     v-if="
+                        resolvedTagPlacement === 'after-title' &&
+                        props.tags.length
+                     "
                      ref="afterTitleTagsTarget"
                      class="flex flex-wrap items-center gap-2"
-                     :class="
-                        resolvedTagPlacement === 'after-title' ? '' : 'hidden'
-                     "
                   />
                </div>
 
-               <NText
-                  v-if="hasContent"
-                  depth="2"
-                  class="mt-1 block wrap-break-word text-sm leading-relaxed"
-               >
+               <div class="flex-1" v-if="hasContent">
                   <slot name="content">
-                     {{ props.content }}
+                     <NText
+                        depth="2"
+                        class="mt-1 block wrap-break-word text-sm leading-relaxed"
+                     >
+                        {{ props.content }}
+                     </NText>
                   </slot>
-               </NText>
+               </div>
 
                <div
+                  v-if="
+                     resolvedTagPlacement === 'below-content' &&
+                     props.tags.length
+                  "
                   ref="belowContentTagsTarget"
                   class="mt-3 flex flex-wrap items-center gap-2"
-                  :class="
-                     resolvedTagPlacement === 'below-content' ? '' : 'hidden'
-                  "
                />
 
-               <NText
-                  v-if="hasFooter"
-                  depth="3"
-                  class="mt-3 block wrap-break-word text-xs leading-normal"
+               <div
+                  v-if="hasFooter || hasAction"
+                  class="flex flex-wrap items-end flex-1"
                >
-                  <slot name="footer">
-                     {{ props.footer }}
-                  </slot>
-               </NText>
+                  <div class="mr-auto">
+                     <slot name="footer">
+                        <NText
+                           depth="3"
+                           class="mt-3 block wrap-break-word text-xs leading-normal"
+                        >
+                           {{ props.footer }}
+                        </NText>
+                     </slot>
+                  </div>
+                  <div v-if="hasAction">
+                     <slot name="action" />
+                  </div>
+               </div>
             </div>
          </div>
 
-         <div v-if="hasMenu" class="self-end sm:self-start">
+         <div v-if="hasMenu">
             <NDropdown
                trigger="click"
                placement="bottom-end"
@@ -94,10 +105,9 @@
       </div>
 
       <Teleport v-if="hasTags && activeTagsTarget" :to="activeTagsTarget">
-         <slot name="tags" :tags="normalizedTags">
+         <template v-for="tag in normalizedTags" :key="tag.key">
             <NTag
-               v-for="tag in normalizedTags"
-               :key="tag.key"
+               v-if="tag.visible"
                :type="tag.type"
                :size="tag.size"
                :bordered="tag.bordered"
@@ -105,7 +115,7 @@
             >
                {{ tag.label }}
             </NTag>
-         </slot>
+         </template>
       </Teleport>
    </NCard>
 </template>
@@ -114,7 +124,7 @@
 import { computed, h, useSlots, useTemplateRef } from "vue";
 import type { VNodeChild } from "vue";
 import { NCard, NButton, NText, NDropdown, NTag, NIcon } from "naive-ui";
-import type { CardProps, TagProps } from "naive-ui";
+import type { CardProps, TagProps, TextProps } from "naive-ui";
 import type {
    DropdownMixedOption,
    DropdownOption,
@@ -130,6 +140,7 @@ interface RowCardTagObject {
    size?: TagProps["size"];
    bordered?: boolean;
    round?: boolean;
+   visible?: boolean;
 }
 
 interface RowCardBaseMenuOption {
@@ -144,6 +155,7 @@ interface RowCardMenuDivider extends RowCardBaseMenuOption {
 interface RowCardMenuItem extends RowCardBaseMenuOption {
    type?: "item";
    label: string;
+   labelProps?: TextProps;
    children?: RowCardMenuOption[];
    icon?: () => VNodeChild;
    to?: RouteLocationRaw;
@@ -173,7 +185,7 @@ const props = withDefaults(
       content: "",
       footer: "",
       tags: () => [],
-      tagsPlacement: "below-content",
+      tagsPlacement: "after-title",
       menuOptions: () => [],
       cardProps: () => ({}),
       iconSize: 24,
@@ -188,8 +200,8 @@ defineSlots<{
    icon(props: Record<string, never>): unknown;
    title(props: Record<string, never>): unknown;
    content(props: Record<string, never>): unknown;
-   tags(props: { tags: RowCardTagObject[] }): unknown;
    footer(props: Record<string, never>): unknown;
+   action(): unknown;
    "menu-trigger"(props: Record<string, never>): unknown;
 }>();
 
@@ -207,6 +219,7 @@ const normalizedTags = computed<RowCardTagObject[]>(() =>
             size: "small",
             bordered: false,
             round: false,
+            visible: true,
          };
       }
 
@@ -217,6 +230,7 @@ const normalizedTags = computed<RowCardTagObject[]>(() =>
          size: tag.size ?? "small",
          bordered: tag.bordered ?? false,
          round: tag.round ?? false,
+         visible: tag.visible ?? true,
       };
    }),
 );
@@ -224,6 +238,7 @@ const normalizedTags = computed<RowCardTagObject[]>(() =>
 const hasTitle = computed(() => Boolean(slots.title || props.title));
 const hasContent = computed(() => Boolean(slots.content || props.content));
 const hasFooter = computed(() => Boolean(slots.footer || props.footer));
+const hasAction = computed(() => Boolean(slots.action));
 const hasTags = computed(() =>
    Boolean(slots.tags || normalizedTags.value.length),
 );
@@ -311,19 +326,25 @@ function renderMenuLabel(option: DropdownOption) {
    const typedOption = option as RowCardDropdownOption;
    const label = String(typedOption.label ?? "");
 
+   const labelComp = h(
+      NText,
+      menuItemLookup.value.get(typedOption.key ?? "")?.labelProps,
+      { default: () => label },
+   );
+
    // render router links inside the dropdown so menu items can navigate directly
-   if (typedOption.to !== undefined) {
+   if (typedOption.to !== undefined && typedOption.to !== null) {
       return h(
          RouterLink,
          {
             to: typedOption.to,
             class: "block w-full",
          },
-         { default: () => label },
+         { default: () => labelComp },
       );
    }
 
-   return label;
+   return labelComp;
 }
 
 function onSelectMenu(key: string | number) {
