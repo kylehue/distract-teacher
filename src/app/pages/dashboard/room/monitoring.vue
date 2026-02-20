@@ -120,6 +120,17 @@
                      label: 'View Reports',
                      to: `/dashboard/student-reports/${monitorLog.studentId}`,
                   },
+                  {
+                     label: 'Filter By This Student',
+                     onSelect() {
+                        warningLogView?.addSpecialFilter({
+                           key: 'filterByStudent',
+                           label: `Student: ${monitorLog.studentName}`,
+                           filter: (log) =>
+                              log.studentId === monitorLog.studentId,
+                        });
+                     },
+                  },
                ]"
                bordered
             >
