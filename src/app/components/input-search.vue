@@ -28,7 +28,11 @@
 <script
    setup
    lang="ts"
-   generic="T extends Record<string, any>, K extends keyof T, F extends (keyof T)[]"
+   generic="
+      T extends Record<string, any>,
+      K extends keyof T,
+      F extends (keyof T)[]
+   "
 >
 import { PhMagnifyingGlass } from "@phosphor-icons/vue";
 import { NInput, NPopselect } from "naive-ui";
@@ -39,6 +43,7 @@ const props = defineProps<{
    documents: T[];
    fields: F;
    idField: K;
+   filterFields?: K[];
    labelField: keyof T;
    placeholder?: string;
    class?: string;
@@ -58,7 +63,11 @@ const searchQuery = defineModel("searchQuery", {
 
 const miniSearch = new MiniSearch<T>({
    fields: props.fields as string[],
-   storeFields: [...props.fields, props.idField as keyof T] as string[],
+   storeFields: [
+      ...props.fields,
+      props.idField,
+      ...(props.filterFields ?? []),
+   ] as string[],
    idField: props.idField as string,
 });
 
@@ -73,8 +82,24 @@ const searchResults = computed(() => {
 
    const options: { label: string; value: T[K] }[] = [];
    const ids: T[K][] = [];
+   const addedFilterValues = new Set<string>();
    results.forEach((r) => {
       let label = String(r[props.labelField as any]);
+
+      // only include suggestions that have unique filter values
+      if (props.filterFields) {
+         const filterValues = props.filterFields.map((field) =>
+            String(r[field as any]),
+         );
+         for (const value of filterValues) {
+            if (!addedFilterValues.has(value)) {
+               addedFilterValues.add(value);
+            } else {
+               return;
+            }
+         }
+      }
+
       if (props.label && typeof props.label === "function") {
          label = props.label(r as any);
       }
@@ -102,7 +127,7 @@ watch(
       miniSearch.removeAll();
       miniSearch.addAll(newDocs);
    },
-   { immediate: true }
+   { immediate: true },
 );
 
 watch(searchQuery, (value) => {
@@ -136,7 +161,20 @@ function onSelect(value: T[K]) {
 
    searchQuery.value = selected?.[props.labelField] as string;
    emit("select", value);
-   emit("search", [value]);
+
+   // inject ids of filter fields in search result
+   let filteredIds: T[K][] = [];
+   if (props.filterFields) {
+      filteredIds = props.documents
+         .filter((doc) =>
+            props.filterFields!.every(
+               (field) => doc[field] === selected?.[field],
+            ),
+         )
+         .map((doc) => doc[props.idField]);
+   }
+
+   emit("search", [value, ...filteredIds]);
 
    nextTick(() => {
       showOptions.value = false;
