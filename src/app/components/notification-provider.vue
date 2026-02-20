@@ -32,10 +32,6 @@
 
          <DataView
             :items="notifications"
-            :pagination="{
-               enabled: true,
-               pageSize: 10,
-            }"
             :item-key="(item) => item.id"
             :search="{
                fields: ['title', 'body'],
@@ -67,8 +63,11 @@
                      },
                   ]"
                   content-class="px-0! py-2!"
-                  tags-placement="after-title"
-                  @click="markAsRead(item.id)"
+                  @click="
+                     () => {
+                        if (!item.isRead) markAsRead(item.id);
+                     }
+                  "
                   :menu-options="[
                      {
                         label: 'View link',
