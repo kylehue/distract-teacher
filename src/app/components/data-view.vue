@@ -1,5 +1,5 @@
 <template>
-   <div class="flex flex-col gap-2">
+   <div class="flex flex-col gap-4">
       <div
          v-if="props.items.length"
          class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between"
@@ -20,7 +20,7 @@
                      :value="selectedSortKeys"
                      @update:value="onUpdateSortKeys"
                   >
-                     <NButton secondary circle :disabled="!props.items.length">
+                     <NButton quaternary circle :disabled="!props.items.length">
                         <template #icon>
                            <PhArrowsDownUp />
                         </template>
@@ -39,7 +39,7 @@
             >
                <NTooltip placement="bottom">
                   <template #trigger>
-                     <NButton secondary circle :disabled="!props.items.length">
+                     <NButton quaternary circle :disabled="!props.items.length">
                         <template #icon>
                            <PhFunnel />
                         </template>
@@ -72,8 +72,9 @@
                   :fields="searchConfig.fields"
                   :id-field="searchConfig.idField"
                   :label-field="searchConfig.labelField"
+                  :filter-fields="searchConfig.filterFields"
                   :placeholder="searchConfig.placeholder ?? 'Search'"
-                  :search-on-input="searchConfig.searchOnInput ?? true"
+                  :search-on-input="searchConfig.searchOnInput"
                   :label="searchConfig.label"
                   :max-suggestions="searchConfig.maxSuggestions"
                   @search="onSearch"
@@ -116,9 +117,7 @@
                            size="tiny"
                            @click.stop="toggleSortDirection(rule.key)"
                         >
-                           <NText class="text-xs!">
-                              {{ sortLabel(rule.key) }}
-                           </NText>
+                           {{ sortLabel(rule.key) }}
                         </NButton>
                      </div>
                   </NTag>
@@ -129,7 +128,7 @@
             </NTooltip>
          </template>
          <NTag
-            v-for="token in selectedFilterTokens"
+            v-for="(token, index) in selectedFilterTokens"
             :key="token"
             closable
             :bordered="false"
@@ -138,15 +137,31 @@
             <template #icon>
                <PhFunnel />
             </template>
-            <NText class="text-xs!">
-               {{ filterTokenLabel(token) }}
-            </NText>
+            <NPopselect
+               :options="
+                  filterTokenOptions(token).map((option) => ({
+                     label: option.label,
+                     value: encodeFilterToken(
+                        parseFilterToken(token)!.key,
+                        option.value,
+                     ),
+                  }))
+               "
+               @update-value="
+                  (value) => (selectedFilterTokens[index] = String(value))
+               "
+               trigger="click"
+            >
+               <NButton quaternary size="tiny">
+                  {{ filterTokenLabel(token) }}
+               </NButton>
+            </NPopselect>
          </NTag>
       </div>
 
       <div v-if="props.loading" class="flex justify-center py-10">
          <slot name="loading">
-            <Loader />
+            <Loader text="" />
          </slot>
       </div>
 
@@ -177,10 +192,7 @@
          </div>
       </NScrollbar>
 
-      <div
-         v-if="isPaginationEnabled && transformedItems.length > pageSize"
-         class="flex justify-end"
-      >
+      <div v-if="isPaginationEnabled" class="flex justify-end">
          <NPagination
             v-model:page="currentPage"
             :page-size="pageSize"
@@ -191,7 +203,7 @@
    </div>
 </template>
 
-<script setup lang="ts" generic="T extends Record<string, unknown>">
+<script setup lang="ts" generic="T extends Record<string, any>">
 import { computed, h, ref, useTemplateRef, watch } from "vue";
 import {
    NButton,
@@ -224,13 +236,13 @@ import {
 type SortDirection = "asc" | "desc";
 type FilterPrimitive = string | number | boolean | null | undefined;
 
-interface DataViewSortRule<T> {
-   key: keyof T & string;
+interface DataViewSortRule {
+   key: string;
    direction: SortDirection;
 }
 
 interface DataViewSortOption<T> {
-   key: keyof T & string;
+   key: string;
    label: string;
    compare: (left: T, right: T) => number;
    defaultDirection?: SortDirection;
@@ -239,13 +251,14 @@ interface DataViewSortOption<T> {
 
 interface DataViewSortConfig<T> {
    options: DataViewSortOption<T>[];
-   defaultRules?: DataViewSortRule<T>[];
+   defaultRules?: DataViewSortRule[];
 }
 
 interface DataViewSearchConfig<T> {
    fields: (keyof T & string)[];
    idField: keyof T & string;
    labelField: keyof T & string;
+   filterFields?: (keyof T & string)[];
    placeholder?: string;
    searchOnInput?: boolean;
    label?: (item: Pick<T, keyof T & string>) => string;
@@ -260,7 +273,7 @@ interface DataViewColumnFilterOption<
 }
 
 interface DataViewColumnFilter<T, V extends FilterPrimitive = FilterPrimitive> {
-   key: keyof T & string;
+   key: string;
    label: string;
    value?: (item: T) => V;
    options?: DataViewColumnFilterOption<V>[];
@@ -268,14 +281,13 @@ interface DataViewColumnFilter<T, V extends FilterPrimitive = FilterPrimitive> {
 
 interface DataViewColumnFilterConfig<T> {
    columns: DataViewColumnFilter<T>[];
-   defaultRules?: DataViewColumnFilterRule<T>[];
+   defaultRules?: DataViewColumnFilterRule[];
 }
 
 interface DataViewColumnFilterRule<
-   T,
    V extends FilterPrimitive = FilterPrimitive,
 > {
-   key: keyof T & string;
+   key: string;
    values: V[];
 }
 
@@ -285,7 +297,6 @@ const props = defineProps<{
    itemKey?: (item: T, localIndex: number) => string | number;
    contentClass?: string;
    pagination?: {
-      enabled?: boolean;
       pageSize?: number;
    };
    sort?: DataViewSortConfig<T>;
@@ -311,7 +322,7 @@ const currentPage = ref(1);
 const searchQuery = ref("");
 const searchIds = ref<string[]>([]);
 const selectedSearchId = ref<string | null>(null);
-const sortRules = ref<DataViewSortRule<T>[]>([]);
+const sortRules = ref<DataViewSortRule[]>([]);
 const selectedFilterTokens = ref<string[]>([]);
 const scrollbar = useTemplateRef("scrollbar");
 
@@ -319,7 +330,7 @@ const isSearchEnabled = computed(() => Boolean(props.search));
 const isSortEnabled = computed(() => Boolean(props.sort));
 const isColumnFilterEnabled = computed(() => Boolean(props.columnFilter));
 const isPaginationEnabled = computed(
-   () => (props.pagination?.enabled ?? true) && !props.loading,
+   () => !props.loading && !!props.items.length,
 );
 const pageSize = computed(() => Math.max(1, props.pagination?.pageSize ?? 10));
 const searchConfig = computed(() => props.search!);
@@ -459,7 +470,7 @@ const searchFilteredItems = computed(() => {
       );
    }
 
-   if (!searchQuery.value.trim()) return props.items;
+   if (!searchQuery.value.trim() || !searchIds.value.length) return props.items;
 
    const ids = new Set(searchIds.value.map((id) => String(id)));
    return props.items.filter((item) =>
@@ -635,6 +646,16 @@ function filterTokenLabel(token: string) {
    return filterTokenLabelMap.value.get(token) || token;
 }
 
+function filterTokenOptions(token: string) {
+   const parsed = parseFilterToken(token);
+   if (!parsed) return [];
+
+   const column = columnFilterMap.value.get(parsed.key);
+   if (!column) return [];
+
+   return resolveColumnFilterOptions(column);
+}
+
 function sortDefaultDirection(key: string): SortDirection {
    return sortOptionMap.value.get(key)?.defaultDirection ?? "asc";
 }
@@ -648,11 +669,11 @@ function applyDefaultRules() {
    selectedFilterTokens.value = [...defaultFilterTokens.value];
 }
 
-function normalizeSortRules(rules?: DataViewSortRule<T>[]) {
-   if (!rules?.length) return [] as DataViewSortRule<T>[];
+function normalizeSortRules(rules?: DataViewSortRule[]) {
+   if (!rules?.length) return [] as DataViewSortRule[];
 
    const seen = new Set<string>();
-   const normalized: DataViewSortRule<T>[] = [];
+   const normalized: DataViewSortRule[] = [];
    for (const rule of rules) {
       const key = String(rule.key);
       if (seen.has(key)) continue;
@@ -667,7 +688,7 @@ function normalizeSortRules(rules?: DataViewSortRule<T>[]) {
    return normalized;
 }
 
-function normalizeDefaultFilterTokens(rules?: DataViewColumnFilterRule<T>[]) {
+function normalizeDefaultFilterTokens(rules?: DataViewColumnFilterRule[]) {
    if (!rules?.length) return [];
 
    const tokens = new Set<string>();
@@ -683,7 +704,7 @@ function normalizeDefaultFilterTokens(rules?: DataViewColumnFilterRule<T>[]) {
    return Array.from(tokens);
 }
 
-function sortRulesSignature(rules: DataViewSortRule<T>[]) {
+function sortRulesSignature(rules: DataViewSortRule[]) {
    return rules
       .map((rule) => `${String(rule.key)}:${rule.direction}`)
       .join("|");
