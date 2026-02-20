@@ -157,6 +157,18 @@
                </NButton>
             </NPopselect>
          </NTag>
+         <NTag
+            v-for="specialFilter in specialFilters.values()"
+            :key="specialFilter.key"
+            closable
+            :bordered="false"
+            @close="specialFilters.delete(specialFilter.key)"
+         >
+            <template #icon>
+               <PhFunnel />
+            </template>
+            <NText class="text-xs">{{ specialFilter.label }}</NText>
+         </NTag>
       </div>
 
       <div v-if="props.loading" class="flex justify-center py-10">
@@ -291,6 +303,12 @@ interface DataViewColumnFilterRule<
    values: V[];
 }
 
+interface SpecialFilterRule {
+   key: string;
+   label: string;
+   filter: (item: T) => boolean;
+}
+
 const props = defineProps<{
    items: T[];
    loading?: boolean;
@@ -324,6 +342,7 @@ const searchIds = ref<string[]>([]);
 const selectedSearchId = ref<string | null>(null);
 const sortRules = ref<DataViewSortRule[]>([]);
 const selectedFilterTokens = ref<string[]>([]);
+const specialFilters = ref(new Map<string, SpecialFilterRule>());
 const scrollbar = useTemplateRef("scrollbar");
 
 const isSearchEnabled = computed(() => Boolean(props.search));
@@ -377,6 +396,7 @@ const validSortKeySet = computed(() => {
    return new Set(Array.from(sortOptionMap.value.keys()));
 });
 
+// active sort rules sorted by priority
 const effectiveSortRules = computed(() => {
    const orderIndex = new Map(
       sortRules.value.map((rule, index) => [String(rule.key), index]),
@@ -394,6 +414,7 @@ const effectiveSortRules = computed(() => {
    });
 });
 
+// for filter dropdown
 const columnFilterMenuOptions = computed<DropdownMixedOption[]>(() => {
    if (!isColumnFilterEnabled.value) return [];
    const selectedTokenSet = new Set(selectedFilterTokens.value);
@@ -455,7 +476,8 @@ const hasActiveTransforms = computed(() => {
          !isSameStringSet(
             selectedFilterTokens.value,
             defaultFilterTokens.value,
-         ))
+         )) ||
+      specialFilters.value.size > 0
    );
 });
 
@@ -495,7 +517,7 @@ const selectedColumnFilters = computed(() => {
 
 // actual filtered items
 const columnFilteredItems = computed(() => {
-   if (!isColumnFilterEnabled.value || !selectedFilterTokens.value.length) {
+   if (!isColumnFilterEnabled.value || (!selectedFilterTokens.value.length && !specialFilters.value.size)) {
       return searchFilteredItems.value;
    }
 
@@ -507,6 +529,11 @@ const columnFilteredItems = computed(() => {
          const raw = getColumnFilterValue(column, item);
          const encoded = encodeSerializedValue(raw);
          if (!allowedValues.has(encoded)) return false;
+      }
+      for (const specialFilter of specialFilters.value.values()) {
+         if (!specialFilter.filter(item)) {
+            return false;
+         }
       }
       return true;
    });
@@ -623,6 +650,7 @@ function resetTransforms() {
    selectedSearchId.value = null;
    applyDefaultRules();
    currentPage.value = 1;
+   specialFilters.value.clear();
 }
 
 function itemIndex(localIndex: number) {
@@ -802,6 +830,14 @@ function formatValue(value: FilterPrimitive) {
    }
    return String(value);
 }
+
+function addSpecialFilter(rule: SpecialFilterRule) {
+   specialFilters.value.set(rule.key, rule);
+}
+
+defineExpose({
+   addSpecialFilter,
+});
 
 watch(
    defaultSortRules,
