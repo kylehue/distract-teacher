@@ -87,6 +87,7 @@
                      },
                      {
                         label: 'Delete',
+                        labelProps: { type: 'error' },
                         disabled: deleteNotification.isLoading,
                         onSelect() {
                            deleteNotif(item.id);
