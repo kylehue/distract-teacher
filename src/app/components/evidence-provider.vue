@@ -9,54 +9,42 @@
          content-class="flex items-center justify-center w-full h-full"
       >
          <template #action v-if="monitorLog && student && room">
-            <div
-               class="flex flex-wrap justify-around gap-x-16 gap-y-8 min-w-[140px]"
-            >
-               <NStatistic label="Student Name">
-                  <NText class="block max-w-[200px] text-lg!">
-                     {{ student.name }}
-                  </NText>
-               </NStatistic>
-               <NStatistic label="Room">
-                  <NText class="block max-w-[200px] text-lg!">
+            <div class="flex flex-col gap-2">
+               <NText>{{ student.name }}</NText>
+               <div class="flex flex-wrap gap-x-12 gap-y-4">
+                  <Statistic title="Room">
                      {{ room.title }}
-                  </NText>
-               </NStatistic>
-               <NStatistic label="Date">
-                  <NText class="block max-w-[200px] text-lg!">
-                     {{ timestampToDateString(monitorLog.createdAt) }}
-                  </NText>
-               </NStatistic>
-               <NStatistic label="Time">
-                  <NText class="block max-w-[200px] text-lg!">
+                  </Statistic>
+                  <Statistic title="Integrity Score">
+                     {{ (monitorLog.integrityScore * 100).toFixed(2) }}%
+                  </Statistic>
+                  <Statistic
+                     title="Phone Detected"
+                     :value-props="{
+                        type: monitorLog.isPhonePresent ? 'error' : undefined,
+                     }"
+                  >
+                     {{ monitorLog.isPhonePresent ? "Yes" : "No" }}
+                  </Statistic>
+                  <Statistic title="Warning Level">
+                     <NTag
+                        :type="
+                           warningLevelToComponentType(monitorLog.warningLevel)
+                        "
+                        round
+                     >
+                        {{ monitorLog.warningLevel }}
+                     </NTag>
+                  </Statistic>
+               </div>
+               <div class="flex flex-wrap">
+                  <NText :depth="3" class="text-xs">
+                     {{ timestampToDateString(monitorLog.createdAt) }} at
                      {{
                         timestampToTimeString(monitorLog.createdAt, false, true)
                      }}
                   </NText>
-               </NStatistic>
-               <NStatistic label="Integrity Score">
-                  <NText class="block max-w-[200px] text-lg!">
-                     {{ (monitorLog.integrityScore * 100).toFixed(2) }}%
-                  </NText>
-               </NStatistic>
-               <NStatistic label="Phone Detected">
-                  <NText
-                     :type="!monitorLog.isPhonePresent ? 'default' : 'error'"
-                     class="block max-w-[200px] text-lg!"
-                  >
-                     {{ monitorLog.isPhonePresent ? "Yes" : "No" }}
-                  </NText>
-               </NStatistic>
-               <NStatistic label="Warning Level">
-                  <NTag
-                     :type="
-                        warningLevelToComponentType(monitorLog.warningLevel)
-                     "
-                     round
-                  >
-                     {{ monitorLog.warningLevel }}
-                  </NTag>
-               </NStatistic>
+               </div>
             </div>
          </template>
          <Loader v-if="store.isLoadMonitorLogLoading" />
@@ -108,7 +96,7 @@
 </template>
 
 <script setup lang="ts">
-import { NModal, NCard, NEmpty, NStatistic, NTag, NText } from "naive-ui";
+import { NModal, NCard, NEmpty, NTag, NText } from "naive-ui";
 import { ref, watch } from "vue";
 import { useStore } from "../composables/use-store";
 import { MonitorLog, RoomInfo, StudentInfo } from "@/lib/typings";
@@ -118,6 +106,7 @@ import { timestampToDateString, timestampToTimeString } from "@/lib/datetime";
 import { warningLevelToComponentType } from "@/lib/ui";
 import FeatureImpactRankChart from "./feature-impact-rank-chart.vue";
 import Loader from "@/app/components/loader.vue";
+import Statistic from "./statistic.vue";
 
 const store = useStore();
 const show = ref(false);

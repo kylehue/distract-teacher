@@ -4,6 +4,7 @@
       :options="featureImpactChartOptions"
       :series="groupedFeatureData.series"
       v-bind="$attrs"
+      height="300px"
    />
 </template>
 
@@ -49,11 +50,10 @@ const groupedFeatureData = computed(() => {
    };
 });
 
-const chartId = crypto.randomUUID();
 const featureImpactChartOptions = computed(() =>
    deepMerge(apexChartOverrides, {
       chart: {
-         id: chartId,
+         id: props.monitorLog.id + "-feature-impact-chart",
          type: "bar",
          toolbar: { show: false },
       },
