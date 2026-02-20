@@ -49,17 +49,6 @@
                </NTooltip>
             </NDropdown>
 
-            <NTooltip v-if="hasActiveTransforms" placement="bottom">
-               <template #trigger>
-                  <NButton quaternary circle @click="resetTransforms">
-                     <template #icon>
-                        <PhArrowCounterClockwise />
-                     </template>
-                  </NButton>
-               </template>
-               Reset filtering and sorting rules
-            </NTooltip>
-
             <NDropdown
                trigger="click"
                :options="
@@ -82,6 +71,17 @@
                   Items per page
                </NTooltip>
             </NDropdown>
+
+            <NTooltip v-if="hasActiveTransforms" placement="bottom">
+               <template #trigger>
+                  <NButton quaternary circle @click="resetTransforms">
+                     <template #icon>
+                        <PhArrowCounterClockwise />
+                     </template>
+                  </NButton>
+               </template>
+               Reset to defaults
+            </NTooltip>
          </div>
 
          <div class="flex w-full items-center gap-2 sm:w-auto sm:justify-end">
@@ -364,11 +364,10 @@ const sortRules = ref<DataViewSortRule[]>([]);
 const selectedFilterTokens = ref<string[]>([]);
 const specialFilters = ref(new Map<string, SpecialFilterRule>());
 const AVAILABLE_PAGE_SIZES = [10, 20, 50, 100] as const;
-const pageSize = ref(
-   props.pageSizeInfinite
-      ? Number.MAX_SAFE_INTEGER
-      : (props.pageSize ?? AVAILABLE_PAGE_SIZES[0]),
-);
+const DEFAULT_PAGE_SIZE = props.pageSizeInfinite
+   ? Number.MAX_SAFE_INTEGER
+   : (props.pageSize ?? AVAILABLE_PAGE_SIZES[0]);
+const pageSize = ref(DEFAULT_PAGE_SIZE);
 const scrollbar = useTemplateRef("scrollbar");
 
 const isSearchEnabled = computed(() => Boolean(props.search));
@@ -502,7 +501,8 @@ const hasActiveTransforms = computed(() => {
             selectedFilterTokens.value,
             defaultFilterTokens.value,
          )) ||
-      specialFilters.value.size > 0
+      specialFilters.value.size > 0 ||
+      pageSize.value !== DEFAULT_PAGE_SIZE
    );
 });
 
@@ -679,6 +679,7 @@ function resetTransforms() {
    applyDefaultRules();
    currentPage.value = 1;
    specialFilters.value.clear();
+   pageSize.value = DEFAULT_PAGE_SIZE;
 }
 
 function itemIndex(localIndex: number) {
