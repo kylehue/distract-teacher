@@ -186,7 +186,7 @@
             <IntegrityScoreChart :theme="props.theme" :static="props.static" />
          </NCard>
       </div>
-      <div class="grid grid-cols-1 gap-4" data-print-new-page>
+      <div class="grid grid-cols-1 gap-4" :data-print-new-page="true">
          <NCard title="Feature Impacts Over Time" :bordered="false">
             <FeatureImpactChart :theme="props.theme" :static="props.static" />
          </NCard>

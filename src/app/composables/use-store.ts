@@ -390,6 +390,20 @@ export const useStore = defineStore("main-store", () => {
       return count;
    }
 
+   function countPhoneDetectionsOfStudent(studentId: string) {
+      let count = 0;
+      let student = allStudents.get(studentId);
+      if (!student) return count;
+      let roomId = student.roomId;
+      let monitorLogs = monitorLogsGroupedByRoomId.get(roomId);
+      if (!monitorLogs) return count;
+      for (let [_, monitorLog] of monitorLogs) {
+         if (monitorLog.studentId !== studentId) continue;
+         if (monitorLog.isPhonePresent) count++;
+      }
+      return count;
+   }
+
    // --- real-time update listeners ---
    const socket = useSocket();
 
@@ -526,7 +540,8 @@ export const useStore = defineStore("main-store", () => {
       deleteDeletedRoom,
       deleteStudent,
       clear,
-      countMonitorLogsOfStudent,
       countUnreadNotifications,
+      countMonitorLogsOfStudent,
+      countPhoneDetectionsOfStudent,
    };
 });

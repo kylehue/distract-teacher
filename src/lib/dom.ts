@@ -60,7 +60,7 @@ export async function printElement(
    const pdfHeight = pdf.internal.pageSize.getHeight() - 2 * margin;
 
    const pageElements = Array.from(
-      el.querySelectorAll<HTMLElement>("[data-print-new-page]"),
+      el.querySelectorAll<HTMLElement>("[data-print-new-page=true]"),
    );
 
    // Helper to slice canvas vertically if it overflows

@@ -138,26 +138,14 @@
             />
          </NCard>
       </div>
-      <NText class="text-xl font-medium mt-8" data-print-new-page>
+      <NText class="text-xl font-medium mt-8" :data-print-new-page="true">
          Students Summary
       </NText>
-      <StudentsTable
-         :static="static"
-         :columns="[
-            'studentName',
-            'warningDistribution',
-            'phoneDetections',
-            'averageIntegrityScore',
-            'standardDeviation',
-            'timeJoined',
-            'timeLeft',
-            'actions',
-         ]"
-         :actions="['view-reports', 'view-logs']"
+      <StudentsView
          :students="studentsArrayPreprocessed"
-         :loading="isLoading"
          :room="room"
-         summary
+         :loading="isLoading"
+         :static="static"
       />
    </div>
 </template>
@@ -172,7 +160,6 @@ import {
 } from "@/lib/datetime";
 import { explainIntegrity } from "@/lib/reports";
 import RoomStatusTag from "@/app/components/room-status-tag.vue";
-import StudentsTable from "@/app/components/students-table.vue";
 import {
    STUDENTS_INJECTION_KEY,
    MONITOR_LOGS_INJECTION_KEY,
@@ -183,6 +170,7 @@ import {
 } from "@/lib/injection-keys";
 import WarningLevelChart from "./charts/warning-level-chart.vue";
 import InfoTooltip from "@/app/components/info-tooltip.vue";
+import StudentsView from "@/app/components/students-view.vue";
 
 const props = defineProps<{
    theme: "light" | "dark";

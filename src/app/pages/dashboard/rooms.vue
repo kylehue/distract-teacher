@@ -1,41 +1,131 @@
 <template>
    <Layout title="Rooms">
-      <div class="flex justify-end gap-2 mb-4">
-         <InputSearch
-            :documents="roomsArray"
-            :fields="['title', 'code']"
-            label-field="title"
-            id-field="id"
-            placeholder="Search rooms..."
-            class="w-fit!"
-            @search="
-               (ids) => {
-                  table?.filters({ title: ids });
-               }
-            "
-         ></InputSearch>
-      </div>
-      <div class="overflow-hidden">
-         <NDataTable
-            ref="table"
-            :columns="columns"
-            :data="roomsArray"
-            :pagination="{ pageSize: 10 }"
-            :single-line="false"
-            :loading="store.isLoadRoomsLoading"
-            :scroll-x="roomsArray.length ? 900 : undefined"
-         >
-            <template #empty>
-               <NEmpty
-                  class="m-auto"
-                  description="You haven't created any rooms yet."
-               />
-            </template>
-            <template #loading>
-               <Loader text="" />
-            </template>
-         </NDataTable>
-      </div>
+      <DataView
+         :items="roomsArray"
+         :loading="store.isLoadRoomsLoading"
+         :search="{
+            fields: ['title', 'code'],
+            labelField: 'title',
+            idField: 'id',
+         }"
+         :sort="{
+            options: [
+               {
+                  key: 'createdAt',
+                  label: 'Date Created',
+                  compare: (a, b) =>
+                     compareTimestamps(a.createdAt, b.createdAt),
+                  priority: 5,
+               },
+               {
+                  key: 'timeStarted',
+                  label: 'Time Started',
+                  compare: (a, b) =>
+                     compareTimestamps(a.timeStarted, b.timeStarted),
+                  priority: 4,
+               },
+               {
+                  key: 'timeEnded',
+                  label: 'Time Ended',
+                  compare: (a, b) =>
+                     compareTimestamps(a.timeEnded, b.timeEnded),
+                  priority: 4,
+               },
+               {
+                  key: 'studentCount',
+                  label: 'Students',
+                  compare: (a, b) => a.studentCount - b.studentCount,
+                  priority: 3,
+               },
+               {
+                  key: 'title',
+                  label: 'Title',
+                  compare: (a, b) => a.title.localeCompare(b.title),
+                  priority: 2,
+               },
+            ],
+            defaultRules: [{ key: 'createdAt', direction: 'desc' }],
+         }"
+         :column-filter="{
+            columns: [
+               {
+                  key: 'status',
+                  label: 'Status',
+                  options: [
+                     { label: 'Monitoring', value: 'monitoring' },
+                     { label: 'Paused', value: 'paused' },
+                     { label: 'Concluded', value: 'concluded' },
+                  ],
+               },
+            ],
+         }"
+      >
+         <template #empty>
+            <NEmpty
+               class="m-auto"
+               description="You haven't created any rooms yet."
+            />
+         </template>
+         <template #item="{ item: room }">
+            <RowCard
+               bordered
+               :title="room.title"
+               :tags="[
+                  {
+                     label: toTitleCase(room.status),
+                     type: roomStatusToComponentType(room.status),
+                  },
+               ]"
+            >
+               <template #content>
+                  <div class="flex flex-wrap items-center gap-x-12 gap-y-4">
+                     <Statistic title="Room Code">
+                        {{ room.code }}
+                        <template #icon><PhHash /></template>
+                     </Statistic>
+                     <Statistic title="Students">
+                        {{ room.studentCount }} /
+                        {{ room.studentCapacity }}
+                        <template #icon><PhUsers /></template>
+                     </Statistic>
+                     <Statistic title="Time Started">
+                        {{
+                           room.timeStarted
+                              ? timestampToTimeString(room.timeStarted)
+                              : "N/A"
+                        }}
+                        <template #icon><PhTimer /></template>
+                     </Statistic>
+                     <Statistic title="Time Ended">
+                        {{
+                           room.timeEnded
+                              ? timestampToTimeString(room.timeEnded)
+                              : "N/A"
+                        }}
+                        <template #icon><PhTimer /></template>
+                     </Statistic>
+                  </div>
+               </template>
+               <template #footer>
+                  <NTooltip placement="bottom">
+                     <template #trigger>
+                        <NText :depth="3" class="text-xs">
+                           Created –
+                           {{ timestampToDateString(room.createdAt, true) }}
+                        </NText>
+                     </template>
+                     {{ timestampToDateString(room.createdAt) }} at
+                     {{ timestampToTimeString(room.createdAt) }}
+                  </NTooltip>
+               </template>
+               <template #action>
+                  <RouterLink :to="`/dashboard/rooms/${room.id}`">
+                     <NButton size="small" quaternary>View Room</NButton>
+                  </RouterLink>
+               </template>
+            </RowCard>
+         </template>
+      </DataView>
       <template #header-extra>
          <div class="flex flex-row gap-2">
             <NButton @click="createRoom.show()">
@@ -49,12 +139,9 @@
 
 <script setup lang="ts">
 import Layout from "./layout.vue";
-import { PhPlus } from "@phosphor-icons/vue";
-import { NButton, NDataTable, NText, NEmpty, DataTableColumns } from "naive-ui";
-import InputSearch from "@/app/components/input-search.vue";
-import CopyButton from "@/app/components/copy-button.vue";
-import { computed, h, onMounted, useTemplateRef, reactive } from "vue";
-import { RoomInfo } from "@/lib/typings";
+import { PhHash, PhPlus, PhUsers, PhTimer } from "@phosphor-icons/vue";
+import { NButton, NText, NEmpty, NTooltip } from "naive-ui";
+import { computed, h, onMounted } from "vue";
 import { RouterLink } from "vue-router";
 import { useStore } from "@/app/composables/use-store";
 import { useCreateRoom } from "@/app/composables/use-create-room";
@@ -63,152 +150,14 @@ import {
    timestampToDateString,
    timestampToTimeString,
 } from "@/lib/datetime";
-import Loader from "@/app/components/loader.vue";
+import DataView from "@/app/components/data-view.vue";
+import RowCard from "@/app/components/row-card.vue";
+import { roomStatusToComponentType } from "@/lib/ui";
+import { toTitleCase } from "@/lib/string";
+import Statistic from "@/app/components/statistic.vue";
 
 const store = useStore();
 const createRoom = useCreateRoom();
-const table = useTemplateRef("table");
-
-const columns: DataTableColumns<RoomInfo> = reactive([
-   {
-      title: "Title",
-      key: "title",
-      ellipsis: { tooltip: { placement: "bottom" } },
-      sorter: {
-         compare: (a, b) => a.title.localeCompare(b.title),
-         multiple: 1,
-      },
-      filterMultiple: true,
-      filter(value, row) {
-         return value === row.id;
-      },
-   },
-   {
-      title: "Code",
-      key: "code",
-      render(row) {
-         return h(CopyButton, {
-            textToCopy: row.code,
-            size: "small",
-            quaternary: true,
-            textClass: "font-mono",
-         });
-      },
-      ellipsis: { tooltip: { placement: "bottom" } },
-      align: "center",
-   },
-   {
-      title: "Students",
-      key: "students",
-      render(row) {
-         return `${row.studentCount} / ${row.studentCapacity}`;
-      },
-      sorter: {
-         compare(rowA, rowB) {
-            return rowA.studentCount - rowB.studentCount;
-         },
-         multiple: 2,
-      },
-   },
-   {
-      title: "Status",
-      key: "status",
-      render(row) {
-         let color: "error" | "success" = "error";
-         if (row.status !== "concluded") color = "success";
-         return h(
-            NText,
-            { type: color },
-            {
-               default: () =>
-                  row.status !== "concluded" ? "Ongoing" : "Concluded",
-            },
-         );
-      },
-      filterOptions: [
-         { label: "Ongoing", value: "ongoing" },
-         { label: "Concluded", value: "concluded" },
-      ],
-      filter(value, row) {
-         if (value === "ongoing") {
-            return row.status !== "concluded";
-         } else {
-            return row.status === "concluded";
-         }
-      },
-      sorter: {
-         compare(rowA, rowB) {
-            const statusA = rowA.status !== "concluded" ? 1 : 0;
-            const statusB = rowB.status !== "concluded" ? 1 : 0;
-            return statusB - statusA;
-         },
-         multiple: 5,
-      },
-   },
-   {
-      title: "Time Started",
-      key: "timeStarted",
-      render(row) {
-         if (!row.timeStarted) return "N/A";
-         return timestampToTimeString(row.timeStarted);
-      },
-      sorter: {
-         compare(rowA, rowB) {
-            return compareTimestamps(rowA.timeStarted, rowB.timeStarted);
-         },
-         multiple: 3,
-      },
-   },
-   {
-      title: "Time Ended",
-      key: "timeEnded",
-      render(row) {
-         if (!row.timeEnded) return "N/A";
-         return timestampToTimeString(row.timeEnded);
-      },
-      sorter: {
-         compare(rowA, rowB) {
-            return compareTimestamps(rowA.timeEnded, rowB.timeEnded);
-         },
-         multiple: 3,
-      },
-   },
-   {
-      title: "Date Created",
-      key: "dateCreated",
-      render(row) {
-         return timestampToDateString(row.createdAt);
-      },
-      sorter: {
-         compare(rowA, rowB) {
-            return compareTimestamps(rowA.createdAt, rowB.createdAt);
-         },
-         multiple: 4,
-      },
-      defaultSortOrder: "descend",
-   },
-   {
-      title: "",
-      key: "actions",
-      width: 120,
-      align: "center",
-      fixed: "right",
-      render(row) {
-         return h(
-            RouterLink,
-            { to: "/dashboard/rooms/" + row.id },
-            {
-               default: () =>
-                  h(
-                     NButton,
-                     { size: "small", tertiary: true },
-                     { default: () => "View Room" },
-                  ),
-            },
-         );
-      },
-   },
-]);
 
 const roomsArray = computed(() => Array.from(store.allRooms.values()));
 onMounted(() => {
