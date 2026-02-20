@@ -50,11 +50,8 @@
                      : "N/A"
                }}
             </NStatistic>
-            <NStatistic label="Room Status">
-               <RoomStatusTag :room="room" />
-            </NStatistic>
             <NStatistic label="Monitoring Status">
-               <RoomStatusTag :room="room" type="monitoring" />
+               <RoomStatusTag :room="room" />
             </NStatistic>
          </NCard>
          <div class="w-full flex flex-wrap gap-4">
