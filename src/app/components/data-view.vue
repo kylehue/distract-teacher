@@ -20,7 +20,7 @@
                      :value="selectedSortKeys"
                      @update:value="onUpdateSortKeys"
                   >
-                     <NButton quaternary circle :disabled="!props.items.length">
+                     <NButton quaternary circle>
                         <template #icon>
                            <PhArrowsDownUp />
                         </template>
@@ -39,7 +39,7 @@
             >
                <NTooltip placement="bottom">
                   <template #trigger>
-                     <NButton quaternary circle :disabled="!props.items.length">
+                     <NButton quaternary circle>
                         <template #icon>
                            <PhFunnel />
                         </template>
@@ -49,10 +49,7 @@
                </NTooltip>
             </NDropdown>
 
-            <NTooltip
-               v-if="hasActiveTransforms && props.items.length"
-               placement="bottom"
-            >
+            <NTooltip v-if="hasActiveTransforms" placement="bottom">
                <template #trigger>
                   <NButton quaternary circle @click="resetTransforms">
                      <template #icon>
@@ -62,6 +59,29 @@
                </template>
                Reset filtering and sorting rules
             </NTooltip>
+
+            <NDropdown
+               trigger="click"
+               :options="
+                  AVAILABLE_PAGE_SIZES.map((size) => ({
+                     label: `${size} per page`,
+                     key: size,
+                  }))
+               "
+               :value="pageSize"
+               @select="(key) => (pageSize = key)"
+            >
+               <NTooltip placement="bottom">
+                  <template #trigger>
+                     <NButton quaternary circle>
+                        <template #icon>
+                           <PhRowsPlusBottom />
+                        </template>
+                     </NButton>
+                  </template>
+                  Items per page
+               </NTooltip>
+            </NDropdown>
          </div>
 
          <div class="flex w-full items-center gap-2 sm:w-auto sm:justify-end">
@@ -240,6 +260,7 @@ import {
    PhArrowCounterClockwise,
    PhArrowsDownUp,
    PhFunnel,
+   PhRowsPlusBottom,
    PhSortAscending,
    PhSortDescending,
    PhX,
@@ -314,13 +335,12 @@ const props = defineProps<{
    loading?: boolean;
    itemKey?: (item: T, localIndex: number) => string | number;
    contentClass?: string;
-   pagination?: {
-      pageSize?: number;
-   };
    sort?: DataViewSortConfig<T>;
    search?: DataViewSearchConfig<T>;
    columnFilter?: DataViewColumnFilterConfig<T>;
    maxHeight?: number | string;
+   pageSize?: (typeof AVAILABLE_PAGE_SIZES)[number];
+   pageSizeInfinite?: boolean;
 }>();
 
 defineSlots<{
@@ -343,6 +363,12 @@ const selectedSearchId = ref<string | null>(null);
 const sortRules = ref<DataViewSortRule[]>([]);
 const selectedFilterTokens = ref<string[]>([]);
 const specialFilters = ref(new Map<string, SpecialFilterRule>());
+const AVAILABLE_PAGE_SIZES = [10, 20, 50, 100] as const;
+const pageSize = ref(
+   props.pageSizeInfinite
+      ? Number.MAX_SAFE_INTEGER
+      : (props.pageSize ?? AVAILABLE_PAGE_SIZES[0]),
+);
 const scrollbar = useTemplateRef("scrollbar");
 
 const isSearchEnabled = computed(() => Boolean(props.search));
@@ -351,7 +377,6 @@ const isColumnFilterEnabled = computed(() => Boolean(props.columnFilter));
 const isPaginationEnabled = computed(
    () => !props.loading && !!props.items.length,
 );
-const pageSize = computed(() => Math.max(1, props.pagination?.pageSize ?? 10));
 const searchConfig = computed(() => props.search!);
 const sortConfig = computed(() => props.sort!);
 const columnFilterConfig = computed(() => props.columnFilter!);
@@ -517,7 +542,10 @@ const selectedColumnFilters = computed(() => {
 
 // actual filtered items
 const columnFilteredItems = computed(() => {
-   if (!isColumnFilterEnabled.value || (!selectedFilterTokens.value.length && !specialFilters.value.size)) {
+   if (
+      !isColumnFilterEnabled.value ||
+      (!selectedFilterTokens.value.length && !specialFilters.value.size)
+   ) {
       return searchFilteredItems.value;
    }
 
