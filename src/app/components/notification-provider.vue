@@ -55,7 +55,6 @@
                <RowCard
                   :title="item.title"
                   :content="item.body"
-                  :footer="timestampToDateString(item.createdAt, true)"
                   :tags="[
                      {
                         label: item.isRead ? 'Read' : 'Unread',
@@ -98,6 +97,17 @@
                   <template #icon>
                      <PhBell />
                   </template>
+                  <template #footer>
+                     <NTooltip placement="bottom">
+                        <template #trigger>
+                           <NText :depth="3" class="text-xs">
+                              {{ timestampToDateString(item.createdAt, true) }}
+                           </NText>
+                        </template>
+                        {{ timestampToDateString(item.createdAt) }} at
+                        {{ timestampToTimeString(item.createdAt) }}
+                     </NTooltip>
+                  </template>
                </RowCard>
             </template>
          </DataView>
@@ -106,10 +116,23 @@
 </template>
 
 <script setup lang="ts">
-import { NButton, NCard, NDivider, NModal, NEmpty, useMessage } from "naive-ui";
+import {
+   NButton,
+   NCard,
+   NDivider,
+   NModal,
+   NEmpty,
+   NTooltip,
+   NText,
+   useMessage,
+} from "naive-ui";
 import { computed, onMounted } from "vue";
 import { PhBell, PhBellZ } from "@phosphor-icons/vue";
-import { compareTimestamps, timestampToDateString } from "@/lib/datetime";
+import {
+   compareTimestamps,
+   timestampToDateString,
+   timestampToTimeString,
+} from "@/lib/datetime";
 import { useNotification } from "@/app/composables/use-notification";
 import RowCard from "./row-card.vue";
 import DataView from "./data-view.vue";
