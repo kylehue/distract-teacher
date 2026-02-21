@@ -19,6 +19,13 @@ export const useAuthStore = defineStore("auth-store", () => {
       socket.socket.connect();
    }
 
+   async function authenticate(_teacher: TeacherInfo) {
+      refreshSocket();
+      teacher.value = _teacher;
+      isAuthenticated.value = true;
+      openPage();
+   }
+
    const postLogin = useFetch<{ teacher: TeacherInfo }>("/api/login", "POST");
    async function loginWithCredentials(username: string, password: string) {
       if (isAuthenticated.value) return;
@@ -30,11 +37,7 @@ export const useAuthStore = defineStore("auth-store", () => {
                password: password,
             },
          });
-         refreshSocket();
-         teacher.value = data.data!.teacher;
-         isAuthenticated.value = true;
-
-         router.replace("/dashboard");
+         authenticate(data.data!.teacher);
       } catch (e) {
          throw e;
       } finally {
@@ -51,10 +54,7 @@ export const useAuthStore = defineStore("auth-store", () => {
       isLoading.value = true;
       try {
          const data = await postValidateSession.execute();
-         refreshSocket();
-         teacher.value = data.data!.teacher;
-         isAuthenticated.value = true;
-         openPage();
+         authenticate(data.data!.teacher);
       } catch (e) {
          throw e;
       } finally {
