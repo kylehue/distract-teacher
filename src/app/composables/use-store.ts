@@ -408,6 +408,14 @@ export const useStore = defineStore("main-store", () => {
    const socket = useSocket();
 
    socket.on(
+      "connect",
+      () => {
+         loadNotifications();
+      },
+      { autoClean: false },
+   );
+
+   socket.on(
       "teacher:upsert_notification",
       (data) => {
          const notification = data.notification as NotificationInfo;
