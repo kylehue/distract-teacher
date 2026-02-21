@@ -172,6 +172,19 @@
                      <NFormItem
                         :show-label="false"
                         content-class="flex items-start gap-2"
+                        feedback="Logout all sessions on other devices. This will not log you out from the current session."
+                     >
+                        <NButton
+                           secondary
+                           :loading="postLogoutAll.isLoading"
+                           @click="postLogoutAll.execute()"
+                        >
+                           Logout All Sessions
+                        </NButton>
+                     </NFormItem>
+                     <NFormItem
+                        :show-label="false"
+                        content-class="flex items-start gap-2"
                         feedback="Clear all cached data. This action is safe and will not delete any data."
                      >
                         <NButton
@@ -210,16 +223,13 @@ import {
    useMessage,
 } from "naive-ui";
 import { TeacherInfo } from "@/lib/typings";
-import {
-   onMounted,
-   reactive,
-} from "vue";
+import { onMounted, reactive } from "vue";
 import { RouterLink } from "vue-router";
 import { useFetch } from "@/app/composables/use-fetch";
 import { PhArrowLeft } from "@phosphor-icons/vue";
 import { useAuthStore } from "../composables/use-auth-store";
 import { UnauthorizedError } from "@/lib/errors";
-import Loader from "@/app/components/loader.vue"
+import Loader from "@/app/components/loader.vue";
 
 const auth = useAuthStore();
 
@@ -238,6 +248,8 @@ const form = reactive({
    password2Feedback: "",
 });
 const message = useMessage();
+
+const postLogoutAll = useFetch("/api/logout_all", "POST");
 
 const postClearCache = useFetch("/api/clear_cache", "POST");
 
