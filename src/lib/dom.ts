@@ -51,126 +51,181 @@ export async function printElement(
    if (options?.height && !options?.fitToSinglePage)
       el.style.height = options.height;
 
-   await waitForSvg(el);
-   await document.fonts.ready;
-
-   const pdf = new jsPDF("p", "mm", "a4");
-   const margin = options?.margin ?? 5;
-   const pdfWidth = pdf.internal.pageSize.getWidth() - 2 * margin;
-   const pdfHeight = pdf.internal.pageSize.getHeight() - 2 * margin;
-
-   const pageElements = Array.from(
-      el.querySelectorAll<HTMLElement>("[data-print-new-page=true]"),
-   );
-
-   // Helper to slice canvas vertically if it overflows
-   const addCanvasToPdf = (canvas: HTMLCanvasElement) => {
-      const scale = pdfWidth / canvas.width;
-      const totalHeight = canvas.height * scale;
-
-      if (totalHeight <= pdfHeight) {
-         pdf.addImage(
-            canvas.toDataURL("image/jpeg"),
-            "JPEG",
-            margin,
-            margin,
-            pdfWidth,
-            totalHeight,
-         );
-      } else {
-         let renderedHeight = 0;
-         while (renderedHeight < canvas.height) {
-            const pageCanvas = document.createElement("canvas");
-            const pageScale = pdfWidth / canvas.width;
-            const pageHeightPx = pdfHeight / pageScale;
-            pageCanvas.width = canvas.width;
-            pageCanvas.height = Math.min(
-               pageHeightPx,
-               canvas.height - renderedHeight,
-            );
-
-            const ctx = pageCanvas.getContext("2d")!;
-            ctx.drawImage(
-               canvas,
-               0,
-               renderedHeight,
-               canvas.width,
-               pageCanvas.height,
-               0,
-               0,
-               canvas.width,
-               pageCanvas.height,
-            );
-
-            if (renderedHeight > 0) pdf.addPage();
-            pdf.addImage(
-               pageCanvas.toDataURL("image/jpeg"),
-               "JPEG",
-               margin,
-               margin,
-               pdfWidth,
-               (pageCanvas.height * pdfWidth) / pageCanvas.width,
-            );
-
-            renderedHeight += pageCanvas.height;
-         }
+   const restoreStyles = () => {
+      el.setAttribute("style", originalStyle);
+      if (!options?.showButtons) {
+         buttons.forEach((btn) => {
+            const origVisibility = origButtonVisibilities.get(btn);
+            if (origVisibility !== undefined)
+               btn.style.visibility = origVisibility;
+            else btn.style.removeProperty("visibility");
+         });
       }
    };
 
-   // Render everything before the first page break
-   let lastOffset = 0;
-   if (pageElements.length > 0) {
-      const firstBreak = pageElements[0];
-      const preCanvas = await html2canvas(el, {
-         scale: 2,
-         useCORS: true,
-         backgroundColor: "#fff",
-         y: 0,
-         height: firstBreak.offsetTop,
-      });
-      addCanvasToPdf(preCanvas);
-      lastOffset = firstBreak.offsetTop;
-   } else {
-      // No manual page breaks, render entire element as one chunk
-      const fullCanvas = await html2canvas(el, {
-         scale: 2,
-         useCORS: true,
-         backgroundColor: "#fff",
-      });
-      addCanvasToPdf(fullCanvas);
-      lastOffset = el.scrollHeight;
+   try {
+      await waitForSvg(el);
+      await document.fonts.ready;
+
+      const pdf = new jsPDF("p", "mm", "a4");
+      const margin = options?.margin ?? 5;
+      const pdfWidth = pdf.internal.pageSize.getWidth() - 2 * margin;
+      const pdfHeight = pdf.internal.pageSize.getHeight() - 2 * margin;
+      const allEntities = Array.from(
+         el.querySelectorAll<HTMLElement>(".print-entity"),
+      );
+      const entities = allEntities
+         .filter((node) => !node.parentElement?.closest(".print-entity"))
+         .map((entity) => {
+            const wrapper = document.createElement("div");
+            entity.parentElement?.insertBefore(wrapper, entity);
+            wrapper.appendChild(entity);
+            wrapper.style.height = "fit-content";
+            wrapper.style.width = "100%";
+            wrapper.style.paddingBottom = "1rem";
+            return wrapper;
+         });
+
+      const printEntities = entities.length ? entities : [el];
+      const captureScale = 2;
+      let currentY = margin;
+      let hasPrinted = false;
+      const pageBottom = margin + pdfHeight;
+      const fitEpsilonMm = 0.2;
+
+      const captureElement = async (entity: HTMLElement) => {
+         const captureId = `print-capture-${Math.random().toString(36).slice(2)}`;
+         entity.setAttribute("data-print-capture-id", captureId);
+         try {
+            return await html2canvas(entity, {
+               scale: captureScale,
+               useCORS: true,
+               backgroundColor: "#fff",
+               x: 0,
+               y: 0,
+               onclone: (clonedDoc) => {
+                  const clonedEntity = clonedDoc.querySelector<HTMLElement>(
+                     `[data-print-capture-id="${captureId}"]`,
+                  );
+                  if (!clonedEntity) return;
+
+                  // Prevent ancestor clipping in the cloned tree.
+                  let parent: HTMLElement | null = clonedEntity;
+                  while (parent && parent !== clonedDoc.body) {
+                     parent.style.overflow = "visible";
+                     parent.style.maxHeight = "none";
+                     parent.style.maxWidth = "none";
+                     parent.style.clipPath = "none";
+                     parent = parent.parentElement;
+                  }
+               },
+            });
+         } finally {
+            entity.removeAttribute("data-print-capture-id");
+         }
+      };
+
+      const addCanvasAtCurrentY = (
+         canvas: HTMLCanvasElement,
+         sourceY: number,
+         sourceHeight: number,
+      ) => {
+         const sliceCanvas = document.createElement("canvas");
+         sliceCanvas.width = canvas.width;
+         sliceCanvas.height = sourceHeight;
+
+         const ctx = sliceCanvas.getContext("2d");
+         if (!ctx) return 0;
+         ctx.fillStyle = "#fff";
+         ctx.fillRect(0, 0, sliceCanvas.width, sliceCanvas.height);
+
+         ctx.drawImage(
+            canvas,
+            0,
+            sourceY,
+            canvas.width,
+            sourceHeight,
+            0,
+            0,
+            canvas.width,
+            sourceHeight,
+         );
+
+         const renderHeightMm = (sourceHeight * pdfWidth) / canvas.width;
+         pdf.addImage(
+            sliceCanvas.toDataURL("image/jpeg"),
+            "JPEG",
+            margin,
+            currentY,
+            pdfWidth,
+            renderHeightMm,
+         );
+         currentY += renderHeightMm;
+         return renderHeightMm;
+      };
+
+      const addCanvasAsEntity = (canvas: HTMLCanvasElement) => {
+         if (canvas.width === 0 || canvas.height === 0) return;
+
+         const fullHeightMm = (canvas.height * pdfWidth) / canvas.width;
+         const remainingMm = pageBottom - currentY;
+
+         // Fits in current page.
+         if (fullHeightMm <= remainingMm + fitEpsilonMm) {
+            addCanvasAtCurrentY(canvas, 0, canvas.height);
+            hasPrinted = true;
+            return;
+         }
+
+         // Fits on a fresh page, move entity as a whole.
+         if (fullHeightMm <= pdfHeight + fitEpsilonMm) {
+            if (hasPrinted) {
+               pdf.addPage();
+            }
+            currentY = margin;
+            addCanvasAtCurrentY(canvas, 0, canvas.height);
+            hasPrinted = true;
+            return;
+         }
+
+         // Oversized entity: split only when one full page cannot contain it.
+         if (hasPrinted && currentY > margin + 0.01) {
+            pdf.addPage();
+            currentY = margin;
+         }
+
+         let sourceY = 0;
+         while (sourceY < canvas.height) {
+            const pageRemainingMm = pageBottom - currentY;
+            let sourceHeight = Math.floor(
+               (pageRemainingMm * canvas.width) / pdfWidth,
+            );
+
+            if (sourceHeight <= 0) {
+               pdf.addPage();
+               currentY = margin;
+               continue;
+            }
+
+            sourceHeight = Math.min(sourceHeight, canvas.height - sourceY);
+            addCanvasAtCurrentY(canvas, sourceY, sourceHeight);
+            hasPrinted = true;
+            sourceY += sourceHeight;
+
+            if (sourceY < canvas.height) {
+               pdf.addPage();
+               currentY = margin;
+            }
+         }
+      };
+
+      for (const entity of printEntities) {
+         const canvas = await captureElement(entity);
+         addCanvasAsEntity(canvas);
+      }
+
+      return pdf;
+   } finally {
+      restoreStyles();
    }
-
-   // Render each chunk starting at a `[data-print-new-page]`
-   for (let i = 0; i < pageElements.length; i++) {
-      const current = pageElements[i];
-      const next = pageElements[i + 1];
-      const yStart = current.offsetTop;
-      const yEnd = next ? next.offsetTop : el.scrollHeight;
-
-      const chunkCanvas = await html2canvas(el, {
-         scale: 2,
-         useCORS: true,
-         backgroundColor: "#fff",
-         y: yStart,
-         height: yEnd - yStart,
-      });
-
-      pdf.addPage();
-      addCanvasToPdf(chunkCanvas);
-      lastOffset = yEnd;
-   }
-
-   // Restore original styles
-   el.setAttribute("style", originalStyle);
-   if (!options?.showButtons) {
-      buttons.forEach((btn) => {
-         const origVisibility = origButtonVisibilities.get(btn);
-         if (origVisibility !== undefined)
-            btn.style.visibility = origVisibility;
-         else btn.style.removeProperty("visibility");
-      });
-   }
-
-   return pdf;
 }

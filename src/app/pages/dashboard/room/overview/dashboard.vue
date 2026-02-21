@@ -2,12 +2,11 @@
    <template v-if="!room || !teacher">Missing data</template>
    <div v-else class="grid gap-4">
       <NText class="text-xl font-medium mt-4">General Information</NText>
-      <div class="flex flex-wrap gap-4">
+      <div class="flex flex-wrap gap-4 print-entity">
          <NCard
             title="Room"
             class="lg:flex-1"
             content-class="flex flex-wrap gap-x-16 gap-y-8"
-            :bordered="false"
          >
             <NStatistic label="Room Title">
                {{ room.title }}
@@ -29,7 +28,6 @@
             title="Session"
             class="lg:flex-1"
             content-class="flex flex-wrap gap-x-16 gap-y-8"
-            :bordered="false"
          >
             <NStatistic label="Time Started">
                {{
@@ -55,7 +53,7 @@
             </NStatistic>
          </NCard>
          <div class="w-full flex flex-wrap gap-4">
-            <NCard class="md:flex-1" :bordered="false">
+            <NCard class="md:flex-1">
                <NStatistic>
                   <template #label>
                      <div class="flex items-center gap-2">
@@ -72,7 +70,7 @@
                   {{ integrityExplanation }}
                </NText>
             </NCard>
-            <NCard class="md:flex-1" :bordered="false">
+            <NCard class="md:flex-1">
                <NStatistic>
                   <template #label>
                      <div class="flex items-center gap-2">
@@ -86,7 +84,7 @@
                   {{ monitorLogsArrayPreprocessed.length }}
                </NStatistic>
             </NCard>
-            <NCard class="md:flex-1" :bordered="false">
+            <NCard class="md:flex-1">
                <NStatistic>
                   <template #label>
                      <div class="flex items-center gap-2">
@@ -104,7 +102,7 @@
                   }}
                </NStatistic>
             </NCard>
-            <NCard class="md:flex-1" :bordered="false">
+            <NCard class="md:flex-1">
                <NStatistic>
                   <template #label>
                      <div class="flex items-center gap-2">
@@ -125,25 +123,29 @@
             </NCard>
          </div>
       </div>
-      <NText class="text-xl font-medium mt-8">Analytics</NText>
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-         <NCard title="Warning Level Distribution" :bordered="false">
-            <WarningLevelChart
-               ref="warningLevelChart"
-               :theme="props.theme"
-               :static="props.static"
-            />
-         </NCard>
+      <div class="flex flex-col gap-4 print-entity mt-8">
+         <NText class="text-xl font-medium">Analytics</NText>
+         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <NCard title="Warning Level Distribution">
+               <WarningLevelChart
+                  ref="warningLevelChart"
+                  :theme="props.theme"
+                  :static="props.static"
+               />
+            </NCard>
+         </div>
       </div>
-      <NText class="text-xl font-medium mt-8" :data-print-new-page="true">
-         Students Summary
-      </NText>
-      <StudentsView
-         :students="studentsArrayPreprocessed"
-         :room="room"
-         :loading="isLoading"
-         :static="static"
-      />
+      <div class="flex flex-col gap-4 mt-8">
+         <NText class="text-xl font-medium print-entity">
+            Students Summary
+         </NText>
+         <StudentsView
+            :students="studentsArrayPreprocessed"
+            :room="room"
+            :loading="isLoading"
+            :static="static"
+         />
+      </div>
    </div>
 </template>
 

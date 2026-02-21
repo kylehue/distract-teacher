@@ -103,9 +103,10 @@
          <template #controlsLeft> </template>
          <template #item="{ item: student, index }">
             <RowCard
+               class="print-entity"
                :title="student.name"
                bordered
-               :data-print-new-page="index % 10 === 0"
+               :data-print-new-page="index % 3 === 0"
                :menu-options="[
                   {
                      label: 'View Reports',
