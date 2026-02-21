@@ -2,7 +2,12 @@ import { mount } from "@vue/test-utils";
 import { createPinia } from "pinia";
 import { defineComponent, h, nextTick } from "vue";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { PageLayoutStub, RouterLinkStub } from "./support/component-stubs";
+import {
+   DataViewStub,
+   PageLayoutStub,
+   RowCardStub,
+   RouterLinkStub,
+} from "./support/component-stubs";
 
 const socketHandlers = new Map<string, Function>();
 
@@ -91,7 +96,9 @@ function mountRoomsPage() {
       global: {
          plugins: [createPinia()],
          stubs: {
+            DataView: DataViewStub,
             Layout: PageLayoutStub,
+            RowCard: RowCardStub,
             RouterLink: RouterLinkStub,
          },
       },
@@ -111,7 +118,7 @@ describe("Dashboard Rooms Page (real-time)", () => {
       const store = useStore();
       await store.loadRooms();
       await nextTick();
-      expect(wrapper.findAll(".room-row").length).toBe(0);
+      expect(wrapper.findAll(".row-card").length).toBe(0);
 
       socketHandlers.get("teacher:upsert_room")?.({
          room: {
@@ -133,8 +140,9 @@ describe("Dashboard Rooms Page (real-time)", () => {
       });
       await nextTick();
 
-      const rows = wrapper.findAll(".room-row").map((r) => r.text());
-      expect(rows.some((txt) => txt.includes("Realtime Room|R1X1"))).toBe(true);
+      expect(wrapper.findAll(".row-card").length).toBe(1);
+      expect(wrapper.text()).toContain("Realtime Room");
+      expect(wrapper.text()).toContain("R1X1");
    });
 
    it("updates rendered rooms when socket deletes a room in store", async () => {
@@ -163,15 +171,16 @@ describe("Dashboard Rooms Page (real-time)", () => {
 
       socketHandlers.get("teacher:upsert_room")?.({ room });
       await nextTick();
-      expect(wrapper.findAll(".room-row").map((r) => r.text())).toContain(
-         "Deleted Realtime Room|DEL1|ongoing",
-      );
+      expect(wrapper.findAll(".row-card").length).toBe(1);
+      expect(wrapper.text()).toContain("Deleted Realtime Room");
+      expect(wrapper.text()).toContain("DEL1");
 
       socketHandlers.get("teacher:delete_room")?.({
          room: { ...room, isDeleted: true },
       });
       await nextTick();
-      expect(wrapper.findAll(".room-row").length).toBe(0);
+      expect(wrapper.findAll(".row-card").length).toBe(0);
+      expect(wrapper.text()).not.toContain("Deleted Realtime Room");
    });
 
    it("opens create-room modal when header action is clicked", async () => {
@@ -190,7 +199,9 @@ describe("Dashboard Rooms Page (real-time)", () => {
       const wrapper = mountRoomsPage();
 
       await nextTick();
-      expect(wrapper.find('[data-testid="rooms-table"]').exists()).toBe(true);
-      expect(wrapper.findAll(".room-row").length).toBe(0);
+      expect(wrapper.find(".data-view").exists()).toBe(true);
+      expect(wrapper.find(".data-view-empty").exists()).toBe(true);
+      expect(wrapper.text()).toContain("You haven't created any rooms yet.");
+      expect(wrapper.findAll(".row-card").length).toBe(0);
    });
 });

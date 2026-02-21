@@ -144,6 +144,87 @@ export const PageLayoutStub = defineComponent({
 
 export const RouterLinkStub = createRouterLinkStub();
 
+export const DataViewStub = defineComponent({
+   name: "DataView",
+   props: {
+      items: { type: Array, default: () => [] },
+      loading: { type: Boolean, default: false },
+   },
+   setup(props, { slots }) {
+      return () => {
+         const items = props.items as any[];
+
+         if (props.loading) {
+            return h("section", { class: "data-view data-view-loading" }, [
+               slots.loading?.() ?? "loading",
+            ]);
+         }
+
+         if (!items.length) {
+            return h("section", { class: "data-view data-view-empty" }, [
+               slots.empty?.(),
+            ]);
+         }
+
+         return h(
+            "section",
+            { class: "data-view" },
+            items.map((item, index) =>
+               h(
+                  "div",
+                  { class: "data-view-item", "data-index": String(index) },
+                  slots.item?.({
+                     item,
+                     index,
+                     localIndex: index,
+                     visibleCount: items.length,
+                  }),
+               ),
+            ),
+         );
+      };
+   },
+});
+
+export const RowCardStub = defineComponent({
+   name: "RowCard",
+   props: {
+      title: { type: String, default: "" },
+      tags: { type: Array, default: () => [] },
+   },
+   setup(props, { attrs, slots }) {
+      return () => {
+         const mergedClass = attrs.class
+            ? `row-card ${String(attrs.class)}`
+            : "row-card";
+
+         return h("article", { ...attrs, class: mergedClass }, [
+            h("h3", { class: "row-card-title" }, props.title),
+            h(
+               "div",
+               { class: "row-card-tags" },
+               (props.tags as any[]).map((tag, index) =>
+                  h(
+                     "span",
+                     { class: "row-card-tag", "data-index": String(index) },
+                     typeof tag === "string" ? tag : String(tag?.label ?? ""),
+                  ),
+               ),
+            ),
+            slots.content
+               ? h("div", { class: "row-card-content" }, slots.content())
+               : null,
+            slots.footer
+               ? h("div", { class: "row-card-footer" }, slots.footer())
+               : null,
+            slots.action
+               ? h("div", { class: "row-card-action" }, slots.action())
+               : null,
+         ]);
+      };
+   },
+});
+
 export const LoaderStub = defineComponent({
    name: "Loader",
    setup() {

@@ -43,10 +43,7 @@ describe("DataView", () => {
       const wrapper = mount(DataView as any, {
          props: {
             items: makeItems(),
-            pagination: {
-               enabled: true,
-               pageSize: 1,
-            },
+            pageSize: 1,
             sort: {
                options: [
                   {
@@ -126,10 +123,7 @@ describe("DataView", () => {
       const wrapper = mount(DataView as any, {
          props: {
             items: makeItems(),
-            pagination: {
-               enabled: true,
-               pageSize: 1,
-            },
+            pageSize: 1,
             sort: {
                options: [
                   {
@@ -225,10 +219,7 @@ describe("DataView", () => {
       const wrapper = mount(DataView as any, {
          props: {
             items: makeItems(),
-            pagination: {
-               enabled: true,
-               pageSize: 2,
-            },
+            pageSize: 2,
          },
          slots: {
             item: ({ item }: any) => h("div", { class: "row" }, item.id),

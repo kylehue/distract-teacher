@@ -57,20 +57,18 @@ describe("Misc UI Components", () => {
       expect(theme.value).toBe("dark");
    });
 
-   it("room status tag updates for general and monitoring modes", async () => {
+   it("room status tag maps status to component type", async () => {
       const wrapper = mount(RoomStatusTag as any, {
          props: {
             room: { status: "monitoring" },
-            type: "monitoring",
          },
       });
 
       expect(wrapper.text()).toContain("Monitoring");
-      expect((wrapper.get('[data-type="warning"]') as any).exists()).toBe(true);
+      expect((wrapper.get('[data-type="success"]') as any).exists()).toBe(true);
 
       await wrapper.setProps({
          room: { status: "concluded" },
-         type: "general",
       });
       expect(wrapper.text()).toContain("Concluded");
       expect((wrapper.get('[data-type="error"]') as any).exists()).toBe(true);

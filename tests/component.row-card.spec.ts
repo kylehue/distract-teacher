@@ -23,8 +23,6 @@ describe("RowCard", () => {
             title: () => h("span", { class: "slot-title" }, "slot title"),
             content: () => h("span", { class: "slot-content" }, "slot content"),
             footer: () => h("span", { class: "slot-footer" }, "slot footer"),
-            tags: ({ tags }: any) =>
-               h("span", { class: "slot-tags" }, `slot tags:${tags.length}`),
          },
          global: {
             stubs: {
@@ -37,11 +35,10 @@ describe("RowCard", () => {
       expect(wrapper.text()).toContain("slot title");
       expect(wrapper.text()).toContain("slot content");
       expect(wrapper.text()).toContain("slot footer");
-      expect(wrapper.text()).toContain("slot tags:1");
+      expect(wrapper.text()).toContain("from-prop");
       expect(wrapper.text()).not.toContain("prop title");
       expect(wrapper.text()).not.toContain("prop content");
       expect(wrapper.text()).not.toContain("prop footer");
-      expect(wrapper.text()).not.toContain("from-prop");
    });
 
    it("normalizes string tags and keeps explicit object tag options", async () => {
@@ -97,18 +94,22 @@ describe("RowCard", () => {
       });
 
       await nextTick();
-      const targets = wrapper.findAll("div.flex.flex-wrap.items-center.gap-2");
-      expect(targets).toHaveLength(2);
-      expect(targets[0].text()).toContain("Unread");
-      expect(targets[1].text()).not.toContain("Unread");
+      const afterTitleTarget = wrapper.get(
+         "div.flex.flex-wrap.items-center.gap-2",
+      );
+      expect(afterTitleTarget.text()).toContain("Unread");
+      expect(
+         wrapper.find("div.mt-3.flex.flex-wrap.items-center.gap-2").exists(),
+      ).toBe(false);
    });
 
-   it("teleports tags to the below-content target by default", async () => {
+   it("teleports tags to the below-content target when configured", async () => {
       const wrapper = mount(RowCard as any, {
          props: {
             title: "Title",
             content: "Body",
             tags: ["Unread"],
+            tagsPlacement: "below-content",
          },
          global: {
             stubs: {
@@ -118,10 +119,10 @@ describe("RowCard", () => {
       });
 
       await nextTick();
-      const targets = wrapper.findAll("div.flex.flex-wrap.items-center.gap-2");
-      expect(targets).toHaveLength(2);
-      expect(targets[0].text()).not.toContain("Unread");
-      expect(targets[1].text()).toContain("Unread");
+      const belowContentTarget = wrapper.get(
+         "div.mt-3.flex.flex-wrap.items-center.gap-2",
+      );
+      expect(belowContentTarget.text()).toContain("Unread");
    });
 
    it("hides dropdown trigger when menu options are empty", () => {
