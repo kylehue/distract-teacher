@@ -28,7 +28,7 @@
       <DataView
          v-if="activeTab === 'warningLogs'"
          ref="warningLogView"
-         :items="monitorLogsArray"
+         :items="monitorLogsArrayPreprocessed"
          :loading="isLoading"
          :search="{
             fields: ['studentName'],
@@ -348,15 +348,18 @@ const message = useMessage();
 const patchUnlockStudent = useFetch("/api/students/:studentId/unlock", "PATCH");
 const room = inject(ROOM_INJECTION_KEY)!;
 const students = inject(STUDENTS_MAP_INJECTION_KEY)!;
-const monitorLogsArray = inject(MONITOR_LOGS_INJECTION_KEY)!.value.map((m) => ({
-   ...m,
-   studentName: students.value.get(m.studentId)?.name || "<Unnamed>",
-}));
+const monitorLogsArray = inject(MONITOR_LOGS_INJECTION_KEY)!;
 const monitorLogs = inject(MONITOR_LOGS_MAP_INJECTION_KEY)!;
 const isLoading = inject(IS_LOADING_INJECTION_KEY)!;
 const activeTab = ref<(typeof TABS)[number]>("warningLogs");
 const warningLogView = useTemplateRef("warningLogView");
 
+const monitorLogsArrayPreprocessed = computed(() => {
+   return monitorLogsArray.value.map((m) => ({
+      ...m,
+      studentName: students.value.get(m.studentId)?.name || "<Unnamed>",
+   }));
+});
 async function closeCase(student: StudentInfo) {
    try {
       await patchUnlockStudent.execute({
