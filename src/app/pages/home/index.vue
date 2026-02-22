@@ -1,6 +1,6 @@
 <template>
    <div class="flex items-center justify-center w-full h-full">
-      <LightCanvas />
+      <Canvas />
       <div
          class="flex flex-col items-center md:items-start justify-center gap-4 w-full h-full z-1"
       >
@@ -34,7 +34,7 @@ import { PhDownloadSimple } from "@phosphor-icons/vue";
 import { NButton, NText } from "naive-ui";
 import { onMounted, ref } from "vue";
 import { RouterLink } from "vue-router";
-import LightCanvas from "./components/light-canvas.vue";
+import Canvas from "./canvas.vue";
 
 async function getLatestExeUrl(): Promise<string | null> {
    const res = await fetch(
