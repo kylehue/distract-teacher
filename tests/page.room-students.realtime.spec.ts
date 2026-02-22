@@ -1,12 +1,39 @@
 import { mount } from "@vue/test-utils";
-import { describe, expect, it } from "vitest";
-import { defineComponent, h, nextTick, ref } from "vue";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { computed, defineComponent, h, nextTick, ref } from "vue";
+import { createPinia, setActivePinia } from "pinia";
 import RoomStudentsPage from "@/app/pages/dashboard/room/students.vue";
 import {
    IS_LOADING_INJECTION_KEY,
    ROOM_INJECTION_KEY,
    STUDENTS_INJECTION_KEY,
 } from "@/lib/injection-keys";
+import { useStore } from "@/app/composables/use-store";
+
+const socketHandlers = new Map<string, Function>();
+const socketApi = {
+   on: vi.fn((event: string, handler: Function) => {
+      socketHandlers.set(event, handler);
+   }),
+   emit: vi.fn(),
+   socket: {
+      connected: false,
+      connect: vi.fn(),
+      disconnect: vi.fn(),
+   },
+};
+
+vi.mock("@/app/composables/use-socket", () => ({
+   useSocket: () => socketApi,
+}));
+
+vi.mock("@/app/composables/use-fetch", () => ({
+   useFetch: () => ({
+      data: null as any,
+      isLoading: false,
+      execute: vi.fn(async () => ({ data: {} })),
+   }),
+}));
 
 const StudentsViewStub = defineComponent({
    name: "StudentsView",
@@ -30,6 +57,21 @@ const StudentsViewStub = defineComponent({
          });
    },
 });
+
+function createStudent(id: string, roomId: string, overrides: Record<string, any> = {}) {
+   return {
+      id,
+      roomId,
+      uuid: `uuid-${id}`,
+      name: `Student ${id}`,
+      timeJoined: "2026-01-01T00:00:00.000Z",
+      active: true,
+      permitted: true,
+      monitorLogCount: 0,
+      createdAt: "2026-01-01T00:00:00.000Z",
+      ...overrides,
+   } as any;
+}
 
 describe("Dashboard Room Students Page", () => {
    it("passes injected room, loading, and students data to StudentsView", async () => {
@@ -117,5 +159,97 @@ describe("Dashboard Room Students Page", () => {
       expect(wrapper.find('[data-testid="students-view"]').exists()).toBe(
          false,
       );
+   });
+});
+
+describe("Dashboard Room Students Page (real-time via store sockets)", () => {
+   beforeEach(() => {
+      vi.clearAllMocks();
+      socketHandlers.clear();
+      setActivePinia(createPinia());
+   });
+
+   function mountStudentsPageFromStore() {
+      const store = useStore();
+      const roomId = "r1";
+
+      store.upsertRooms([
+         {
+            id: roomId,
+            teacherAccountId: "t1",
+            title: "Realtime Room",
+            code: "RM01",
+            studentCount: 1,
+            studentCapacity: 30,
+            status: "monitoring",
+            evidenceWarningLevel: "moderate",
+            enablePunishments: true,
+            allowLateStudents: true,
+            joinConfirmation: true,
+            createdAt: "2026-01-01T00:00:00.000Z",
+         } as any,
+      ]);
+      store.upsertStudents([createStudent("s1", roomId, { name: "Alice" })]);
+
+      const wrapper = mount(RoomStudentsPage, {
+         global: {
+            provide: {
+               [ROOM_INJECTION_KEY as symbol]: computed(
+                  () => store.allRooms.get(roomId) ?? null,
+               ),
+               [IS_LOADING_INJECTION_KEY as symbol]: ref(false),
+               [STUDENTS_INJECTION_KEY as symbol]: computed(() =>
+                  Array.from(
+                     (
+                        store.studentsGroupedByRoomId.get(roomId) ??
+                        new Map<string, any>()
+                     ).values(),
+                  ),
+               ),
+            },
+            stubs: {
+               StudentsView: StudentsViewStub,
+            },
+         },
+      });
+
+      return { wrapper, store };
+   }
+
+   it("adds a student row when socket upserts a student", async () => {
+      const { wrapper } = mountStudentsPageFromStore();
+      await nextTick();
+
+      expect(
+         wrapper.get('[data-testid="students-view"]').attributes("data-student-ids"),
+      ).toBe("s1");
+
+      socketHandlers.get("teacher:upsert_student")?.({
+         student: createStudent("s2", "r1", { name: "Bob" }),
+      });
+      await nextTick();
+
+      expect(
+         wrapper.get('[data-testid="students-view"]').attributes("data-student-ids"),
+      ).toBe("s1,s2");
+   });
+
+   it("removes a student row when socket deletes a student", async () => {
+      const { wrapper, store } = mountStudentsPageFromStore();
+      store.upsertStudents([createStudent("s2", "r1", { name: "Bob" })]);
+      await nextTick();
+
+      expect(
+         wrapper.get('[data-testid="students-view"]').attributes("data-student-ids"),
+      ).toBe("s1,s2");
+
+      socketHandlers.get("teacher:delete_student")?.({
+         student: { id: "s1" },
+      });
+      await nextTick();
+
+      expect(
+         wrapper.get('[data-testid="students-view"]').attributes("data-student-ids"),
+      ).toBe("s2");
    });
 });

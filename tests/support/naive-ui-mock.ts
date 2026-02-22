@@ -76,6 +76,12 @@ export function createUnifiedNaiveUiMock() {
                );
          },
       }),
+      NButtonGroup: defineComponent({
+         name: "NButtonGroup",
+         setup(_, { slots }) {
+            return () => h("div", { class: "n-button-group" }, slots.default?.());
+         },
+      }),
       NText: defineComponent({
          name: "NText",
          props: {

@@ -405,4 +405,35 @@ describe("NotificationProvider", () => {
       expect(wrapper.findAll("article.row-card-stub")).toHaveLength(0);
       expect(findButtonByText(wrapper, "Clear")).toBeUndefined();
    });
+
+   it("reacts to socket realtime batch upsert notifications event", async () => {
+      seededNotifications = [];
+      const wrapper = mountNotificationProvider();
+      await syncUi();
+
+      expect(wrapper.findAll("article.row-card-stub")).toHaveLength(0);
+
+      activeSocket._emitServer("teacher:upsert_notifications", {
+         notifications: [
+            {
+               id: "n-batch-1",
+               title: "Batch older",
+               body: "body 1",
+               isRead: false,
+               createdAt: "2026-01-01T00:00:00.000Z",
+            },
+            {
+               id: "n-batch-2",
+               title: "Batch newer",
+               body: "body 2",
+               isRead: true,
+               createdAt: "2026-01-03T00:00:00.000Z",
+            },
+         ],
+      });
+      await syncUi();
+
+      const rows = wrapper.findAll("button.row-card-open").map((n) => n.text());
+      expect(rows).toEqual(["Batch newer", "Batch older"]);
+   });
 });
