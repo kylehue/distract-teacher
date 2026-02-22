@@ -1,1 +1,0 @@
-import{d as e,e as o,g as s,w as r,i as n,a$ as m,f as t,be as p,bd as u,bP as c}from"./index-Dh9-dD8D.js";const _=e({__name:"room-status-tag",props:{room:{}},setup(a){return(i,d)=>(s(),o(t(c),{type:t(u)(a.room.status),round:""},{default:r(()=>[n(m(t(p)(a.room.status)),1)]),_:1},8,["type"]))}});export{_};
