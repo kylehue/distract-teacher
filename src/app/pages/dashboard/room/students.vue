@@ -5,7 +5,6 @@
       :students="allStudents"
       :room="room"
       :loading="isLoading"
-      show-join-requests
    />
 </template>
 

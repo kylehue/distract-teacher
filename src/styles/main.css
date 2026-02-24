@@ -73,13 +73,20 @@ body {
    display: none !important;
 }
 
-.table-with-custom-row tr, .table-with-custom-row th, .table-with-custom-row td {
+.table-with-custom-row tr,
+.table-with-custom-row th,
+.table-with-custom-row td {
    background: transparent !important;
 }
 
-.table-with-custom-row th, .table-with-custom-row td {
+.table-with-custom-row th,
+.table-with-custom-row td {
    padding: 0 !important;
    padding-top: 0.25rem !important;
    padding-bottom: 0.25rem !important;
    border: 0 !important;
+}
+
+.link {
+   @apply hover:underline;
 }

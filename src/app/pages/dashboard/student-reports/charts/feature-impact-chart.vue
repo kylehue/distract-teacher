@@ -20,10 +20,9 @@ import ApexChart from "vue3-apexcharts";
 import { deepMerge } from "@/lib/object";
 import { apexChartOverrides } from "@/lib/theme-overrides";
 import { MONITOR_LOGS_INJECTION_KEY } from "@/lib/injection-keys";
-import { MonitorLog } from "@/lib/typings";
-import { timestampToTimeString } from "@/lib/datetime";
 import { useRouter } from "vue-router";
 import { FEATURE_GROUPS_MAP, groupFeatureImpacts } from "@/lib/reports";
+import moment from "moment";
 
 const props = defineProps<{
    theme: "light" | "dark";
@@ -38,7 +37,7 @@ const monitorLogs = inject(MONITOR_LOGS_INJECTION_KEY)!;
 const featureImpactTimeline = computed(() => {
    return monitorLogs.value.map((log) => {
       return {
-         time: timestampToTimeString(log.createdAt, false, true),
+         time: moment(log.createdAt).format("HH:mm:ss A"),
          grouped: groupFeatureImpacts(log.featureImpacts),
       };
    });

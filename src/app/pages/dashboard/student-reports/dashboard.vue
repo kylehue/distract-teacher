@@ -5,14 +5,14 @@
          <NText class="text-xl font-medium">General Information</NText>
          <div class="grid grid-cols-2 gap-4">
             <NCard title="" content-class="flex flex-wrap gap-x-16 gap-y-8">
-               <NStatistic label="Student Name">
+               <Statistic title="Student Name" size="large">
                   {{ student.name }}
-               </NStatistic>
+               </Statistic>
             </NCard>
             <NCard title="" content-class="flex flex-wrap gap-x-16 gap-y-8">
-               <NStatistic label="Teacher Name">
+               <Statistic title="Teacher Name" size="large">
                   {{ teacher.displayName }}
-               </NStatistic>
+               </Statistic>
             </NCard>
          </div>
          <div class="flex flex-wrap gap-4">
@@ -31,46 +31,60 @@
                      </NButton>
                   </RouterLink>
                </template>
-               <NStatistic label="Room Title">
-                  {{ room.title }}
-               </NStatistic>
-               <NStatistic label="Room Code">
+               <Statistic title="Room Title">
+                  <RouterLink :to="`/dashboard/rooms/${room.id}`" class="link">
+                     {{ room.title }}
+                  </RouterLink>
+               </Statistic>
+               <Statistic title="Room Code">
                   {{ room.code }}
-               </NStatistic>
-               <NStatistic label="Date Created">
-                  {{ timestampToDateString(room.createdAt) }}
-               </NStatistic>
-               <NStatistic label="Monitoring Start Time">
-                  {{
-                     room.timeStarted
-                        ? timestampToTimeString(room.timeStarted)
-                        : "N/A"
-                  }}
-               </NStatistic>
-               <NStatistic label="Monitoring End Time">
-                  {{
-                     room.timeEnded
-                        ? timestampToTimeString(room.timeEnded)
-                        : "N/A"
-                  }}
-               </NStatistic>
-               <NStatistic label="Student Join Time">
-                  {{ timestampToTimeString(student.timeJoined) }}
-               </NStatistic>
-               <NStatistic label="Student Leave Time">
-                  {{
-                     student.timeLeft
-                        ? timestampToTimeString(student.timeLeft)
-                        : "N/A"
-                  }}
-               </NStatistic>
-               <NStatistic label="Time Spent In Room Session">
-                  {{
-                     room.timeStarted && student.timeLeft
-                        ? totalTime(room.timeStarted, student.timeLeft)
-                        : "N/A"
-                  }}
-               </NStatistic>
+               </Statistic>
+               <Statistic title="Date Created">
+                  <Timestamp
+                     :value="room.createdAt"
+                     absolute
+                     date-only
+                     simple-date
+                  />
+               </Statistic>
+               <Statistic v-if="room.timeStarted" title="Monitoring Start Time">
+                  <Timestamp
+                     :value="room.timeStarted"
+                     absolute
+                     time-only
+                     exclude-seconds
+                  />
+               </Statistic>
+               <Statistic v-if="room.timeEnded" title="Monitoring End Time">
+                  <Timestamp
+                     :value="room.timeEnded"
+                     absolute
+                     time-only
+                     exclude-seconds
+                  />
+               </Statistic>
+               <Statistic title="Student Join Time">
+                  <Timestamp
+                     :value="student.timeJoined"
+                     absolute
+                     time-only
+                     exclude-seconds
+                  />
+               </Statistic>
+               <Statistic v-if="student.timeLeft" title="Student Leave Time">
+                  <Timestamp
+                     :value="student.timeLeft"
+                     absolute
+                     time-only
+                     exclude-seconds
+                  />
+               </Statistic>
+               <Statistic
+                  v-if="room.timeStarted && student.timeLeft"
+                  title="Time Spent In Room Session"
+               >
+                  {{ totalTime(room.timeStarted, student.timeLeft) }}
+               </Statistic>
             </NCard>
          </div>
       </div>
@@ -78,55 +92,49 @@
          <NText class="text-xl font-medium">Statistics</NText>
          <div class="flex-1 grid grid-cols-1 lg:grid-cols-3 grid-rows-1 gap-4">
             <NCard>
-               <NStatistic>
-                  <template #label>
-                     <div class="flex items-center gap-2">
-                        Integrity Score Average
-                        <InfoTooltip>
-                           The mean integrity score across all monitor logs for
-                           this student.
-                        </InfoTooltip>
-                     </div>
+               <Statistic title="Integrity Score Average" size="large">
+                  <template #title-suffix>
+                     <InfoTooltip>
+                        The mean integrity score across all monitor logs for
+                        this student.
+                     </InfoTooltip>
                   </template>
                   {{ (reports.integrityScoreAverage * 100).toFixed(2) }}%
-               </NStatistic>
+               </Statistic>
                <NText :depth="3" class="text-xs">
                   {{ reports.integritySummary }}
                </NText>
             </NCard>
             <NCard>
-               <NStatistic>
-                  <template #label>
-                     <div class="flex items-center gap-2">
-                        Integrity Score Standard Deviation
-                        <InfoTooltip>
-                           The standard deviation of integrity scores across all
-                           monitor logs for this student. A lower value
-                           indicates more consistent performance. E.g., a
-                           standard deviation of 0% means the student had the
-                           same integrity score for all logs.
-                        </InfoTooltip>
-                     </div>
+               <Statistic
+                  title="Integrity Score Standard Deviation"
+                  size="large"
+               >
+                  <template #title-suffix>
+                     <InfoTooltip>
+                        The standard deviation of integrity scores across all
+                        monitor logs for this student. A lower value indicates
+                        more consistent performance. E.g., a standard deviation
+                        of 0% means the student had the same integrity score for
+                        all logs.
+                     </InfoTooltip>
                   </template>
                   {{ (reports.standardDeviation * 100).toFixed(2) }}%
-               </NStatistic>
+               </Statistic>
                <NText :depth="3" class="text-xs">
                   {{ reports.standardDeviationSummary }}
                </NText>
             </NCard>
             <NCard>
-               <NStatistic>
-                  <template #label>
-                     <div class="flex items-center gap-2">
-                        Phone Activity Count
-                        <InfoTooltip>
-                           The total number of times phone activity was detected
-                           for this student.
-                        </InfoTooltip>
-                     </div>
+               <Statistic title="Phone Activity Count" size="large">
+                  <template #title-suffix>
+                     <InfoTooltip>
+                        The total number of times phone activity was detected
+                        for this student.
+                     </InfoTooltip>
                   </template>
                   {{ reports.phoneDetectionCount }}
-               </NStatistic>
+               </Statistic>
             </NCard>
          </div>
          <div class="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -134,36 +142,33 @@
                class="flex-1 grid grid-cols-2 lg:grid-cols-1 lg:grid-rows-2 gap-4"
             >
                <NCard>
-                  <NStatistic>
-                     <template #label>
-                        <div class="flex items-center gap-2">
-                           Total Number of Warnings
-                           <InfoTooltip>
-                              The total number of warnings for this student.
-                           </InfoTooltip>
-                        </div>
+                  <Statistic title="Total Number of Warnings" size="large">
+                     <template #title-suffix>
+                        <InfoTooltip>
+                           The total number of warnings for this student.
+                        </InfoTooltip>
                      </template>
                      {{ monitorLogs.length }}
-                  </NStatistic>
+                  </Statistic>
                </NCard>
                <NCard>
-                  <NStatistic>
-                     <template #label>
-                        <div class="flex items-center gap-2">
-                           Log Count / Expected Log Count Ratio
-                           <InfoTooltip>
-                              The ratio of the student's actual monitor log
-                              count to the expected monitor log count based on
-                              the duration of the room session. A ratio close to
-                              1 suggests that the number of logs recorded aligns
-                              with expectations, while a significantly lower
-                              ratio may indicate unusual disconnects, technical
-                              issues, or atypical student behavior.
-                           </InfoTooltip>
-                        </div>
+                  <Statistic
+                     title="Log Count Ratio / Expected Log Count Ratio"
+                     size="large"
+                  >
+                     <template #title-suffix>
+                        <InfoTooltip>
+                           The ratio of the student's actual monitor log count
+                           to the expected monitor log count based on the
+                           duration of the room session. A ratio close to 1
+                           suggests that the number of logs recorded aligns with
+                           expectations, while a significantly lower ratio may
+                           indicate unusual disconnects, technical issues, or
+                           atypical student behavior.
+                        </InfoTooltip>
                      </template>
                      {{ studentLogCountRatio }}
-                  </NStatistic>
+                  </Statistic>
                </NCard>
             </div>
             <NCard title="Log Count Z-Score">
@@ -216,14 +221,10 @@
 
 <script setup lang="ts">
 import { PhArrowSquareOut } from "@phosphor-icons/vue";
-import { NButton, NText, NStatistic, NCard, NTooltip, NIcon } from "naive-ui";
-import { computed, inject, useTemplateRef } from "vue";
+import { NButton, NText, NCard } from "naive-ui";
+import { computed, inject } from "vue";
 import { RouterLink } from "vue-router";
-import {
-   timestampToDateString,
-   timestampToTimeString,
-   totalTime,
-} from "@/lib/datetime";
+import { totalTime } from "@/lib/datetime";
 import {
    createStudentsIndividualReports,
    createMonitorLogsReports,
@@ -241,6 +242,8 @@ import {
 } from "@/lib/injection-keys";
 import LogCountChart from "./charts/log-count-chart.vue";
 import InfoTooltip from "@/app/components/info-tooltip.vue";
+import Timestamp from "@/app/components/timestamp.vue";
+import Statistic from "@/app/components/statistic.vue";
 
 const props = defineProps<{
    theme: "light" | "dark";

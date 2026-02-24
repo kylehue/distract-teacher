@@ -15,7 +15,11 @@
 
             <div class="min-w-0 flex-1 flex flex-col gap-2">
                <div
-                  v-if="hasTitle || resolvedTagPlacement === 'after-title'"
+                  v-if="
+                     hasTitle ||
+                     (props.tags.length &&
+                        resolvedTagPlacement === 'after-title')
+                  "
                   class="flex flex-wrap items-start gap-2"
                >
                   <div class="flex-1">

@@ -1,5 +1,5 @@
 <template>
-   <div class="flex flex-col gap-2">
+   <div class="flex flex-col gap-4">
       <NAlert
          v-if="unpermittedStudentsCount"
          type="warning"
@@ -29,13 +29,12 @@
                {
                   key: 'timeJoined',
                   label: 'Time Joined',
-                  compare: (a, b) =>
-                     compareTimestamps(a.timeJoined, b.timeJoined),
+                  compare: (a, b) => moment(a.timeJoined).diff(b.timeJoined),
                },
                {
                   key: 'timeLeft',
                   label: 'Time Left',
-                  compare: (a, b) => compareTimestamps(a.timeLeft, b.timeLeft),
+                  compare: (a, b) => moment(a.timeLeft).diff(b.timeLeft),
                },
                {
                   key: 'totalWarnings',
@@ -104,7 +103,6 @@
          <template #item="{ item: student, index }">
             <RowCard
                class="print-entity"
-               :title="student.name"
                bordered
                :data-print-new-page="index % 3 === 0"
                :menu-options="[
@@ -144,6 +142,17 @@
                   },
                ]"
             >
+               <template #title>
+                  <NText class="flex items-center gap-1">
+                     <PhUser />
+                     <RouterLink
+                        :to="`/dashboard/student-reports/${student.id}`"
+                        class="link"
+                     >
+                        {{ student.name }}
+                     </RouterLink>
+                  </NText>
+               </template>
                <template #content>
                   <div class="flex flex-wrap gap-x-12 gap-y-4">
                      <Statistic title="Total Warnings">
@@ -155,9 +164,24 @@
                               {{ student.monitorLogs.length }}
                            </template>
                            <div class="flex flex-col">
-                              <NText>Low: {{ student.warningLevelDistribution.low }}</NText>
-                              <NText>Moderate: {{ student.warningLevelDistribution.moderate }}</NText>
-                              <NText>Severe: {{ student.warningLevelDistribution.severe }}</NText>
+                              <NText
+                                 >Low:
+                                 {{
+                                    student.warningLevelDistribution.low
+                                 }}</NText
+                              >
+                              <NText
+                                 >Moderate:
+                                 {{
+                                    student.warningLevelDistribution.moderate
+                                 }}</NText
+                              >
+                              <NText
+                                 >Severe:
+                                 {{
+                                    student.warningLevelDistribution.severe
+                                 }}</NText
+                              >
                            </div>
                         </NTooltip>
                      </Statistic>
@@ -195,38 +219,21 @@
                </template>
                <template #footer>
                   <div class="flex items-center gap-2">
-                     <NTooltip placement="bottom">
-                        <template #trigger>
-                           <NText :depth="3" class="text-xs">
-                              Join –
-                              {{
-                                 timestampToTimeString(student.timeJoined, true)
-                              }}
-                           </NText>
-                        </template>
-                        {{ timestampToDateString(student.timeJoined) }} at
-                        {{
-                           timestampToTimeString(
-                              student.timeJoined,
-                              false,
-                              true,
-                           )
-                        }}
-                     </NTooltip>
-                     <NTooltip v-if="student.timeLeft" placement="bottom">
-                        <template #trigger>
-                           <NText :depth="3" class="text-xs">
-                              Leave –
-                              {{
-                                 timestampToTimeString(student.timeLeft, true)
-                              }}
-                           </NText>
-                        </template>
-                        {{ timestampToDateString(student.timeLeft) }} at
-                        {{
-                           timestampToTimeString(student.timeLeft, false, true)
-                        }}
-                     </NTooltip>
+                     <NText :depth="3" class="text-xs flex items-center gap-1">
+                        <PhSignIn />
+                        <Timestamp
+                           prefix="Joined"
+                           :value="student.timeJoined"
+                        />
+                     </NText>
+                     <NText :depth="3" class="text-xs flex items-center gap-1">
+                        <PhSignOut />
+                        <Timestamp
+                           v-if="student.timeLeft"
+                           prefix="Left"
+                           :value="student.timeLeft"
+                        />
+                     </NText>
                   </div>
                </template>
                <template
@@ -259,13 +266,8 @@
 </template>
 <script setup lang="ts">
 import { NTooltip, NText, NButton, useMessage, NAlert } from "naive-ui";
-import { computed, inject, ref, useTemplateRef } from "vue";
+import { computed } from "vue";
 import DataView from "@/app/components/data-view.vue";
-import {
-   compareTimestamps,
-   timestampToTimeString,
-   timestampToDateString,
-} from "@/lib/datetime";
 import { useStore } from "@/app/composables/use-store";
 import { MonitorLog, RoomInfo, StudentInfo } from "@/lib/typings";
 import {
@@ -276,7 +278,16 @@ import {
 import RowCard from "./row-card.vue";
 import Statistic from "./statistic.vue";
 import { useFetch } from "../composables/use-fetch";
-import { PhWarning, PhDeviceMobile, PhChartLine } from "@phosphor-icons/vue";
+import {
+   PhWarning,
+   PhDeviceMobile,
+   PhChartLine,
+   PhUser,
+   PhSignIn,
+   PhSignOut,
+} from "@phosphor-icons/vue";
+import moment from "moment";
+import Timestamp from "./timestamp.vue";
 
 const props = defineProps<{
    students: StudentInfo[];

@@ -11,6 +11,24 @@
                :visibleCount="visibleItems.length"
             />
 
+            <div v-if="isSearchEnabled" class="flex-1 sm:w-[320px]">
+               <InputSearch
+                  v-model:search-query="searchQuery"
+                  :documents="props.items"
+                  :fields="searchConfig.fields"
+                  :id-field="searchConfig.idField"
+                  :label-field="searchConfig.labelField"
+                  :filter-fields="searchConfig.filterFields"
+                  :placeholder="searchConfig.placeholder ?? 'Search'"
+                  :search-on-input="searchConfig.searchOnInput"
+                  :label="searchConfig.label"
+                  :max-suggestions="searchConfig.maxSuggestions"
+                  @search="onSearch"
+                  @select="onSearchSelect"
+                  :disabled="!props.items.length"
+               />
+            </div>
+
             <NTooltip v-if="isSortEnabled" placement="bottom">
                <template #trigger>
                   <NPopselect
@@ -20,7 +38,7 @@
                      :value="selectedSortKeys"
                      @update:value="onUpdateSortKeys"
                   >
-                     <NButton quaternary circle>
+                     <NButton secondary circle>
                         <template #icon>
                            <PhArrowsDownUp />
                         </template>
@@ -39,7 +57,7 @@
             >
                <NTooltip placement="bottom">
                   <template #trigger>
-                     <NButton quaternary circle>
+                     <NButton secondary circle>
                         <template #icon>
                            <PhFunnel />
                         </template>
@@ -62,7 +80,7 @@
             >
                <NTooltip placement="bottom">
                   <template #trigger>
-                     <NButton quaternary circle>
+                     <NButton secondary circle>
                         <template #icon>
                            <PhRowsPlusBottom />
                         </template>
@@ -74,7 +92,7 @@
 
             <NTooltip v-if="hasActiveTransforms" placement="bottom">
                <template #trigger>
-                  <NButton quaternary circle @click="resetTransforms">
+                  <NButton secondary circle @click="resetTransforms">
                      <template #icon>
                         <PhArrowCounterClockwise />
                      </template>
@@ -85,24 +103,6 @@
          </div>
 
          <div class="flex w-full items-center gap-2 sm:w-auto sm:justify-end">
-            <div v-if="isSearchEnabled" class="w-full sm:w-[320px]">
-               <InputSearch
-                  v-model:search-query="searchQuery"
-                  :documents="props.items"
-                  :fields="searchConfig.fields"
-                  :id-field="searchConfig.idField"
-                  :label-field="searchConfig.labelField"
-                  :filter-fields="searchConfig.filterFields"
-                  :placeholder="searchConfig.placeholder ?? 'Search'"
-                  :search-on-input="searchConfig.searchOnInput"
-                  :label="searchConfig.label"
-                  :max-suggestions="searchConfig.maxSuggestions"
-                  @search="onSearch"
-                  @select="onSearchSelect"
-                  :disabled="!props.items.length"
-               />
-            </div>
-
             <slot
                name="controlsRight"
                :totalCount="transformedItems.length"
@@ -925,13 +925,4 @@ watch([totalPages, pageSize], () => {
       currentPage.value = 1;
    }
 });
-
-watch(
-   [searchQuery, selectedFilterTokens, sortRules],
-   () => {
-      // jump back to the first page whenever any transform changes
-      currentPage.value = 1;
-   },
-   { deep: true },
-);
 </script>

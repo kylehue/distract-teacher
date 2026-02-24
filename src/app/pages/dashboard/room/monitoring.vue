@@ -41,8 +41,7 @@
                {
                   key: 'createdAt',
                   label: 'Timestamp',
-                  compare: (a, b) =>
-                     compareTimestamps(a.createdAt, b.createdAt),
+                  compare: (a, b) => moment(a.createdAt).diff(b.createdAt),
                   priority: 5,
                },
                {
@@ -99,18 +98,7 @@
          </template>
          <template #item="{ item: monitorLog }">
             <RowCard
-               :title="monitorLog.studentName"
-               :tags="[
-                  {
-                     label: 'Phone Detected',
-                     type: 'error',
-                     visible: monitorLog.isPhonePresent,
-                  },
-                  {
-                     label: toTitleCase(monitorLog.warningLevel),
-                     type: warningLevelToComponentType(monitorLog.warningLevel),
-                  },
-               ]"
+               bordered
                :menu-options="[
                   {
                      label: 'View Evidence',
@@ -132,31 +120,13 @@
                      },
                   },
                ]"
-               bordered
             >
-               <template #title>
-                  <div class="flex gap-x-12 gap-y-4">
-                     <Statistic title="Student Name">
-                        <template #icon>
-                           <PhUser />
-                        </template>
-                        {{ monitorLog.studentName }}
-                     </Statistic>
-                     <Statistic title="Integrity Score">
-                        <template #icon>
-                           <PhChartLine />
-                        </template>
-                        {{ (monitorLog.integrityScore * 100).toFixed(2) + "%" }}
-                     </Statistic>
-                  </div>
-               </template>
-               <template #footer>
-                  <NText :depth="3" class="text-xs">
-                     {{ timestampToDateString(monitorLog.createdAt) }} at
-                     {{
-                        timestampToTimeString(monitorLog.createdAt, false, true)
-                     }}
-                  </NText>
+               <template #content>
+                  <MonitorLogItem
+                     :monitorLog="monitorLog"
+                     :student="monitorLog.student"
+                     :room="room"
+                  />
                </template>
             </RowCard>
          </template>
@@ -176,8 +146,7 @@
                   key: 'timeLocked',
                   label: 'Time Locked',
                   compare: (a, b) =>
-                     compareTimestamps(
-                        a.lockMonitorLog.createdAt,
+                     moment(a.lockMonitorLog.createdAt).diff(
                         b.lockMonitorLog.createdAt,
                      ),
                   priority: 5,
@@ -230,76 +199,38 @@
             />
          </template>
          <template #item="{ item: student }">
-            <RowCard
-               :tags="[
-                  {
-                     label: 'Phone Detected',
-                     type: 'error',
-                     visible: student.lockMonitorLog.isPhonePresent,
-                  },
-                  {
-                     label: toTitleCase(student.lockMonitorLog.warningLevel),
-                     type: warningLevelToComponentType(
-                        student.lockMonitorLog.warningLevel,
-                     ),
-                  },
-               ]"
-               bordered
-            >
-               <template #title>
-                  <div class="flex gap-x-12 gap-y-4">
-                     <Statistic title="Student Name">
-                        <template #icon>
-                           <PhUser />
-                        </template>
-                        {{ student.name }}
-                     </Statistic>
-                     <Statistic title="Integrity Score">
-                        <template #icon>
-                           <PhChartLine />
-                        </template>
-                        {{
-                           (
-                              student.lockMonitorLog.integrityScore * 100
-                           ).toFixed(2) + "%"
-                        }}
-                     </Statistic>
-                  </div>
-               </template>
-               <template #footer>
-                  <NText :depth="3" class="text-xs">
-                     {{
-                        timestampToDateString(student.lockMonitorLog.createdAt)
-                     }}
-                     at
-                     {{
-                        timestampToTimeString(
-                           student.lockMonitorLog.createdAt,
-                           false,
-                           true,
-                        )
-                     }}
-                  </NText>
-               </template>
-               <template #action>
-                  <div class="flex items-center gap-2">
-                     <RouterLink
-                        :to="{
-                           query: { monitorLogId: student.lockMonitorLog.id },
-                        }"
-                     >
-                        <NButton size="small" secondary>View Evidence</NButton>
-                     </RouterLink>
-                     <NButton
-                        type="error"
-                        size="small"
-                        secondary
-                        :loading="patchUnlockStudent.isLoading"
-                        @click="closeCase(student)"
-                     >
-                        Close Case
-                     </NButton>
-                  </div>
+            <RowCard bordered>
+               <template #content>
+                  <MonitorLogItem
+                     :monitorLog="student.lockMonitorLog"
+                     :student="student"
+                     :room="room"
+                  >
+                     <template #action>
+                        <div class="flex items-center gap-2">
+                           <RouterLink
+                              :to="{
+                                 query: {
+                                    monitorLogId: student.lockMonitorLog.id,
+                                 },
+                              }"
+                           >
+                              <NButton size="small" secondary>
+                                 View Evidence
+                              </NButton>
+                           </RouterLink>
+                           <NButton
+                              type="error"
+                              size="small"
+                              secondary
+                              :loading="patchUnlockStudent.isLoading"
+                              @click="closeCase(student)"
+                           >
+                              Close Case
+                           </NButton>
+                        </div>
+                     </template>
+                  </MonitorLogItem>
                </template>
             </RowCard>
          </template>
@@ -310,7 +241,6 @@
 <script setup lang="ts">
 import {
    NButton,
-   NText,
    useMessage,
    NButtonGroup,
    useThemeVars,
@@ -319,15 +249,8 @@ import {
 } from "naive-ui";
 import { computed, inject, onMounted, ref, useTemplateRef, watch } from "vue";
 import { StudentInfo } from "@/lib/typings";
-import { PhChartLine, PhUser } from "@phosphor-icons/vue";
 import { RouterLink, useRoute, useRouter } from "vue-router";
-import { warningLevelToComponentType } from "@/lib/ui";
 import { useFetch } from "@/app/composables/use-fetch";
-import {
-   compareTimestamps,
-   timestampToTimeString,
-   timestampToDateString,
-} from "@/lib/datetime";
 import {
    MONITOR_LOGS_INJECTION_KEY,
    MONITOR_LOGS_MAP_INJECTION_KEY,
@@ -337,14 +260,15 @@ import {
 } from "@/lib/injection-keys";
 import DataView from "@/app/components/data-view.vue";
 import RowCard from "@/app/components/row-card.vue";
-import { toTitleCase } from "@/lib/string";
-import Statistic from "@/app/components/statistic.vue";
+import MonitorLogItem from "@/app/components/monitor-log-item.vue";
+import moment from "moment";
 
 const TABS = ["warningLogs", "lockedStudents"] as const;
 
 const route = useRoute();
 const router = useRouter();
 const message = useMessage();
+const themeVars = useThemeVars();
 const patchUnlockStudent = useFetch("/api/students/:studentId/unlock", "PATCH");
 const room = inject(ROOM_INJECTION_KEY)!;
 const students = inject(STUDENTS_MAP_INJECTION_KEY)!;
@@ -355,10 +279,14 @@ const activeTab = ref<(typeof TABS)[number]>("warningLogs");
 const warningLogView = useTemplateRef("warningLogView");
 
 const monitorLogsArrayPreprocessed = computed(() => {
-   return monitorLogsArray.value.map((m) => ({
-      ...m,
-      studentName: students.value.get(m.studentId)?.name || "<Unnamed>",
-   }));
+   return monitorLogsArray.value.map((m) => {
+      const student = students.value.get(m.studentId)!;
+      return {
+         ...m,
+         studentName: student.name,
+         student: student,
+      };
+   });
 });
 async function closeCase(student: StudentInfo) {
    try {
@@ -411,3 +339,23 @@ onMounted(() => {
    }
 });
 </script>
+
+<style scoped>
+.monitor-log-item {
+   border-radius: 10px;
+   width: 10px;
+   height: 10px;
+}
+
+.monitor-log-item-low {
+   background-color: v-bind("themeVars.successColor");
+}
+
+.monitor-log-item-moderate {
+   background-color: v-bind("themeVars.warningColor");
+}
+
+.monitor-log-item-severe {
+   background-color: v-bind("themeVars.errorColor");
+}
+</style>

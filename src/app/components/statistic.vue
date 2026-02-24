@@ -2,13 +2,16 @@
    <div class="flex flex-col">
       <NText
          :depth="3"
+         class="flex items-center gap-1"
          :class="{
             'text-xs': props.size === 'small' || props.size === 'medium',
             'text-sm': props.size === 'large',
          }"
          v-bind="titleProps"
       >
+         <slot name="title-prefix"></slot>
          {{ title }}
+         <slot name="title-suffix"></slot>
       </NText>
       <div class="flex flex-row items-center gap-1">
          <NIcon

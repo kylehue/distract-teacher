@@ -7,7 +7,7 @@ export function renderIcon(icon: Component, size = 20) {
 }
 
 export function warningLevelToComponentType(level: WarningLevel) {
-   let color: "default" | "warning" | "error" = "default";
+   let color: "success" | "warning" | "error" = "success";
    if (level === "moderate") color = "warning";
    else if (level === "severe") color = "error";
    return color;

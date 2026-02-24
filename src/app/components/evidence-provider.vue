@@ -9,43 +9,11 @@
          content-class="flex items-center justify-center w-full h-full"
       >
          <template #action v-if="monitorLog && student && room">
-            <div class="flex flex-col gap-2">
-               <NText>{{ student.name }}</NText>
-               <div class="flex flex-wrap gap-x-12 gap-y-4">
-                  <Statistic title="Room">
-                     {{ room.title }}
-                  </Statistic>
-                  <Statistic title="Integrity Score">
-                     {{ (monitorLog.integrityScore * 100).toFixed(2) }}%
-                  </Statistic>
-                  <Statistic
-                     title="Phone Detected"
-                     :value-props="{
-                        type: monitorLog.isPhonePresent ? 'error' : undefined,
-                     }"
-                  >
-                     {{ monitorLog.isPhonePresent ? "Yes" : "No" }}
-                  </Statistic>
-                  <Statistic title="Warning Level">
-                     <NTag
-                        :type="
-                           warningLevelToComponentType(monitorLog.warningLevel)
-                        "
-                        round
-                     >
-                        {{ monitorLog.warningLevel }}
-                     </NTag>
-                  </Statistic>
-               </div>
-               <div class="flex flex-wrap">
-                  <NText :depth="3" class="text-xs">
-                     {{ timestampToDateString(monitorLog.createdAt) }} at
-                     {{
-                        timestampToTimeString(monitorLog.createdAt, false, true)
-                     }}
-                  </NText>
-               </div>
-            </div>
+            <MonitorLogItem
+               :monitorLog="monitorLog"
+               :student="student"
+               :room="room"
+            />
          </template>
          <Loader v-if="store.isLoadMonitorLogLoading" />
          <NEmpty
@@ -96,17 +64,15 @@
 </template>
 
 <script setup lang="ts">
-import { NModal, NCard, NEmpty, NTag, NText } from "naive-ui";
+import { NModal, NCard, NEmpty, NText } from "naive-ui";
 import { ref, watch } from "vue";
 import { useStore } from "../composables/use-store";
 import { MonitorLog, RoomInfo, StudentInfo } from "@/lib/typings";
 import { useRoute, useRouter } from "vue-router";
 import { PhVideoCameraSlash } from "@phosphor-icons/vue";
-import { timestampToDateString, timestampToTimeString } from "@/lib/datetime";
-import { warningLevelToComponentType } from "@/lib/ui";
 import FeatureImpactRankChart from "./feature-impact-rank-chart.vue";
 import Loader from "@/app/components/loader.vue";
-import Statistic from "./statistic.vue";
+import MonitorLogItem from "./monitor-log-item.vue";
 
 const store = useStore();
 const show = ref(false);

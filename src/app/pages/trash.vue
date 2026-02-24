@@ -69,8 +69,8 @@ import { useStore } from "@/app/composables/use-store";
 import { PhArrowLeft, PhTrash } from "@phosphor-icons/vue";
 import { useAuthStore } from "../composables/use-auth-store";
 import { UnauthorizedError } from "@/lib/errors";
-import { timestampToDateString, compareTimestamps } from "@/lib/datetime";
 import Loader from "@/app/components/loader.vue";
+import moment from "moment";
 
 const auth = useAuthStore();
 const store = useStore();
@@ -91,13 +91,7 @@ const columns: DataTableColumns<RoomInfo> = reactive([
       title: "Code",
       key: "code",
       render(row) {
-         return h(
-            NText,
-            {
-               class: "font-mono",
-            },
-            { default: () => row.code },
-         );
+         return row.code;
       },
       ellipsis: { tooltip: { placement: "bottom" } },
       align: "center",
@@ -106,11 +100,11 @@ const columns: DataTableColumns<RoomInfo> = reactive([
       title: "Date Created",
       key: "dateCreated",
       render(row) {
-         return timestampToDateString(row.createdAt);
+         return moment(row.createdAt).format("MMMM DD, YYYY");
       },
       sorter: {
-         compare(rowA, rowB) {
-            return compareTimestamps(rowA.createdAt, rowB.createdAt);
+         compare(a, b) {
+            return moment(a.createdAt).diff(b.createdAt);
          },
          multiple: 2,
       },
@@ -119,11 +113,11 @@ const columns: DataTableColumns<RoomInfo> = reactive([
       title: "Date Deleted",
       key: "dateDeleted",
       render(row) {
-         return timestampToDateString(row.deletedAt!);
+         return moment(row.deletedAt).format("MMMM DD, YYYY");
       },
       sorter: {
-         compare(rowA, rowB) {
-            return compareTimestamps(rowA.deletedAt, rowB.deletedAt);
+         compare(a, b) {
+            return moment(a.deletedAt).diff(b.deletedAt);
          },
          multiple: 2,
       },

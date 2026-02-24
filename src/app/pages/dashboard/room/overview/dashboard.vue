@@ -8,118 +8,114 @@
             class="lg:flex-1"
             content-class="flex flex-wrap gap-x-16 gap-y-8"
          >
-            <NStatistic label="Room Title">
+            <Statistic title="Room Title">
                {{ room.title }}
-            </NStatistic>
-            <NStatistic label="Room Code">
+            </Statistic>
+            <Statistic title="Room Code">
                {{ room.code }}
-            </NStatistic>
-            <NStatistic label="Room Capacity">
+            </Statistic>
+            <Statistic title="Room Capacity">
                {{ room.studentCapacity }}
-            </NStatistic>
-            <NStatistic label="Teacher Name">
+            </Statistic>
+            <Statistic title="Teacher Name">
                {{ teacher.displayName }}
-            </NStatistic>
-            <NStatistic label="Date Created">
-               {{ timestampToDateString(room.createdAt) }}
-            </NStatistic>
+            </Statistic>
+            <Statistic title="Date Created">
+               <Timestamp
+                  :value="room.createdAt"
+                  absolute
+                  date-only
+                  simple-date
+               />
+            </Statistic>
          </NCard>
          <NCard
             title="Session"
             class="lg:flex-1"
             content-class="flex flex-wrap gap-x-16 gap-y-8"
          >
-            <NStatistic label="Time Started">
-               {{
-                  room.timeStarted
-                     ? timestampToTimeString(room.timeStarted)
-                     : "N/A"
-               }}
-            </NStatistic>
-            <NStatistic label="Time Ended">
-               {{
-                  room.timeEnded ? timestampToTimeString(room.timeEnded) : "N/A"
-               }}
-            </NStatistic>
-            <NStatistic label="Total Session Duration">
-               {{
-                  room.timeStarted && room.timeEnded
-                     ? totalTime(room.timeStarted, room.timeEnded)
-                     : "N/A"
-               }}
-            </NStatistic>
-            <NStatistic label="Monitoring Status">
+            <Statistic title="Time Started" value="N/A">
+               <Timestamp
+                  v-if="room.timeStarted"
+                  :value="room.timeStarted"
+                  absolute
+                  date-only
+                  simple-date
+               />
+            </Statistic>
+            <Statistic v-if="room.timeEnded" title="Time Ended">
+               <Timestamp
+                  :value="room.timeEnded"
+                  absolute
+                  date-only
+                  simple-date
+               />
+            </Statistic>
+            <Statistic
+               v-if="room.timeStarted && room.timeEnded"
+               title="Total Session Duration"
+            >
+               {{ totalTime(room.timeStarted, room.timeEnded) }}
+            </Statistic>
+            <Statistic title="Monitoring Status">
                <RoomStatusTag :room="room" />
-            </NStatistic>
+            </Statistic>
          </NCard>
          <div class="w-full flex flex-wrap gap-4">
             <NCard class="md:flex-1">
-               <NStatistic>
-                  <template #label>
-                     <div class="flex items-center gap-2">
-                        Average Integrity Score
-                        <InfoTooltip>
-                           The integrity score mean across all students in this
-                           room.
-                        </InfoTooltip>
-                     </div>
+               <Statistic title="Average Integrity Score" size="large">
+                  <template #title-suffix>
+                     <InfoTooltip>
+                        The integrity score mean across all students in this
+                        room.
+                     </InfoTooltip>
                   </template>
                   {{ (integrityScoreAvg * 100).toFixed(2) }}%
-               </NStatistic>
+               </Statistic>
                <NText :depth="3" class="text-xs">
                   {{ integrityExplanation }}
                </NText>
             </NCard>
             <NCard class="md:flex-1">
-               <NStatistic>
-                  <template #label>
-                     <div class="flex items-center gap-2">
-                        Total Number of Warnings
-                        <InfoTooltip>
-                           The total number of warnings received across all
-                           students in this room.
-                        </InfoTooltip>
-                     </div>
+               <Statistic title="Total Number of Warnings" size="large">
+                  <template #title-suffix>
+                     <InfoTooltip>
+                        The total number of warnings received across all
+                        students in this room.
+                     </InfoTooltip>
                   </template>
                   {{ monitorLogsArrayPreprocessed.length }}
-               </NStatistic>
+               </Statistic>
             </NCard>
             <NCard class="md:flex-1">
-               <NStatistic>
-                  <template #label>
-                     <div class="flex items-center gap-2">
-                        Active Students
-                        <InfoTooltip>
-                           The number of students currently active in the
-                           session.
-                        </InfoTooltip>
-                     </div>
+               <Statistic title="Active Students" size="large">
+                  <template #title-suffix>
+                     <InfoTooltip>
+                        The number of students currently active in the session.
+                     </InfoTooltip>
                   </template>
                   {{
                      studentsArrayPreprocessed.filter(
                         (student) => student.active,
                      ).length
                   }}
-               </NStatistic>
+               </Statistic>
             </NCard>
             <NCard class="md:flex-1">
-               <NStatistic>
-                  <template #label>
-                     <div class="flex items-center gap-2">
-                        Inactive Students
-                        <InfoTooltip>
-                           The number of students that have left the session or
-                           were removed. This doesn't include the students that
-                           have no monitor log data.
-                        </InfoTooltip>
-                     </div>
+               <Statistic title="Inactive Students" size="large">
+                  <template #title-suffix>
+                     <InfoTooltip>
+                        The number of students that have left the session or
+                        were removed. This doesn't include the students that
+                        have no monitor log data.
+                     </InfoTooltip>
                   </template>
                   {{
                      studentsArrayPreprocessed.filter(
                         (student) => !student.active,
                      ).length
                   }}
-               </NStatistic>
+               </Statistic>
             </NCard>
          </div>
       </div>
@@ -150,13 +146,9 @@
 </template>
 
 <script setup lang="ts">
-import { NText, NStatistic, NCard } from "naive-ui";
+import { NText, NCard } from "naive-ui";
 import { computed, inject } from "vue";
-import {
-   timestampToDateString,
-   timestampToTimeString,
-   totalTime,
-} from "@/lib/datetime";
+import { totalTime } from "@/lib/datetime";
 import { explainIntegrity } from "@/lib/reports";
 import RoomStatusTag from "@/app/components/room-status-tag.vue";
 import {
@@ -170,6 +162,8 @@ import {
 import WarningLevelChart from "./charts/warning-level-chart.vue";
 import InfoTooltip from "@/app/components/info-tooltip.vue";
 import StudentsView from "@/app/components/students-view.vue";
+import Statistic from "@/app/components/statistic.vue";
+import Timestamp from "@/app/components/timestamp.vue";
 
 const props = defineProps<{
    theme: "light" | "dark";

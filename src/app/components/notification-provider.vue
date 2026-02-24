@@ -98,15 +98,9 @@
                      <PhBell />
                   </template>
                   <template #footer>
-                     <NTooltip placement="bottom">
-                        <template #trigger>
-                           <NText :depth="3" class="text-xs">
-                              {{ timestampToDateString(item.createdAt, true) }}
-                           </NText>
-                        </template>
-                        {{ timestampToDateString(item.createdAt) }} at
-                        {{ timestampToTimeString(item.createdAt) }}
-                     </NTooltip>
+                     <NText :depth="3" class="text-xs">
+                        <Timestamp :value="item.createdAt" />
+                     </NText>
                   </template>
                </RowCard>
             </template>
@@ -122,22 +116,18 @@ import {
    NDivider,
    NModal,
    NEmpty,
-   NTooltip,
    NText,
    useMessage,
 } from "naive-ui";
 import { computed, onMounted } from "vue";
 import { PhBell, PhBellZ } from "@phosphor-icons/vue";
-import {
-   compareTimestamps,
-   timestampToDateString,
-   timestampToTimeString,
-} from "@/lib/datetime";
 import { useNotification } from "@/app/composables/use-notification";
 import RowCard from "./row-card.vue";
 import DataView from "./data-view.vue";
 import { useStore } from "../composables/use-store";
 import { useFetch } from "../composables/use-fetch";
+import moment from "moment";
+import Timestamp from "./timestamp.vue";
 
 const { isShowing, hide } = useNotification();
 const message = useMessage();
@@ -154,7 +144,7 @@ const deleteNotification = useFetch(
 const deleteNotifications = useFetch("/api/notifications", "DELETE");
 const notifications = computed(() =>
    Array.from(store.allNotifications.values()).sort((a, b) =>
-      compareTimestamps(b.createdAt, a.createdAt),
+      moment(b.createdAt).diff(a.createdAt),
    ),
 );
 

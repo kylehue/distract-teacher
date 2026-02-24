@@ -19,9 +19,9 @@ import ApexChart from "vue3-apexcharts";
 import { deepMerge } from "@/lib/object";
 import { apexChartOverrides } from "@/lib/theme-overrides";
 import { MONITOR_LOGS_INJECTION_KEY } from "@/lib/injection-keys";
-import { timestampToTimeString } from "@/lib/datetime";
 import { useRouter } from "vue-router";
 import { NText } from "naive-ui";
+import moment from "moment";
 
 const props = defineProps<{
    theme: "light" | "dark";
@@ -65,7 +65,7 @@ const integrityOverTimeChartOptions = computed(() => {
       },
       xaxis: {
          categories: monitorLogs.value.map((log) =>
-            timestampToTimeString(log.createdAt, false, true),
+            moment(log.createdAt).format("HH:mm:ss A"),
          ),
          title: { text: "Time" },
       },

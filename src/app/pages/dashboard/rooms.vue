@@ -13,22 +13,19 @@
                {
                   key: 'createdAt',
                   label: 'Date Created',
-                  compare: (a, b) =>
-                     compareTimestamps(a.createdAt, b.createdAt),
+                  compare: (a, b) => moment(a.createdAt).diff(b.createdAt),
                   priority: 5,
                },
                {
                   key: 'timeStarted',
                   label: 'Time Started',
-                  compare: (a, b) =>
-                     compareTimestamps(a.timeStarted, b.timeStarted),
+                  compare: (a, b) => moment(a.timeStarted).diff(b.timeStarted),
                   priority: 4,
                },
                {
                   key: 'timeEnded',
                   label: 'Time Ended',
-                  compare: (a, b) =>
-                     compareTimestamps(a.timeEnded, b.timeEnded),
+                  compare: (a, b) => moment(a.timeEnded).diff(b.timeEnded),
                   priority: 4,
                },
                {
@@ -69,7 +66,6 @@
          <template #item="{ item: room }">
             <RowCard
                bordered
-               :title="room.title"
                :tags="[
                   {
                      label: toTitleCase(room.status),
@@ -77,6 +73,17 @@
                   },
                ]"
             >
+               <template #title>
+                  <NText class="flex items-center gap-1">
+                     <PhHouse />
+                     <RouterLink
+                        :to="`/dashboard/rooms/${room.id}`"
+                        class="link"
+                     >
+                        {{ room.title }}
+                     </RouterLink>
+                  </NText>
+               </template>
                <template #content>
                   <div class="flex flex-wrap items-center gap-x-12 gap-y-4">
                      <Statistic title="Room Code">
@@ -89,39 +96,33 @@
                         <template #icon><PhUsers /></template>
                      </Statistic>
                      <Statistic title="Time Started">
-                        {{
-                           room.timeStarted
-                              ? timestampToTimeString(room.timeStarted)
-                              : "N/A"
-                        }}
                         <template #icon><PhTimer /></template>
+                        <Timestamp
+                           v-if="room.timeStarted"
+                           :value="room.timeStarted"
+                           absolute
+                           date-only
+                           simple-date
+                        />
+                        <span v-else>N/A</span>
                      </Statistic>
                      <Statistic title="Time Ended">
-                        {{
-                           room.timeEnded
-                              ? timestampToTimeString(room.timeEnded)
-                              : "N/A"
-                        }}
                         <template #icon><PhTimer /></template>
+                        <Timestamp
+                           v-if="room.timeEnded"
+                           :value="room.timeEnded"
+                           absolute
+                           date-only
+                           simple-date
+                        />
+                        <span v-else>N/A</span>
                      </Statistic>
                   </div>
                </template>
                <template #footer>
-                  <NTooltip placement="bottom">
-                     <template #trigger>
-                        <NText :depth="3" class="text-xs">
-                           Created –
-                           {{ timestampToDateString(room.createdAt, true) }}
-                        </NText>
-                     </template>
-                     {{ timestampToDateString(room.createdAt) }} at
-                     {{ timestampToTimeString(room.createdAt) }}
-                  </NTooltip>
-               </template>
-               <template #action>
-                  <RouterLink :to="`/dashboard/rooms/${room.id}`">
-                     <NButton size="small" quaternary>View Room</NButton>
-                  </RouterLink>
+                  <NText :depth="3" class="text-xs">
+                     <Timestamp prefix="Created" :value="room.createdAt" />
+                  </NText>
                </template>
             </RowCard>
          </template>
@@ -139,22 +140,19 @@
 
 <script setup lang="ts">
 import Layout from "./layout.vue";
-import { PhHash, PhPlus, PhUsers, PhTimer } from "@phosphor-icons/vue";
-import { NButton, NText, NEmpty, NTooltip } from "naive-ui";
-import { computed, h, onMounted } from "vue";
+import { PhHash, PhPlus, PhUsers, PhTimer, PhHouse } from "@phosphor-icons/vue";
+import { NButton, NText, NEmpty } from "naive-ui";
+import { computed, onMounted } from "vue";
 import { RouterLink } from "vue-router";
 import { useStore } from "@/app/composables/use-store";
 import { useCreateRoom } from "@/app/composables/use-create-room";
-import {
-   compareTimestamps,
-   timestampToDateString,
-   timestampToTimeString,
-} from "@/lib/datetime";
 import DataView from "@/app/components/data-view.vue";
 import RowCard from "@/app/components/row-card.vue";
 import { roomStatusToComponentType } from "@/lib/ui";
 import { toTitleCase } from "@/lib/string";
 import Statistic from "@/app/components/statistic.vue";
+import moment from "moment";
+import Timestamp from "@/app/components/timestamp.vue";
 
 const store = useStore();
 const createRoom = useCreateRoom();

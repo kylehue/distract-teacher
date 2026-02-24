@@ -66,7 +66,6 @@ import {
 } from "vue";
 import { useRoute } from "vue-router";
 import { useStore } from "@/app/composables/use-store";
-import { compareTimestamps } from "@/lib/datetime";
 import {
    MONITOR_LOGS_INJECTION_KEY,
    ROOM_INJECTION_KEY,
@@ -85,6 +84,7 @@ import {
    createStudentsIndividualReports,
 } from "@/lib/reports";
 import Loader from "@/app/components/loader.vue";
+import moment from "moment";
 
 const store = useStore();
 const auth = useAuthStore();
@@ -108,7 +108,7 @@ const monitorLogs = computed(() =>
       store.monitorLogsGroupedByStudentId
          .get(student.value?.id ?? "")
          ?.values() ?? [],
-   ).sort((a, b) => compareTimestamps(a.createdAt, b.createdAt)),
+   ).sort((a, b) => moment(a.createdAt).diff(b.createdAt)),
 );
 
 async function print() {
