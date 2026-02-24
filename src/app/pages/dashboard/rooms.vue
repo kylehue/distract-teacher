@@ -101,8 +101,8 @@
                            v-if="room.timeStarted"
                            :value="room.timeStarted"
                            absolute
-                           date-only
-                           simple-date
+                           time-only
+                           exclude-seconds
                         />
                         <span v-else>N/A</span>
                      </Statistic>
@@ -112,8 +112,8 @@
                            v-if="room.timeEnded"
                            :value="room.timeEnded"
                            absolute
-                           date-only
-                           simple-date
+                           time-only
+                           exclude-seconds
                         />
                         <span v-else>N/A</span>
                      </Statistic>

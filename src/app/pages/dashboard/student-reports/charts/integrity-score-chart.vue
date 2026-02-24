@@ -65,7 +65,7 @@ const integrityOverTimeChartOptions = computed(() => {
       },
       xaxis: {
          categories: monitorLogs.value.map((log) =>
-            moment(log.createdAt).format("HH:mm:ss A"),
+            moment(log.createdAt).format("hh:mm:ss A"),
          ),
          title: { text: "Time" },
       },
@@ -81,7 +81,7 @@ const integrityOverTimeChartOptions = computed(() => {
          width: 2,
       },
       tooltip: {
-         x: { format: "HH:mm:ss" },
+         x: { format: "hh:mm:ss" },
          y: { formatter: (val: number) => (val * 100).toFixed(2) + "%" },
       },
       theme: { mode: props.theme },

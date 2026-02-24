@@ -24,21 +24,32 @@ const props = defineProps<{
    prefix?: string;
    suffix?: string;
 }>();
-
+const dateFormat = computed(() =>
+   props.simpleDate ? "MM/DD/YYYY" : "MMMM DD, YYYY",
+);
+const timeFormat = computed(() =>
+   props.excludeSeconds ? "hh:mm A" : "hh:mm:ss A",
+);
 const relative = computed(() => moment(props.value).fromNow());
-const absolute = computed(() => {
-   const dateFormat = props.simpleDate ? "MM/DD/YYYY" : "MMMM DD, YYYY";
-   const timeFormat = props.excludeSeconds ? "HH:mm A" : "HH:mm:ss A";
-   if (props.dateOnly) {
-      return moment(props.value).format(dateFormat);
-   }
-   if (props.timeOnly) {
-      return moment(props.value).format(timeFormat);
-   }
-   return moment(props.value).format(`${dateFormat} [at] ${timeFormat}`);
-});
+const absolute = computed(() =>
+   moment(props.value).format(`MMMM DD, YYYY [at] hh:mm:ss A`),
+);
 const defaultText = computed(() => {
-   let text = props.absolute ? absolute.value : relative.value;
+   let text = "";
+   if (props.absolute) {
+      if (props.dateOnly) {
+         text = moment(props.value).format(dateFormat.value);
+      } else if (props.timeOnly) {
+         text = moment(props.value).format(timeFormat.value);
+      } else {
+         text = moment(props.value).format(
+            `${dateFormat.value} [at] ${timeFormat.value}`,
+         );
+      }
+   } else {
+      text = relative.value;
+   }
+
    if (props.prefix) {
       text = props.prefix + " " + text;
    }

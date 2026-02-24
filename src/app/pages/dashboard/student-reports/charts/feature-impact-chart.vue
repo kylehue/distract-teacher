@@ -37,7 +37,7 @@ const monitorLogs = inject(MONITOR_LOGS_INJECTION_KEY)!;
 const featureImpactTimeline = computed(() => {
    return monitorLogs.value.map((log) => {
       return {
-         time: moment(log.createdAt).format("HH:mm:ss A"),
+         time: moment(log.createdAt).format("hh:mm:ss A"),
          grouped: groupFeatureImpacts(log.featureImpacts),
       };
    });

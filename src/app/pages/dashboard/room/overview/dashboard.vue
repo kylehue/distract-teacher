@@ -39,16 +39,16 @@
                   v-if="room.timeStarted"
                   :value="room.timeStarted"
                   absolute
-                  date-only
-                  simple-date
+                  time-only
+                  exclude-seconds
                />
             </Statistic>
             <Statistic v-if="room.timeEnded" title="Time Ended">
                <Timestamp
                   :value="room.timeEnded"
                   absolute
-                  date-only
-                  simple-date
+                  time-only
+                  exclude-seconds
                />
             </Statistic>
             <Statistic

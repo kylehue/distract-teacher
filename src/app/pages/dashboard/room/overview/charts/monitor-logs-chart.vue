@@ -79,7 +79,7 @@ const scatterChartOptions = computed(() => {
 
       tooltip: {
          x: {
-            format: "HH:mm:ss",
+            format: "hh:mm:ss",
          },
          y: {
             formatter: (val: number) => (val * 100).toFixed(2) + "%",
