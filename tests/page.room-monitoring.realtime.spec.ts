@@ -123,6 +123,7 @@ const RowCardSlotStub = defineComponent({
                   ),
                ),
             ),
+            h("div", { class: "row-card-content" }, slots.content?.()),
             h("div", { class: "row-card-footer" }, slots.footer?.()),
             h("div", { class: "row-card-action" }, slots.action?.()),
          ]);
@@ -202,6 +203,12 @@ function mountMonitoringPage(params: {
             DataView: DataViewExposeStub,
             RowCard: RowCardSlotStub,
             Statistic: StatisticStub,
+            RouterLink: defineComponent({
+               name: "RouterLink",
+               setup(_, { slots }) {
+                  return () => h("a", slots.default?.());
+               },
+            }),
          },
       },
    });

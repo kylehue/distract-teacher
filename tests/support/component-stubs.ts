@@ -199,7 +199,11 @@ export const RowCardStub = defineComponent({
             : "row-card";
 
          return h("article", { ...attrs, class: mergedClass }, [
-            h("h3", { class: "row-card-title" }, props.title),
+            h(
+               "h3",
+               { class: "row-card-title" },
+               slots.title ? slots.title() : props.title,
+            ),
             h(
                "div",
                { class: "row-card-tags" },

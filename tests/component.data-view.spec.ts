@@ -119,7 +119,7 @@ describe("DataView", () => {
       expect(rowIds(wrapper)).toEqual(["1", "2", "3", "4"]);
    });
 
-   it("resets to first page when sort rules change and scrolls to top", async () => {
+   it("keeps current page when sort rules change and scrolls to top", async () => {
       const wrapper = mount(DataView as any, {
          props: {
             items: makeItems(),
@@ -149,7 +149,7 @@ describe("DataView", () => {
          .getComponent({ name: "NPopselect" })
          .vm.$emit("update:value", ["score"]);
       await nextTick();
-      expect(rowIds(wrapper)).toEqual(["2"]);
+      expect(rowIds(wrapper)).toEqual(["3"]);
    });
 
    it("keeps sort direction when selected sort keys are re-applied", async () => {

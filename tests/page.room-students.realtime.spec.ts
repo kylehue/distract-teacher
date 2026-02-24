@@ -41,7 +41,6 @@ const StudentsViewStub = defineComponent({
       students: { type: Array, default: () => [] },
       room: { type: Object, default: null },
       loading: { type: Boolean, default: false },
-      showJoinRequests: { type: Boolean, default: false },
    },
    setup(props) {
       return () =>
@@ -50,7 +49,6 @@ const StudentsViewStub = defineComponent({
             "data-room-id": String((props.room as any)?.id ?? ""),
             "data-room-status": String((props.room as any)?.status ?? ""),
             "data-loading": String(props.loading),
-            "data-show-join-requests": String(props.showJoinRequests),
             "data-student-ids": (props.students as any[])
                .map((student: any) => student.id)
                .join(","),
@@ -100,7 +98,6 @@ describe("Dashboard Room Students Page", () => {
       expect(view.attributes("data-room-id")).toBe("r1");
       expect(view.attributes("data-room-status")).toBe("monitoring");
       expect(view.attributes("data-loading")).toBe("false");
-      expect(view.attributes("data-show-join-requests")).toBe("true");
       expect(view.attributes("data-student-ids")).toBe("s1,s2");
 
       allStudents.value = [
@@ -137,7 +134,6 @@ describe("Dashboard Room Students Page", () => {
 
       const view = wrapper.get('[data-testid="students-view"]');
       expect(view.attributes("data-room-status")).toBe("concluded");
-      expect(view.attributes("data-show-join-requests")).toBe("true");
       expect(view.attributes("data-student-ids")).toBe("s1,s2");
    });
 
