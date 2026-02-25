@@ -92,6 +92,7 @@ export async function printElement(
 
    const restoreStyles = () => {
       el.setAttribute("style", originalStyle);
+      document.body.style.removeProperty("line-height");
       if (!options?.showButtons) {
          buttons.forEach((btn) => {
             const origVisibility = origButtonVisibilities.get(btn);
@@ -130,6 +131,10 @@ export async function printElement(
             wrapper.style.height = "fit-content";
             wrapper.style.width = "100%";
             wrapper.style.paddingBottom = "1rem";
+
+            /* https://github.com/niklasvh/html2canvas/issues/2781 */
+            entity.style.lineHeight = "normal";
+            document.body.style.lineHeight = "0.5";
             return wrapper;
          });
 
@@ -305,5 +310,3 @@ export async function printElement(
       restoreStyles();
    }
 }
-
-
