@@ -81,7 +81,7 @@
                },
                {
                   key: 'isPhonePresent',
-                  label: 'Phone Present',
+                  label: 'Phone Detected',
                   options: [
                      { label: 'Yes', value: true },
                      { label: 'No', value: false },
