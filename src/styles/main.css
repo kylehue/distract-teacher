@@ -11,14 +11,19 @@ html.dark {
    color-scheme: dark;
 }
 
-body {
-   /* overflow: hidden; */
-}
-
 /* For print CSS */
 .page-break {
    page-break-after: always;
    page-break-before: always;
+}
+
+/* https://github.com/niklasvh/html2canvas/issues/2781 */
+body {
+   line-height: 0.5 !important;
+}
+
+.print-entity {
+   line-height: normal !important;
 }
 
 /* vue transitions */
