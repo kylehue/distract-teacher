@@ -164,24 +164,18 @@
                               {{ student.monitorLogs.length }}
                            </template>
                            <div class="flex flex-col">
-                              <NText
-                                 >Low:
-                                 {{
-                                    student.warningLevelDistribution.low
-                                 }}</NText
-                              >
-                              <NText
-                                 >Moderate:
-                                 {{
-                                    student.warningLevelDistribution.moderate
-                                 }}</NText
-                              >
-                              <NText
-                                 >Severe:
-                                 {{
-                                    student.warningLevelDistribution.severe
-                                 }}</NText
-                              >
+                              <NText>
+                                 Low:
+                                 {{ student.warningLevelDistribution.low }}
+                              </NText>
+                              <NText>
+                                 Moderate:
+                                 {{ student.warningLevelDistribution.moderate }}
+                              </NText>
+                              <NText>
+                                 Severe:
+                                 {{ student.warningLevelDistribution.severe }}
+                              </NText>
                            </div>
                         </NTooltip>
                      </Statistic>
@@ -226,13 +220,13 @@
                            :value="student.timeJoined"
                         />
                      </NText>
-                     <NText :depth="3" class="text-xs flex items-center gap-1">
+                     <NText
+                        v-if="student.timeLeft"
+                        :depth="3"
+                        class="text-xs flex items-center gap-1"
+                     >
                         <PhSignOut />
-                        <Timestamp
-                           v-if="student.timeLeft"
-                           prefix="Left"
-                           :value="student.timeLeft"
-                        />
+                        <Timestamp prefix="Left" :value="student.timeLeft" />
                      </NText>
                   </div>
                </template>
