@@ -19,6 +19,45 @@ export function waitForSvg(el: HTMLElement) {
    });
 }
 
+async function loadPrintBanner() {
+   return new Promise<{
+      dataUrl: string;
+      width: number;
+      height: number;
+   } | null>((resolve) => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.decoding = "async";
+
+      img.onload = () => {
+         if (!img.naturalWidth || !img.naturalHeight) {
+            resolve(null);
+            return;
+         }
+
+         const canvas = document.createElement("canvas");
+         canvas.width = img.naturalWidth;
+         canvas.height = img.naturalHeight;
+
+         const ctx = canvas.getContext("2d");
+         if (!ctx) {
+            resolve(null);
+            return;
+         }
+
+         ctx.drawImage(img, 0, 0);
+         resolve({
+            dataUrl: canvas.toDataURL("image/png"),
+            width: img.naturalWidth,
+            height: img.naturalHeight,
+         });
+      };
+
+      img.onerror = () => resolve(null);
+      img.src = "/distract-text-dark.svg";
+   });
+}
+
 export async function printElement(
    el: HTMLElement,
    options?: {
@@ -71,6 +110,14 @@ export async function printElement(
       const margin = options?.margin ?? 5;
       const pdfWidth = pdf.internal.pageSize.getWidth() - 2 * margin;
       const pdfHeight = pdf.internal.pageSize.getHeight() - 2 * margin;
+      const banner = await loadPrintBanner();
+      const bannerGapMm = banner ? 4 : 0;
+      const bannerWidthMm = banner ? Math.min(pdfWidth, 30) : 0;
+      const bannerHeightMm =
+         banner && bannerWidthMm
+            ? (bannerWidthMm * banner.height) / banner.width
+            : 0;
+      const pageTopY = banner ? margin + bannerHeightMm + bannerGapMm : margin;
       const allEntities = Array.from(
          el.querySelectorAll<HTMLElement>(".print-entity"),
       );
@@ -88,10 +135,31 @@ export async function printElement(
 
       const printEntities = entities.length ? entities : [el];
       const captureScale = 2;
-      let currentY = margin;
-      let hasPrinted = false;
       const pageBottom = margin + pdfHeight;
+      const maxEntityHeightOnFreshPage = pageBottom - pageTopY;
+      let currentY = pageTopY;
+      let hasPrinted = false;
       const fitEpsilonMm = 0.2;
+
+      const renderBanner = () => {
+         if (!banner || !bannerWidthMm || !bannerHeightMm) return;
+         pdf.addImage(
+            banner.dataUrl,
+            "PNG",
+            margin,
+            margin,
+            bannerWidthMm,
+            bannerHeightMm,
+         );
+      };
+
+      const moveToNewPage = () => {
+         pdf.addPage();
+         renderBanner();
+         currentY = pageTopY;
+      };
+
+      renderBanner();
 
       const captureElement = async (entity: HTMLElement) => {
          const captureId = `print-capture-${Math.random().toString(36).slice(2)}`;
@@ -178,20 +246,18 @@ export async function printElement(
          }
 
          // Fits on a fresh page, move entity as a whole.
-         if (fullHeightMm <= pdfHeight + fitEpsilonMm) {
+         if (fullHeightMm <= maxEntityHeightOnFreshPage + fitEpsilonMm) {
             if (hasPrinted) {
-               pdf.addPage();
+               moveToNewPage();
             }
-            currentY = margin;
             addCanvasAtCurrentY(canvas, 0, canvas.height);
             hasPrinted = true;
             return;
          }
 
          // Oversized entity: split only when one full page cannot contain it.
-         if (hasPrinted && currentY > margin + 0.01) {
-            pdf.addPage();
-            currentY = margin;
+         if (hasPrinted && currentY > pageTopY + 0.01) {
+            moveToNewPage();
          }
 
          let sourceY = 0;
@@ -202,8 +268,7 @@ export async function printElement(
             );
 
             if (sourceHeight <= 0) {
-               pdf.addPage();
-               currentY = margin;
+               moveToNewPage();
                continue;
             }
 
@@ -213,8 +278,7 @@ export async function printElement(
             sourceY += sourceHeight;
 
             if (sourceY < canvas.height) {
-               pdf.addPage();
-               currentY = margin;
+               moveToNewPage();
             }
          }
       };
@@ -224,8 +288,22 @@ export async function printElement(
          addCanvasAsEntity(canvas);
       }
 
+      const totalPages = pdf.getNumberOfPages();
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      pdf.setFontSize(9);
+      pdf.setTextColor(120);
+      for (let page = 1; page <= totalPages; page++) {
+         pdf.setPage(page);
+         pdf.text(String(page), pageWidth - margin, pageHeight - margin / 2, {
+            align: "right",
+         });
+      }
+
       return pdf;
    } finally {
       restoreStyles();
    }
 }
+
+
