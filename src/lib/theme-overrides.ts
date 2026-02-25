@@ -53,7 +53,7 @@ export const apexChartOverrides: ApexOptions = {
       redrawOnParentResize: true,
    },
    xaxis: {
-      labels: { style: { fontFamily: "Inter, sans-serif" } },
+      labels: { style: { fontFamily: "Inter, sans-serif", colors: [] } },
       title: {
          style: { fontFamily: "Inter, sans-serif", fontWeight: 500 },
       },
@@ -65,6 +65,9 @@ export const apexChartOverrides: ApexOptions = {
       },
    },
    colors: ["#8661ff"],
+   dataLabels: {
+      style: { fontFamily: "Inter, sans-serif", colors: [] },
+   },
    tooltip: { style: { fontFamily: "Inter, sans-serif" } },
    legend: { fontFamily: "Inter, sans-serif" },
 };
