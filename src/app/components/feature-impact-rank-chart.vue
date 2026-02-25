@@ -36,7 +36,6 @@ const groupedFeatureData = computed(() => {
    // convert to percentage and sort descending
    const sortedGroups = Object.entries(groupTotals)
       .map(([group, value]) => ({ group, percentage: value * 100 }))
-      .filter((g) => Number(g.percentage.toFixed(1)) > 0)
       .sort((a, b) => b.percentage - a.percentage);
 
    return {
@@ -83,6 +82,16 @@ const featureImpactChartOptions = computed(() =>
          y: {
             formatter: (v: number) => `${v.toFixed(2)}%`,
          },
+      },
+      annotations: {
+         xaxis: [
+            {
+               x: 0,
+               borderWidth: 1,
+               strokeDashArray: 4,
+               opacity: 1,
+            },
+         ],
       },
       theme: { mode: theme.value },
    } as ApexCharts.ApexOptions),
