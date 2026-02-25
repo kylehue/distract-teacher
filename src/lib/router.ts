@@ -118,6 +118,11 @@ const routes: RouteRecordRaw[] = [
 const router = createRouter({
    history: createWebHistory(import.meta.env.VITE_BASE_URL),
    routes,
+   scrollBehavior() {
+      let container = document.querySelector(".n-layout-scroll-container");
+      if (!container) return;
+      container.scrollTo({ top: 0, left: 0 });
+   },
 });
 
 export { router };
