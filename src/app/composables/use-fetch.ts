@@ -1,19 +1,20 @@
+import {
+   isDummyModeEnabled,
+   resolveDummyResponse,
+   type DummyError,
+   type DummyRequestOptions,
+   type DummyResponse,
+} from "@/lib/dummy-database";
 import { keysToCamel } from "@/lib/object";
-import { getSocket } from "@/plugins/socket";
 import { proxyRefs, ref } from "vue";
 
 const API = import.meta.env.VITE_API_URL;
-if (!API) throw new Error("VITE_API_URL is not defined");
 
-export type ApiSuccess<T> = {
-   message: string;
-   data?: T;
-};
+export type ApiSuccess<T> = DummyResponse<T>;
+export type ApiError = DummyError;
 
-export type ApiError = {
-   message: string;
-   fieldErrors?: Record<string, string>;
-};
+type ExecuteOptions = Omit<RequestInit, "body" | "method"> &
+   DummyRequestOptions;
 
 function resolveUrl(
    template: string,
@@ -31,7 +32,7 @@ function resolveUrl(
    }
 
    // dev safety: unresolved params
-   if (process.env.NODE_ENV === "development") {
+   if (import.meta.env.DEV) {
       const unresolved = url.match(/:[a-zA-Z_]\w*/g);
       if (unresolved) {
          throw new Error(
@@ -43,23 +44,10 @@ function resolveUrl(
    return url;
 }
 
-async function waitForSocket() {
-   const socket = getSocket();
-   if (socket.connected) return socket;
-   return new Promise<typeof socket>((resolve) => {
-      socket.once("connect", () => resolve(socket));
-   });
-}
-
 export function useFetch<T = any>(url: string, method: string = "GET") {
    const data = ref<ApiSuccess<T> | null>(null);
    const error = ref<ApiError | null>(null);
    const isLoading = ref(false);
-
-   type ExecuteOptions = Omit<RequestInit, "body" | "method"> & {
-      body?: Record<string, any> | FormData | null;
-      params?: Record<string, any>;
-   };
 
    const execute = async (
       options: ExecuteOptions = {},
@@ -68,11 +56,30 @@ export function useFetch<T = any>(url: string, method: string = "GET") {
       data.value = null;
       error.value = null;
 
-      if (process.env.NODE_ENV === "development") {
-         console.log(`FETCH -> ${url}:\n`, options);
+      if (import.meta.env.DEV) {
+         console.log(`FETCH -> ${url} [${method.toUpperCase()}]:\n`, options);
       }
 
       try {
+         const normalizedMethod = method.toUpperCase();
+
+         if (isDummyModeEnabled()) {
+            const dummyResponse = resolveDummyResponse<T>(
+               url,
+               normalizedMethod,
+               {
+                  body: options.body,
+                  params: options.params,
+               },
+            );
+            data.value = dummyResponse;
+            return dummyResponse;
+         }
+
+         if (!API) {
+            throw new Error("VITE_API_URL is not defined");
+         }
+
          const headers: HeadersInit = {
             ...options.headers,
          };
@@ -87,12 +94,15 @@ export function useFetch<T = any>(url: string, method: string = "GET") {
          }
 
          const res = await fetch(
-            resolveUrl(new URL(url, API).toString(), options.params),
+            resolveUrl(
+               new URL(url, API).toString(),
+               options.params as Record<string, string | number> | undefined,
+            ),
             {
                ...options,
                headers,
                body,
-               method,
+               method: normalizedMethod,
                credentials: "include",
             },
          );
@@ -119,7 +129,7 @@ export function useFetch<T = any>(url: string, method: string = "GET") {
       } finally {
          isLoading.value = false;
 
-         if (process.env.NODE_ENV === "development") {
+         if (import.meta.env.DEV) {
             console.log(`RESPONSE -> ${url}:\n`, data.value || error.value);
          }
       }
