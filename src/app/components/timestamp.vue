@@ -1,5 +1,5 @@
 <template>
-   <NTooltip placement="bottom" :disabled="absolute === defaultText">
+   <NTooltip :disabled="absolute === defaultText">
       <template #trigger>
          <slot :relative="relative" :absolute="absolute">
             {{ defaultText }}

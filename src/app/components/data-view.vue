@@ -29,7 +29,7 @@
                />
             </div>
 
-            <NTooltip v-if="isSortEnabled" placement="bottom">
+            <NTooltip v-if="isSortEnabled">
                <template #trigger>
                   <NPopselect
                      trigger="click"
@@ -55,7 +55,7 @@
                :options="columnFilterMenuOptions"
                @select="onSelectColumnFilter"
             >
-               <NTooltip placement="bottom">
+               <NTooltip>
                   <template #trigger>
                      <NButton secondary circle>
                         <template #icon>
@@ -78,7 +78,7 @@
                :value="pageSize"
                @select="(key) => (pageSize = key)"
             >
-               <NTooltip placement="bottom">
+               <NTooltip>
                   <template #trigger>
                      <NButton secondary circle>
                         <template #icon>
@@ -90,7 +90,7 @@
                </NTooltip>
             </NDropdown>
 
-            <NTooltip v-if="hasActiveTransforms" placement="bottom">
+            <NTooltip v-if="hasActiveTransforms">
                <template #trigger>
                   <NButton secondary circle @click="resetTransforms">
                      <template #icon>
@@ -120,7 +120,7 @@
          class="flex flex-wrap gap-2"
       >
          <template v-for="rule in effectiveSortRules" :key="rule.key">
-            <NTooltip placement="bottom" :delay="1000">
+            <NTooltip :delay="1000">
                <template #trigger>
                   <NTag
                      closable

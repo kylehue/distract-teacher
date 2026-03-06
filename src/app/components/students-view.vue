@@ -159,7 +159,7 @@
                         <template #icon>
                            <PhWarning />
                         </template>
-                        <NTooltip placement="bottom">
+                        <NTooltip>
                            <template #trigger>
                               {{ student.monitorLogs.length }}
                            </template>

@@ -1,5 +1,5 @@
 <template>
-   <NTooltip placement="bottom">
+   <NTooltip>
       <template #trigger>
          <NIcon>
             <PhInfo :color="themeVars.textColor3" />

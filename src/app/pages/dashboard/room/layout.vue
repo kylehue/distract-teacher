@@ -17,7 +17,7 @@
       </template>
       <template v-if="!!room && room.status !== 'concluded'" #header-extra>
          <div class="flex items-center gap-1">
-            <NTooltip placement="bottom">
+            <NTooltip>
                <template #trigger>
                   <NButton
                      type="error"
@@ -33,7 +33,7 @@
                </template>
                Stop monitoring and conclude room session
             </NTooltip>
-            <NTooltip placement="bottom">
+            <NTooltip>
                <template #trigger>
                   <NButton
                      type="warning"
@@ -50,7 +50,7 @@
                </template>
                Pause monitoring
             </NTooltip>
-            <NTooltip placement="bottom">
+            <NTooltip>
                <template #trigger>
                   <NButton
                      type="success"
@@ -69,7 +69,7 @@
             </NTooltip>
          </div>
          <NDivider vertical />
-         <NTooltip placement="bottom">
+         <NTooltip>
             <template #trigger>
                <NButton circle @click="announcement.show(room)">
                   <template #icon>
@@ -147,7 +147,7 @@ import { getWithDefault } from "@/lib/object";
 import { useAnnouncement } from "@/app/composables/use-announcement";
 import { useAuthStore } from "@/app/composables/use-auth-store";
 import { useFetch } from "@/app/composables/use-fetch";
-import Loader from "@/app/components/loader.vue"
+import Loader from "@/app/components/loader.vue";
 
 const router = useRouter();
 const route = useRoute();

@@ -1,6 +1,5 @@
 <template>
    <NPopselect
-      placement="bottom"
       v-model:show="showOptions"
       trigger="manual"
       :options="searchResults.options"
