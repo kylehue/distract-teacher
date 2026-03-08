@@ -113,8 +113,11 @@
                   {
                      label: 'View Warnings',
                      to: {
-                        path: 'monitoring',
-                        query: { filterByStudent: student.id },
+                        name: 'monitoring',
+                        query: {
+                           filterByStudent: student.id,
+                           tab: 'warningLogs',
+                        },
                      },
                   },
                   {

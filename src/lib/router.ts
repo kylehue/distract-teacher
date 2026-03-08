@@ -55,7 +55,9 @@ const routes: RouteRecordRaw[] = [
                   path: "student-reports/:studentId",
                   component: _defineAsyncComponent(
                      () =>
-                        import("@/app/pages/dashboard/student-reports/index.vue"),
+                        import(
+                           "@/app/pages/dashboard/student-reports/index.vue"
+                        ),
                   ),
                },
                {
@@ -77,7 +79,9 @@ const routes: RouteRecordRaw[] = [
                         path: "overview",
                         component: _defineAsyncComponent(
                            () =>
-                              import("@/app/pages/dashboard/room/overview/index.vue"),
+                              import(
+                                 "@/app/pages/dashboard/room/overview/index.vue"
+                              ),
                         ),
                      },
                      {
@@ -96,9 +100,12 @@ const routes: RouteRecordRaw[] = [
                      },
                      {
                         path: "monitoring",
+                        name: "monitoring",
                         component: _defineAsyncComponent(
                            () =>
-                              import("@/app/pages/dashboard/room/monitoring/index.vue"),
+                              import(
+                                 "@/app/pages/dashboard/room/monitoring/index.vue"
+                              ),
                         ),
                      },
                   ],

@@ -8,6 +8,25 @@
             <NText strong class="text-lg"> Student Report </NText>
          </div>
       </template>
+      <template v-if="student && room" #header-extra>
+         <div class="flex items-center gap-2">
+            <RouterLink
+               :to="{
+                  name: 'monitoring',
+                  query: {
+                     filterByStudent: student.id,
+                     tab: 'warningLogs',
+                  },
+                  params: {
+                     roomId: room.id,
+                  },
+               }"
+               class="link"
+            >
+               View Warnings
+            </RouterLink>
+         </div>
+      </template>
       <div
          v-if="isLoading"
          class="flex items-center justify-center w-full h-full"
@@ -64,7 +83,7 @@ import {
    ref,
    useTemplateRef,
 } from "vue";
-import { useRoute } from "vue-router";
+import { RouterLink, useRoute } from "vue-router";
 import { useStore } from "@/app/composables/use-store";
 import {
    MONITOR_LOGS_INJECTION_KEY,
