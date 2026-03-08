@@ -79,7 +79,8 @@ export function createUnifiedNaiveUiMock() {
       NButtonGroup: defineComponent({
          name: "NButtonGroup",
          setup(_, { slots }) {
-            return () => h("div", { class: "n-button-group" }, slots.default?.());
+            return () =>
+               h("div", { class: "n-button-group" }, slots.default?.());
          },
       }),
       NText: defineComponent({
@@ -366,7 +367,9 @@ export function createUnifiedNaiveUiMock() {
                         h(
                            "p",
                            { class: "room-row" },
-                           `${row?.title ?? ""}|${row?.code ?? ""}|${row?.status ?? ""}`,
+                           `${row?.title ?? ""}|${row?.code ?? ""}|${
+                              row?.status ?? ""
+                           }`,
                         ),
                      ),
                   ),
@@ -466,6 +469,64 @@ export function createUnifiedNaiveUiMock() {
                   },
                   slots.default?.(),
                );
+         },
+      }),
+      NSelect: defineComponent({
+         name: "NSelect",
+         props: {
+            options: { type: Array, default: () => [] },
+            value: {
+               type: [Array, String, Number, Boolean, Object],
+               default: undefined,
+            },
+         },
+         emits: ["update:value"],
+         setup(props, { slots, emit }) {
+            return () =>
+               h("div", { class: "n-select" }, [
+                  slots.default?.(),
+                  ...flattenOptions(props.options as any[]).map((option) =>
+                     h(
+                        "button",
+                        {
+                           type: "button",
+                           class: "select-option menu-item",
+                           "data-key": String(option?.key),
+                           disabled: !!option?.disabled,
+                           onClick: () => {
+                              if (option?.disabled) return;
+                              emit("update:value", option?.key);
+                           },
+                        },
+                        String(option?.label ?? ""),
+                     ),
+                  ),
+               ]);
+         },
+      }),
+      NInputNumber: defineComponent({
+         name: "NInputNumber",
+         props: {
+            value: { type: Number, default: 0 },
+            min: { type: Number, default: -Infinity },
+            max: { type: Number, default: Infinity },
+         },
+         emits: ["update:value"],
+         setup(props, { slots, emit }) {
+            return () =>
+               h("div", [
+                  slots.prefix?.(),
+                  h("input", {
+                     value: String(props.value),
+                     type: "number",
+                     onInput: (event: Event) =>
+                        emit(
+                           "update:value",
+                           Number((event.target as HTMLInputElement).value),
+                        ),
+                  }),
+                  slots.suffix?.(),
+               ]);
          },
       }),
       useMessage: () => naiveUiMockState.message,

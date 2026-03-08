@@ -8,6 +8,7 @@ import {
    MONITOR_LOGS_INJECTION_KEY,
    MONITOR_LOGS_MAP_INJECTION_KEY,
    ROOM_INJECTION_KEY,
+   STUDENTS_INJECTION_KEY,
    STUDENTS_MAP_INJECTION_KEY,
 } from "@/lib/injection-keys";
 
@@ -54,7 +55,7 @@ vi.mock("@/app/composables/use-socket", () => ({
    useSocket: () => socketApi,
 }));
 
-import MonitoringPage from "@/app/pages/dashboard/room/monitoring.vue";
+import MonitoringPage from "@/app/pages/dashboard/room/monitoring/index.vue";
 import { useStore } from "@/app/composables/use-store";
 
 const DataViewExposeStub = defineComponent({
@@ -144,7 +145,11 @@ const StatisticStub = defineComponent({
    },
 });
 
-function createStudent(id: string, name: string, overrides: Record<string, any> = {}) {
+function createStudent(
+   id: string,
+   name: string,
+   overrides: Record<string, any> = {},
+) {
    return {
       id,
       roomId: "r1",
@@ -186,6 +191,7 @@ function mountMonitoringPage(params: {
    studentsMap: Ref<Map<string, any>>;
    monitorLogsMap: Ref<Map<string, any>>;
    monitorLogsArray: Ref<any[]>;
+   studentsArray?: Ref<any[]>;
 }) {
    return mount(MonitoringPage, {
       global: {
@@ -198,6 +204,7 @@ function mountMonitoringPage(params: {
             [STUDENTS_MAP_INJECTION_KEY as symbol]: params.studentsMap,
             [MONITOR_LOGS_MAP_INJECTION_KEY as symbol]: params.monitorLogsMap,
             [MONITOR_LOGS_INJECTION_KEY as symbol]: params.monitorLogsArray,
+            [STUDENTS_INJECTION_KEY as symbol]: params.studentsArray,
          },
          stubs: {
             DataView: DataViewExposeStub,
@@ -218,7 +225,7 @@ describe("Dashboard Room Monitoring Page (real-time and update expectations)", (
    beforeEach(() => {
       vi.clearAllMocks();
       socketHandlers.clear();
-      state.route.query = {};
+      state.route.query = { tab: "warningLogs" };
       state.unlockExecute.mockResolvedValue({ data: { success: true } });
    });
 
@@ -240,6 +247,8 @@ describe("Dashboard Room Monitoring Page (real-time and update expectations)", (
             allowLateStudents: true,
             joinConfirmation: true,
             createdAt: "2026-01-01T00:00:00.000Z",
+            seatOrders: {},
+            seatColumnCount: 8,
          } as any,
       ]);
       store.upsertStudents([createStudent("s1", "Alice")]);
@@ -249,6 +258,9 @@ describe("Dashboard Room Monitoring Page (real-time and update expectations)", (
          () =>
             store.studentsGroupedByRoomId.get("r1") ??
             (new Map<string, any>() as Map<string, any>),
+      );
+      const studentsArray = computed(() =>
+         Array.from(studentsMap.value.values()),
       );
       const monitorLogsMap = computed(
          () =>
@@ -261,6 +273,7 @@ describe("Dashboard Room Monitoring Page (real-time and update expectations)", (
 
       const wrapper = mountMonitoringPage({
          studentsMap,
+         studentsArray,
          monitorLogsMap,
          monitorLogsArray,
       });
@@ -283,6 +296,9 @@ describe("Dashboard Room Monitoring Page (real-time and update expectations)", (
       const studentsMap = ref(
          new Map<string, any>([["s1", createStudent("s1", "Alice")]]),
       );
+      const studentsArray = computed(() =>
+         Array.from(studentsMap.value.values()),
+      );
       const monitorLogsMap = ref(
          new Map<string, any>([["m1", createMonitorLog("m1", "s1")]]),
       );
@@ -292,6 +308,7 @@ describe("Dashboard Room Monitoring Page (real-time and update expectations)", (
 
       const wrapper = mountMonitoringPage({
          studentsMap,
+         studentsArray,
          monitorLogsMap,
          monitorLogsArray,
       });

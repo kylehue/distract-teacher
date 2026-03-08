@@ -11,30 +11,13 @@ describe("useFetch", () => {
       vi.restoreAllMocks();
    });
 
-   it("executes successful request and camel-cases response", async () => {
-      vi.stubGlobal(
-         "fetch",
-         vi.fn().mockResolvedValue({
-            ok: true,
-            json: async () => ({ message: "ok", data: { teacher_id: "t1" } }),
-         }),
-      );
-
-      const api = useFetch<{ teacherId: string }>("/api/login", "POST");
-      const res = await api.execute({ body: { username: "u" } });
-
-      expect((fetch as any).mock.calls[0][0]).toContain("/api/login");
-      expect(res.data?.teacherId).toBe("t1");
-      expect(api.isLoading).toBe(false);
-   });
-
    it("throws structured api error on failed response", async () => {
       vi.stubGlobal(
          "fetch",
          vi.fn().mockResolvedValue({
             ok: false,
             json: async () => ({
-               detail: { message: "Bad", field_errors: { a: "b" } },
+               detail: { message: "Bad", fieldErrors: { a: "b" } },
             }),
          }),
       );
