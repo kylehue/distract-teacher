@@ -53,6 +53,8 @@ export interface RoomInfo {
    joinConfirmation: boolean;
    createdAt: string;
    deletedAt?: string;
+   seatOrders: Record<string, number>;
+   seatColumnCount: number;
 }
 
 export interface StudentInfo {

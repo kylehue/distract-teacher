@@ -1,6 +1,5 @@
 import { onUnmounted, unref } from "vue";
 import { getSocket } from "@/plugins/socket";
-import { keysToCamel } from "@/lib/object";
 
 export function useSocket() {
    const socket = getSocket();
@@ -10,7 +9,7 @@ export function useSocket() {
       handler: (data: Record<any, any>) => void,
       { autoClean = true } = {},
    ) {
-      const wrappedHandler = (data: any) => handler(keysToCamel(data));
+      const wrappedHandler = (data: any) => handler(data);
       socket.on(event, wrappedHandler);
       if (autoClean) {
          onUnmounted(() => socket.off(event, wrappedHandler));
@@ -21,7 +20,7 @@ export function useSocket() {
          const _test_handler_ = (args: any) => {
             console.log(`SERVER -> CLIENT (${event}):\n`, args);
          };
-         socket.on(event, (data) => _test_handler_(keysToCamel(data)));
+         socket.on(event, (data) => _test_handler_(data));
          if (autoClean) {
             onUnmounted(() => socket.off(event, _test_handler_));
          }

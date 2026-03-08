@@ -5,7 +5,6 @@ import {
    type DummyRequestOptions,
    type DummyResponse,
 } from "@/lib/dummy-database";
-import { keysToCamel } from "@/lib/object";
 import { proxyRefs, ref } from "vue";
 
 const API = import.meta.env.VITE_API_URL;
@@ -107,7 +106,7 @@ export function useFetch<T = any>(url: string, method: string = "GET") {
             },
          );
 
-         const json = keysToCamel(await res.json());
+         const json = await res.json();
 
          if (!res.ok) {
             // server-controlled error shape
