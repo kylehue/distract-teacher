@@ -207,6 +207,8 @@ export function createRoom(overrides: Partial<Room> = {}): Room {
       joinConfirmation: randBool(),
       createdAt,
       deletedAt: undefined,
+      seatColumnCount: 8,
+      seatOrders: {},
    };
 
    return { ...base, ...overrides };
