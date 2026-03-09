@@ -10,6 +10,7 @@ import RegisterPage from "@/app/pages/register.vue";
 import UnauthorizedPage from "@/app/pages/error/unauthorized.vue";
 import ForbiddenPage from "@/app/pages/error/forbidden.vue";
 import NotFoundPage from "@/app/pages/error/not-found.vue";
+import MonitoringPage from "@/app/pages/dashboard/room/monitoring/index.vue";
 
 function _defineAsyncComponent(loader: () => Promise<any>) {
    return defineAsyncComponent({
@@ -101,12 +102,7 @@ const routes: RouteRecordRaw[] = [
                      {
                         path: "monitoring",
                         name: "monitoring",
-                        component: _defineAsyncComponent(
-                           () =>
-                              import(
-                                 "@/app/pages/dashboard/room/monitoring/index.vue"
-                              ),
-                        ),
+                        component: MonitoringPage,
                      },
                   ],
                },
