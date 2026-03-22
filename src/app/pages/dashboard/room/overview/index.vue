@@ -71,6 +71,7 @@ async function print() {
    const pdf = await printElement(dashboard, {
       width: "260mm",
       margin: 10,
+      headerText: "Room Reports",
       // fitToSinglePage: true,
    });
    pdf.save(`Room_Report_${room.value?.code || "unnamed"}.pdf`);

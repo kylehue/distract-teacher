@@ -55,115 +55,140 @@
       <NEmpty v-if="!preprocessedStudentsArray.length">
          Room is currently empty.
       </NEmpty>
-      <Draggable
-         v-else
-         :list="preprocessedStudentsArray"
-         item-key="id"
-         animation="200"
-         @change="(e: any) => onChangeOrder(e.moved)"
-         class="seats-container grid"
-         :style="{
-            'grid-template-columns': `repeat(${seatColumnCount}, minmax(0, 1fr))`,
-         }"
-      >
-         <template #item="{ element: student }: { element: StudentInfo }">
-            <NCard
-               content-class="p-0!"
-               class="seats-item"
-               :class="{
-                  'seats-item-low': !!getRecentWarnings(student.id).low,
-                  'seats-item-moderate': !!getRecentWarnings(student.id)
-                     .moderate,
-                  'seats-item-severe':
-                     !!getRecentWarnings(student.id).severe ||
-                     !!getRecentWarnings(student.id).phone,
-                  'seats-item-highlighted': highlightedStudent === student.id,
-               }"
-            >
-               <div class="flex flex-col h-full">
-                  <NTooltip>
-                     <template #trigger>
-                        <RouterLink
-                           :to="`/dashboard/student-reports/${student.id}`"
-                           class="seats-item-title link text-center"
-                        >
-                           <NText class="truncate">{{ student.name }}</NText>
-                        </RouterLink>
-                     </template>
-                     {{ student.name }}
-                  </NTooltip>
-                  <div
-                     v-if="!hasRecentWarnings(student.id)"
-                     class="flex justify-center w-full"
-                  >
-                     <NText
-                        class="seats-info text-center leading-tight"
-                        :depth="3"
+      <div v-else class="flex flex-col gap-4">
+         <Draggable
+            :list="preprocessedStudentsArray"
+            item-key="id"
+            animation="200"
+            @change="(e: any) => onChangeOrder(e.moved)"
+            class="seats-container grid"
+            :style="{
+               'grid-template-columns': `repeat(${seatColumnCount}, minmax(0, 1fr))`,
+            }"
+         >
+            <template #item="{ element: student }: { element: StudentInfo }">
+               <NCard
+                  content-class="p-0!"
+                  class="seats-item"
+                  :class="{
+                     'seats-item-low': !!getRecentWarnings(student.id).low,
+                     'seats-item-moderate': !!getRecentWarnings(student.id)
+                        .moderate,
+                     'seats-item-severe':
+                        !!getRecentWarnings(student.id).severe ||
+                        !!getRecentWarnings(student.id).phone,
+                     'seats-item-highlighted':
+                        highlightedStudent === student.id,
+                  }"
+               >
+                  <div class="flex flex-col h-full">
+                     <NTooltip>
+                        <template #trigger>
+                           <RouterLink
+                              :to="`/dashboard/student-reports/${student.id}`"
+                              class="seats-item-title link text-center"
+                           >
+                              <NText class="truncate">{{ student.name }}</NText>
+                           </RouterLink>
+                        </template>
+                        {{ student.name }}
+                     </NTooltip>
+                     <div
+                        v-if="!hasRecentWarnings(student.id)"
+                        class="flex justify-center w-full"
                      >
-                        No recent warnings
-                     </NText>
-                  </div>
-                  <div v-else class="flex flex-col">
-                     <template
-                        v-for="level in LEVELS"
-                        :key="student.id + '_' + level"
-                     >
-                        <div
-                           v-if="getRecentWarnings(student.id)[level]"
-                           class="flex items-center gap-1"
+                        <NText
+                           class="seats-info text-center leading-tight"
+                           :depth="3"
                         >
-                           <PhDeviceMobile
-                              v-if="level === 'phone'"
-                              class="text-error"
-                           />
-                           <div v-else class="dot" :class="'bg-' + level"></div>
-                           <NTooltip>
-                              <template #trigger>
-                                 <RouterLink
-                                    :to="{
+                           No recent warnings
+                        </NText>
+                     </div>
+                     <div v-else class="flex flex-col">
+                        <template
+                           v-for="level in LEVELS"
+                           :key="student.id + '_' + level"
+                        >
+                           <div
+                              v-if="getRecentWarnings(student.id)[level]"
+                              class="flex items-center gap-1"
+                           >
+                              <PhDeviceMobile
+                                 v-if="level === 'phone'"
+                                 class="text-error"
+                              />
+                              <div
+                                 v-else
+                                 class="dot"
+                                 :class="'bg-' + level"
+                              ></div>
+                              <NTooltip>
+                                 <template #trigger>
+                                    <RouterLink
+                                       :to="{
                                        query: {
                                           monitorLogId: getRecentWarnings(
                                              student.id,
                                           )[level]!.id,
                                        },
                                     }"
-                                    class="link text-center"
-                                 >
-                                    <NText
-                                       class="truncate seats-info"
-                                       :depth="3"
+                                       class="link text-center"
                                     >
-                                       {{
-                                          moment(
-                                             getRecentWarnings(student.id)[
-                                                level
-                                             ]!.createdAt,
-                                          ).fromNow()
-                                       }}
-                                    </NText>
-                                 </RouterLink>
-                              </template>
-                              Detected a
-                              {{
-                                 level === "phone"
-                                    ? "phone"
-                                    : `${level} warning level`
-                              }}
-                              on
-                              {{
-                                 moment(
-                                    getRecentWarnings(student.id)[level]!
-                                       .createdAt,
-                                 ).format("MMMM DD, YYYY [at] hh:mm:ss A")
-                              }}
-                           </NTooltip>
-                        </div>
-                     </template>
+                                       <NText
+                                          class="truncate seats-info"
+                                          :depth="3"
+                                       >
+                                          {{
+                                             moment(
+                                                getRecentWarnings(student.id)[
+                                                   level
+                                                ]!.createdAt,
+                                             ).fromNow()
+                                          }}
+                                       </NText>
+                                    </RouterLink>
+                                 </template>
+                                 Detected a
+                                 {{
+                                    level === "phone"
+                                       ? "phone"
+                                       : `${level} warning level`
+                                 }}
+                                 on
+                                 {{
+                                    moment(
+                                       getRecentWarnings(student.id)[level]!
+                                          .createdAt,
+                                    ).format("MMMM DD, YYYY [at] hh:mm:ss A")
+                                 }}
+                              </NTooltip>
+                           </div>
+                        </template>
+                     </div>
                   </div>
-               </div>
-            </NCard>
-         </template>
-      </Draggable>
+               </NCard>
+            </template>
+         </Draggable>
+         <NDivider class="m-0!" />
+         <NCard class="flex flex-col sm:w-fit!" title="Legend">
+            <div class="flex items-center gap-1">
+               <div class="dot bg-low"></div>
+               Low Warning Level Detected
+            </div>
+            <div class="flex items-center gap-1">
+               <div class="dot bg-moderate"></div>
+               Moderate Warning Level Detected
+            </div>
+            <div class="flex items-center gap-1">
+               <div class="dot bg-severe"></div>
+               Severe Warning Level Detected
+            </div>
+            <div class="flex items-center gap-1">
+               <PhDeviceMobile class="text-error" />
+               Phone Detected
+            </div>
+         </NCard>
+      </div>
    </div>
 </template>
 
@@ -177,6 +202,7 @@ import {
    NSelect,
    NInputNumber,
    NEmpty,
+   NDivider,
 } from "naive-ui";
 import { computed, inject, onMounted, ref } from "vue";
 import { MonitorLog, StudentInfo } from "@/lib/typings";

@@ -137,6 +137,7 @@ async function print() {
    const pdf = await printElement(dashboard, {
       width: "260mm",
       margin: 10,
+      headerText: "Student Reports",
       // fitToSinglePage: true,
    });
    pdf.save(`Student_Report_${student.value?.name || "unnamed"}.pdf`);

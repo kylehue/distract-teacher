@@ -177,7 +177,7 @@ const monitorLogsArray = computed(() => Array.from(monitorLogs.value.values()));
 const studentsArray = computed(() => Array.from(students.value.values()));
 const teacher = computed(() => auth.teacher);
 const tabs = reactive([
-   { name: "Overview", key: "overview", icon: renderIcon(PhHouse) },
+   { name: "Room Overview", key: "overview", icon: renderIcon(PhHouse) },
    {
       name: "Monitoring",
       key: "monitoring",

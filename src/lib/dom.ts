@@ -66,6 +66,7 @@ export async function printElement(
       height?: string;
       fitToSinglePage?: boolean;
       showButtons?: boolean;
+      headerText?: string;
    },
 ) {
    const originalStyle = el.getAttribute("style") || "";
@@ -156,6 +157,18 @@ export async function printElement(
             bannerWidthMm,
             bannerHeightMm,
          );
+
+         if (options?.headerText) {
+            const textX = banner
+               ? margin + bannerWidthMm + bannerGapMm / 2
+               : margin;
+            const textY = margin + bannerHeightMm / 2; // vertically center with banner
+            pdf.setFontSize(10);
+            pdf.setTextColor(60);
+            pdf.text(options.headerText, textX, textY + 0.25, {
+               baseline: "middle",
+            });
+         }
       };
 
       const moveToNewPage = () => {
@@ -167,7 +180,9 @@ export async function printElement(
       renderBanner();
 
       const captureElement = async (entity: HTMLElement) => {
-         const captureId = `print-capture-${Math.random().toString(36).slice(2)}`;
+         const captureId = `print-capture-${Math.random()
+            .toString(36)
+            .slice(2)}`;
          entity.setAttribute("data-print-capture-id", captureId);
          try {
             return await html2canvas(entity, {
