@@ -86,9 +86,9 @@
                         <template #trigger>
                            <RouterLink
                               :to="`/dashboard/student-reports/${student.id}`"
-                              class="seats-item-title link text-center"
+                              class="seats-item-title link text-center truncate"
                            >
-                              <NText class="truncate">{{ student.name }}</NText>
+                              <NText>{{ student.name }}</NText>
                            </RouterLink>
                         </template>
                         {{ student.name }}
@@ -132,12 +132,9 @@
                                           )[level]!.id,
                                        },
                                     }"
-                                       class="link text-center"
+                                       class="link text-center truncate"
                                     >
-                                       <NText
-                                          class="truncate seats-info"
-                                          :depth="3"
-                                       >
+                                       <NText class="seats-info" :depth="3">
                                           {{
                                              moment(
                                                 getRecentWarnings(student.id)[
