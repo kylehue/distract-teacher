@@ -17,6 +17,7 @@
       "@tailwindcss/vite": "^4.1.17",
       "apexcharts": "^5.3.6",
       "jspdf": "^4.0.0",
+      "livekit-client": "^2.18.1",
       "minisearch": "^7.2.0",
       "moment": "^2.30.1",
       "pinia": "^3.0.4",

@@ -23,7 +23,7 @@
                   class="flex-1"
                >
                   <template #prefix>
-                     <PhColumns />
+                     <NText :depth="3">Columns: </NText>
                   </template>
                </NInputNumber>
             </template>
@@ -81,18 +81,22 @@
                         highlightedStudent === student.id,
                   }"
                >
-                  <div class="flex flex-col h-full">
+                  <div class="flex flex-col gap-2 h-full">
                      <NTooltip>
                         <template #trigger>
                            <RouterLink
                               :to="`/dashboard/student-reports/${student.id}`"
-                              class="seats-item-title link text-center truncate"
+                              class="seats-item-title link text-center truncate leading-normal"
                            >
                               <NText>{{ student.name }}</NText>
                            </RouterLink>
                         </template>
                         {{ student.name }}
                      </NTooltip>
+                     <!-- Video of students should show up here -->
+                     <VideoTile
+                        :video-track="mappedParticipants[student.uuid]?.track"
+                     />
                      <div
                         v-if="!hasRecentWarnings(student.id)"
                         class="flex justify-center w-full"
@@ -201,7 +205,15 @@ import {
    NEmpty,
    NDivider,
 } from "naive-ui";
-import { computed, inject, onMounted, ref } from "vue";
+import {
+   computed,
+   inject,
+   onBeforeUnmount,
+   onMounted,
+   ref,
+   triggerRef,
+   watch,
+} from "vue";
 import { MonitorLog, StudentInfo } from "@/lib/typings";
 import { RouterLink } from "vue-router";
 import {
@@ -210,16 +222,19 @@ import {
    STUDENTS_INJECTION_KEY,
 } from "@/lib/injection-keys";
 import moment from "moment";
-import { PhColumns, PhDeviceMobile } from "@phosphor-icons/vue";
+import { PhDeviceMobile } from "@phosphor-icons/vue";
 import InputSearch from "@/app/components/input-search.vue";
 import Draggable from "vuedraggable";
 import { useFetch } from "@/app/composables/use-fetch";
+import { Participant, useLiveKit } from "@/app/composables/use-live-kit";
+import VideoTile from "@/app/components/video-tile.vue";
 
 const themeVars = useThemeVars();
 const patchRoom = useFetch("/api/rooms/:roomId", "PATCH");
 const room = inject(ROOM_INJECTION_KEY)!;
 const studentsArray = inject(STUDENTS_INJECTION_KEY)!;
 const monitorLogsArray = inject(MONITOR_LOGS_INJECTION_KEY)!;
+const liveKit = useLiveKit();
 
 const LEVELS = ["low", "moderate", "severe", "phone"] as const;
 const TIME_THRESHOLD_OPTIONS = [
@@ -230,12 +245,19 @@ const TIME_THRESHOLD_OPTIONS = [
 ];
 
 const timeThreshold = ref(TIME_THRESHOLD_OPTIONS[0].value);
-const seatColumnCount = ref(room.value?.seatColumnCount ?? 8);
+const seatColumnCount = ref(room.value?.seatColumnCount ?? 4);
 const highlightedStudent = ref<string>();
 const currentSeatOrders = ref(
    room.value?.seatOrders ? { ...room.value.seatOrders } : {},
 );
 
+const mappedParticipants = computed(() => {
+   const map: Record<string, Participant> = {};
+   for (const participant of liveKit.participants.value) {
+      map[participant.identity] = participant as Participant;
+   }
+   return map;
+});
 const preprocessedStudentsArray = computed(() => {
    return studentsArray.value
       .filter((student) => student.permitted)
@@ -411,6 +433,29 @@ function arrangeAlphabetically() {
       currentSeatOrders.value[student.id] = index;
    });
 }
+
+watch(
+   () => [
+      room.value?.code,
+      room.value?.status,
+      preprocessedStudentsArray.value.length,
+   ],
+   () => {
+      // TODO: temporarily disable to save bandwidth
+      if (
+         room.value &&
+         room.value.status === "monitoring" &&
+         preprocessedStudentsArray.value.length
+      ) {
+         liveKit.connect(room.value.code);
+      } else {
+         liveKit.disconnect();
+      }
+   },
+   {
+      immediate: true,
+   },
+);
 </script>
 
 <style scoped>
@@ -459,11 +504,11 @@ function arrangeAlphabetically() {
 }
 
 .seats-item * {
-   font-size: clamp(0px, 12cqw, 1rem);
+   font-size: clamp(1vmin, 12cqw, 1rem);
 }
 
 .seats-info {
-   font-size: clamp(0px, 10cqw, 0.8rem);
+   font-size: clamp(1vmin, 10cqw, 0.8rem);
 }
 
 .seats-item-low {
