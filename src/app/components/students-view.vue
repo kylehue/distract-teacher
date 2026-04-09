@@ -8,7 +8,9 @@
       >
          There are currently unpermitted students in the room.
       </NAlert>
+
       <DataView
+         v-if="viewMode === 'card'"
          :items="students"
          :item-key="(item) => item.id"
          :loading="loading"
@@ -246,24 +248,80 @@
                      >
                         Approve
                      </NButton>
-                     <!-- <NButton
-                     size="small"
-                     type="error"
-                     quaternary
-                     @click="togglePermit(student, false)"
-                  >
-                     Reject
-                  </NButton> -->
                   </div>
                </template>
             </RowCard>
          </template>
       </DataView>
+
+      <template v-else>
+         <div class="flex flex-wrap items-center gap-3">
+            <NInput
+               v-model:value="tableSearch"
+               placeholder="Search students..."
+               clearable
+               style="max-width: 260px"
+            >
+               <template #prefix><PhMagnifyingGlass /></template>
+            </NInput>
+
+            <NSelect
+               v-model:value="tablePermitFilter"
+               :options="([
+                  { label: 'Permitted', value: 'true' },
+                  { label: 'Unpermitted', value: 'false' },
+               ] as SelectOption[])"
+               placeholder="Permit Status"
+               clearable
+               style="width: 160px"
+            />
+
+            <NSelect
+               v-model:value="tableActiveFilter"
+               :options="([
+                  { label: 'Active', value: 'true' },
+                  { label: 'Inactive', value: 'false' },
+               ] as SelectOption[])"
+               placeholder="Active Status"
+               clearable
+               style="width: 160px"
+            />
+         </div>
+
+         <div class="w-full overflow-hidden print-entity">
+            <NDataTable
+               :columns="tableColumns"
+               :data="filteredTableStudents"
+               :loading="loading"
+               :pagination="props.static ? false : tablePagination"
+               :row-key="(row) => row.id"
+               size="small"
+               striped
+               :scroll-x="!props.static && filteredTableStudents.length ? 900 : undefined"
+            />
+         </div>
+      </template>
    </div>
 </template>
+
 <script setup lang="ts">
-import { NTooltip, NText, NButton, useMessage, NAlert } from "naive-ui";
-import { computed } from "vue";
+import {
+   NTooltip,
+   NText,
+   NButton,
+   useMessage,
+   NAlert,
+   NDataTable,
+   NInput,
+   NSelect,
+   NRadioGroup,
+   NRadioButton,
+   NTag,
+   type DataTableColumns,
+   type SelectOption,
+} from "naive-ui";
+import { computed, h, ref } from "vue";
+import { RouterLink } from "vue-router";
 import DataView from "@/app/components/data-view.vue";
 import { useStore } from "@/app/composables/use-store";
 import { MonitorLog, RoomInfo, StudentInfo } from "@/lib/typings";
@@ -282,6 +340,9 @@ import {
    PhUser,
    PhSignIn,
    PhSignOut,
+   PhSquaresFour,
+   PhTable,
+   PhMagnifyingGlass,
 } from "@phosphor-icons/vue";
 import moment from "moment";
 import Timestamp from "./timestamp.vue";
@@ -304,6 +365,8 @@ const patchGrantPermitStudent = useFetch(
    "PATCH",
 );
 
+const viewMode = ref<"card" | "table">(props.static ? "table" : "card");
+
 const students = computed(() => {
    const zScoreReports = getAndExplainZScores(props.students);
    const timeStarted = props.room?.timeStarted;
@@ -312,6 +375,7 @@ const students = computed(() => {
       timeStarted && timeEnded
          ? computeExpectedMonitorLogCount(timeStarted, timeEnded)
          : 0;
+
    return props.students.map((student) => {
       const monitorLogs = Array.from(
          store.monitorLogsGroupedByStudentId.get(student.id)?.values() ?? [],
@@ -343,9 +407,164 @@ const students = computed(() => {
    });
 });
 
-const unpermittedStudentsCount = computed(() => {
-   return props.students.filter((student) => !student.permitted).length;
+const unpermittedStudentsCount = computed(
+   () => props.students.filter((s) => !s.permitted).length,
+);
+const tablePagination = computed(() => ({
+   page: 1,
+   pageSize: props.static ? Number.MAX_SAFE_INTEGER : 20,
+   showSizePicker: props.static ? false : true,
+   pageSizes: [10, 20, 50],
+}));
+
+const tableSearch = ref("");
+const tablePermitFilter = ref<string | null>("true");
+const tableActiveFilter = ref<string | null>(null);
+
+const filteredTableStudents = computed(() => {
+   return students.value.filter((s) => {
+      const matchesSearch =
+         !tableSearch.value ||
+         s.name.toLowerCase().includes(tableSearch.value.toLowerCase());
+      const matchesPermit =
+         tablePermitFilter.value === null ||
+         s.permitted === (tablePermitFilter.value === "true");
+      const matchesActive =
+         tableActiveFilter.value === null ||
+         s.active === (tableActiveFilter.value === "true");
+      return matchesSearch && matchesPermit && matchesActive;
+   });
 });
+
+type StudentRow = (typeof students.value)[number];
+
+const tableColumns = computed<DataTableColumns<StudentRow>>(() => [
+   {
+      title: "Student",
+      key: "name",
+      width: 200,
+      sorter: (a, b) => a.name.localeCompare(b.name),
+      defaultSortOrder: "ascend",
+      fixed: "left",
+      render(row) {
+         return h("div", { class: "flex flex-col gap-1" }, [
+            h(
+               RouterLink,
+               { to: `/dashboard/student-reports/${row.id}`, class: "link" },
+               () => row.name,
+            ),
+            h("div", { class: "flex gap-1 flex-wrap" }, [
+               !row.active
+                  ? h(
+                       NTag,
+                       { size: "small", type: "default" },
+                       () => "Inactive",
+                    )
+                  : null,
+               !row.permitted
+                  ? h(
+                       NTag,
+                       { size: "small", type: "error" },
+                       () => "Unpermitted",
+                    )
+                  : null,
+            ]),
+         ]);
+      },
+   },
+   {
+      title: "Total Warnings",
+      key: "totalWarnings",
+      sorter: (a, b) => a.monitorLogs.length - b.monitorLogs.length,
+      render(row) {
+         return h(
+            NTooltip,
+            {},
+            {
+               trigger: () => h("span", row.monitorLogs.length),
+               default: () =>
+                  h("div", { class: "flex flex-col" }, [
+                     h("span", `Low: ${row.warningLevelDistribution.low}`),
+                     h(
+                        "span",
+                        `Moderate: ${row.warningLevelDistribution.moderate}`,
+                     ),
+                     h(
+                        "span",
+                        `Severe: ${row.warningLevelDistribution.severe}`,
+                     ),
+                  ]),
+            },
+         );
+      },
+   },
+   {
+      title: "Phone Detections",
+      key: "phoneDetectionsCount",
+      sorter: (a, b) => a.phoneDetectionsCount - b.phoneDetectionsCount,
+      render(row) {
+         return row.phoneDetectionsCount;
+      },
+   },
+   {
+      title: "Avg Integrity Score",
+      key: "integrityScoreAverage",
+      sorter: (a, b) =>
+         a.monitorLogsReports.integrityScoreAverage -
+         b.monitorLogsReports.integrityScoreAverage,
+      render(row) {
+         return `${(row.monitorLogsReports.integrityScoreAverage * 100).toFixed(
+            2,
+         )}%`;
+      },
+   },
+   {
+      title: "Integrity Score Std Dev",
+      key: "standardDeviation",
+      sorter: (a, b) =>
+         a.monitorLogsReports.standardDeviation -
+         b.monitorLogsReports.standardDeviation,
+      render(row) {
+         return `${(row.monitorLogsReports.standardDeviation * 100).toFixed(
+            2,
+         )}%`;
+      },
+   },
+   {
+      title: "Log Count Z-Score",
+      key: "zScore",
+      sorter: (a, b) => a.zScoreReports.zScore - b.zScoreReports.zScore,
+      render(row) {
+         return row.zScoreReports.zScore.toFixed(2);
+      },
+   },
+   {
+      title: "Expected Log Count Ratio",
+      key: "expectedLogCountRatio",
+      sorter: (a, b) => a.expectedLogCountRatio - b.expectedLogCountRatio,
+      render(row) {
+         return row.expectedLogCountRatio.toFixed(2);
+      },
+   },
+   {
+      title: "Time Joined",
+      key: "timeJoined",
+      sorter: (a, b) => moment(a.timeJoined).diff(b.timeJoined),
+      render(row) {
+         return moment(row.timeJoined).format("MMM D, YYYY h:mm A");
+      },
+   },
+   {
+      title: "Time Left",
+      key: "timeLeft",
+      sorter: (a, b) => moment(a.timeLeft).diff(b.timeLeft),
+      render(row) {
+         return row.timeLeft
+            ? moment(row.timeLeft).format("MMM D, YYYY h:mm A")
+            : "—";
+      },
+   },
+]);
 
 async function togglePermit(student: StudentInfo, permit: boolean) {
    try {
@@ -365,8 +584,4 @@ async function togglePermit(student: StudentInfo, permit: boolean) {
       message.error("Failed to update student's permit");
    }
 }
-
-// const numberOfJoinRequests = computed(() => {
-//    return props.students.filter((student) => !student.permitted).length;
-// });
 </script>
