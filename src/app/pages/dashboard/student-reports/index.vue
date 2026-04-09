@@ -153,7 +153,7 @@ function exportData() {
          sheetName: "Student Reports",
          data: {
             ...student.value,
-            ...createMonitorLogsReports(monitorLogs.value),
+            ...createMonitorLogsReports(student.value, monitorLogs.value),
             ...getAndExplainZScores(
                Array.from(allStudents.value.values()),
             ).get(student.value.id)!,

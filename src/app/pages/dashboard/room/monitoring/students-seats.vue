@@ -86,17 +86,50 @@
                         <template #trigger>
                            <RouterLink
                               :to="`/dashboard/student-reports/${student.id}`"
-                              class="seats-item-title link text-center truncate leading-normal"
+                              class="seats-item-title link truncate leading-normal text-current! w-fit"
                            >
-                              <NText>{{ student.name }}</NText>
+                              <div class="flex items-center gap-1">
+                                 <PhUser />
+                                 <NText>{{ student.name }}</NText>
+                                 <NText
+                                    v-if="
+                                       !student.active &&
+                                       room?.status !== 'concluded'
+                                    "
+                                    :depth="3"
+                                 >
+                                    (Inactive)
+                                 </NText>
+                              </div>
                            </RouterLink>
                         </template>
                         {{ student.name }}
                      </NTooltip>
+                     <div class="flex gap-1">
+                        <NText class="text-xs! font-normal!" :depth="3">
+                           Avg. Integrity Score:
+                        </NText>
+                        <NText class="text-xs! font-normal!" :depth="2">
+                           {{
+                              student.monitorLogCount
+                                 ? (
+                                      (student.integrityScoreSum /
+                                         student.monitorLogCount) *
+                                      100
+                                   ).toFixed(2)
+                                 : "0.00"
+                           }}%
+                        </NText>
+                     </div>
                      <!-- Video of students should show up here -->
                      <VideoTile
                         :video-track="mappedParticipants[student.uuid]?.track"
                      />
+                     <NDivider class="m-0!">
+                        <NText class="text-xs! font-normal!" :depth="3">
+                           Recent Warnings
+                        </NText>
+                     </NDivider>
                      <div
                         v-if="!hasRecentWarnings(student.id)"
                         class="flex justify-center w-full"
@@ -222,7 +255,7 @@ import {
    STUDENTS_INJECTION_KEY,
 } from "@/lib/injection-keys";
 import moment from "moment";
-import { PhDeviceMobile } from "@phosphor-icons/vue";
+import { PhDeviceMobile, PhUser } from "@phosphor-icons/vue";
 import InputSearch from "@/app/components/input-search.vue";
 import Draggable from "vuedraggable";
 import { useFetch } from "@/app/composables/use-fetch";
@@ -501,14 +534,6 @@ watch(
 .seats-item {
    padding: 0.5cqw;
    container-type: inline-size;
-}
-
-.seats-item * {
-   font-size: clamp(1vmin, 12cqw, 1rem);
-}
-
-.seats-info {
-   font-size: clamp(1vmin, 10cqw, 0.8rem);
 }
 
 .seats-item-low {

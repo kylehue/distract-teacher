@@ -132,13 +132,14 @@ export function groupFeatureImpacts(
    return groupedImpacts;
 }
 
-export function createMonitorLogsReports(monitorLogs: MonitorLog[]) {
-   const integrityScoreAverage = monitorLogs.length
-      ? monitorLogs
-           .map((log) => log.integrityScore)
-           .reduce((a, b) => a + b, 0) / monitorLogs.length
-      : 0;
-
+export function createMonitorLogsReports(
+   student: StudentInfo | undefined | null,
+   monitorLogs: MonitorLog[],
+) {
+   const integrityScoreAverage =
+      student && student.monitorLogCount > 0
+         ? student.integrityScoreSum / student.monitorLogCount
+         : 0;
    const standardDeviation = computeStdDev(
       monitorLogs.map((log) => log.integrityScore),
    );

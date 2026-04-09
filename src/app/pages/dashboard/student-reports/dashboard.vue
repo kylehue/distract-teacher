@@ -264,7 +264,7 @@ const student = inject(STUDENT_INJECTION_KEY)!;
 const room = inject(ROOM_INJECTION_KEY)!;
 const teacher = inject(TEACHER_INJECTION_KEY)!;
 const monitorLogs = inject(MONITOR_LOGS_INJECTION_KEY)!;
-const reports = computed(() => createMonitorLogsReports(monitorLogs.value));
+const reports = computed(() => createMonitorLogsReports(student.value, monitorLogs.value));
 const studentIndividualReport = computed(() =>
    getAndExplainZScores(Array.from(allStudents.value.values())).get(
       student.value!.id,

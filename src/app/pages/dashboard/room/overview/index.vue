@@ -121,6 +121,7 @@ function exportData() {
             return {
                ...student,
                ...createMonitorLogsReports(
+                  student,
                   monitorLogsGroupedByStudentId.get(student.id) || [],
                ),
                ...studentIndividualReports.get(student.id)!,

@@ -331,7 +331,7 @@ const students = computed(() => {
       return {
          ...student,
          monitorLogs,
-         monitorLogsReports: createMonitorLogsReports(monitorLogs),
+         monitorLogsReports: createMonitorLogsReports(student, monitorLogs),
          zScoreReports: zScoreReports.get(student.id)!,
          expectedLogCountRatio:
             expectedLogCount === 0

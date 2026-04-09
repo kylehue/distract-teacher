@@ -235,6 +235,7 @@ export function createStudent(overrides: Partial<Student> = {}): Student {
       permitted: randBool(),
       lockMonitorLogId: randBool() ? uid("log") : undefined,
       monitorLogCount: randInt(0, 40),
+      integrityScoreSum: randInt(0, 4000),
       createdAt,
    };
 
@@ -258,7 +259,10 @@ export function createNotification(
 
 export function createTeacher(overrides: Partial<Teacher> = {}): Teacher {
    const displayName = `${pick(FIRST_NAMES)} ${pick(LAST_NAMES)}`;
-   const username = `${displayName.toLowerCase().replace(/\s+/g, ".")}${randInt(10, 99)}`;
+   const username = `${displayName.toLowerCase().replace(/\s+/g, ".")}${randInt(
+      10,
+      99,
+   )}`;
 
    const base: Teacher = {
       id: uid("teacher"),
@@ -358,12 +362,22 @@ export function createCorrelatedData(
             }),
          );
 
+         const studentLogsSum = studentLogs.reduce(
+            (sum, log) => sum + log.integrityScore,
+            0,
+         );
          const severeLog = studentLogs.find((x) => x.warningLevel === "severe");
          const correlatedStudent =
             options.studentOverrides?.lockMonitorLogId !== undefined
                ? student
                : {
                     ...student,
+                    integrityScoreSum:
+                       studentLogsSum +
+                       randFloat(0.6, 1) *
+                          Math.abs(
+                             student.monitorLogCount - studentLogs.length,
+                          ),
                     lockMonitorLogId: severeLog?.id,
                  };
 

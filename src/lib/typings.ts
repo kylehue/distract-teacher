@@ -68,6 +68,7 @@ export interface StudentInfo {
    permitted: boolean;
    lockMonitorLogId?: string;
    monitorLogCount: number;
+   integrityScoreSum: number;
    createdAt: string;
 }
 
