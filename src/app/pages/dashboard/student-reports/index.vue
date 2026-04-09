@@ -100,7 +100,7 @@ import { useAuthStore } from "@/app/composables/use-auth-store";
 import { exportToExcel } from "@/lib/excel";
 import {
    createMonitorLogsReports,
-   createStudentsIndividualReports,
+   getAndExplainZScores,
 } from "@/lib/reports";
 import Loader from "@/app/components/loader.vue";
 import moment from "moment";
@@ -154,7 +154,7 @@ function exportData() {
          data: {
             ...student.value,
             ...createMonitorLogsReports(monitorLogs.value),
-            ...createStudentsIndividualReports(
+            ...getAndExplainZScores(
                Array.from(allStudents.value.values()),
             ).get(student.value.id)!,
          },

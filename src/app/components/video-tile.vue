@@ -45,7 +45,7 @@ onUnmounted(() => {
 <style scoped>
 .tile {
    position: relative;
-   border-radius: 8px;
+   border-radius: 2px;
    overflow: hidden;
    background: #1c1c1c;
    aspect-ratio: 16 / 9;

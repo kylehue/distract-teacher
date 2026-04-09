@@ -19,7 +19,7 @@ import ApexChart from "vue3-apexcharts";
 import { deepMerge } from "@/lib/object";
 import { apexChartOverrides } from "@/lib/theme-overrides";
 import { NText, useThemeVars } from "naive-ui";
-import { createStudentsIndividualReports } from "@/lib/reports";
+import { getAndExplainZScores } from "@/lib/reports";
 import {
    STUDENTS_MAP_INJECTION_KEY,
    STUDENT_INJECTION_KEY,
@@ -41,7 +41,7 @@ const allStudents = inject(STUDENTS_MAP_INJECTION_KEY)!;
 const student = inject(STUDENT_INJECTION_KEY)!;
 
 const studentIndividualReport = computed(() =>
-   createStudentsIndividualReports(Array.from(allStudents.value.values())).get(
+   getAndExplainZScores(Array.from(allStudents.value.values())).get(
       student.value!.id,
    ),
 );

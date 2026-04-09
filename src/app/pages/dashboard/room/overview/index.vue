@@ -48,7 +48,7 @@ import { printElement } from "@/lib/dom";
 import { exportToExcel } from "@/lib/excel";
 import {
    createMonitorLogsReports,
-   createStudentsIndividualReports,
+   getAndExplainZScores,
 } from "@/lib/reports";
 import { useAuthStore } from "@/app/composables/use-auth-store";
 
@@ -94,7 +94,7 @@ function exportData() {
       }
       monitorLogsGroupedByStudentId.get(log.studentId)!.push(log);
    }
-   const studentIndividualReports = createStudentsIndividualReports(
+   const studentIndividualReports = getAndExplainZScores(
       students.value,
    );
 

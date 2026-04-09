@@ -10,7 +10,7 @@
                @click="activeTab = 'seats'"
                size="small"
             >
-               Grid View
+               Live View
             </NButton>
             <NButton
                :focusable="false"

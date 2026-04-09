@@ -90,9 +90,20 @@
       </div>
       <div class="grid gap-4 print-entity mt-8">
          <NText class="text-xl font-medium">Statistics</NText>
+         <NCard title="Findings">
+            <NText :depth="2">
+               {{ reports.findings }}
+            </NText>
+         </NCard>
          <div class="flex-1 grid grid-cols-1 lg:grid-cols-3 grid-rows-1 gap-4">
             <NCard>
-               <Statistic title="Integrity Score Average" size="large">
+               <Statistic
+                  title="Integrity Score Average"
+                  :description="reports.integritySummary"
+                  size="large"
+                  class="min-h-32"
+                  exclusive
+               >
                   <template #title-suffix>
                      <InfoTooltip>
                         The mean integrity score across all monitor logs for
@@ -101,14 +112,14 @@
                   </template>
                   {{ (reports.integrityScoreAverage * 100).toFixed(2) }}%
                </Statistic>
-               <NText :depth="3" class="text-xs">
-                  {{ reports.integritySummary }}
-               </NText>
             </NCard>
             <NCard>
                <Statistic
                   title="Integrity Score Standard Deviation"
+                  :description="reports.standardDeviationSummary"
                   size="large"
+                  class="min-h-32"
+                  exclusive
                >
                   <template #title-suffix>
                      <InfoTooltip>
@@ -121,12 +132,14 @@
                   </template>
                   {{ (reports.standardDeviation * 100).toFixed(2) }}%
                </Statistic>
-               <NText :depth="3" class="text-xs">
-                  {{ reports.standardDeviationSummary }}
-               </NText>
             </NCard>
             <NCard>
-               <Statistic title="Phone Activity Count" size="large">
+               <Statistic
+                  title="Phone Activity Count"
+                  size="large"
+                  class="min-h-32"
+                  exclusive
+               >
                   <template #title-suffix>
                      <InfoTooltip>
                         The total number of times phone activity was detected
@@ -142,7 +155,12 @@
                class="flex-1 grid grid-cols-2 lg:grid-cols-1 lg:grid-rows-2 gap-4"
             >
                <NCard>
-                  <Statistic title="Total Number of Warnings" size="large">
+                  <Statistic
+                     title="Total Number of Warnings"
+                     size="large"
+                     class="min-h-32"
+                     exclusive
+                  >
                      <template #title-suffix>
                         <InfoTooltip>
                            The total number of warnings for this student.
@@ -154,7 +172,10 @@
                <NCard>
                   <Statistic
                      title="Log Count Ratio / Expected Log Count Ratio"
+                     :description="ratioExplanation"
                      size="large"
+                     class="min-h-32"
+                     exclusive
                   >
                      <template #title-suffix>
                         <InfoTooltip>
@@ -167,7 +188,7 @@
                            atypical student behavior.
                         </InfoTooltip>
                      </template>
-                     {{ studentLogCountRatio }}
+                     {{ studentLogCountRatio.toFixed(2) }}
                   </Statistic>
                </NCard>
             </div>
@@ -195,14 +216,6 @@
                />
             </NCard>
          </div>
-         <div class="grid grid-cols-1 gap-4" :data-print-new-page="true">
-            <NCard title="Feature Impacts Over Time">
-               <FeatureImpactChart
-                  :theme="props.theme"
-                  :static="props.static"
-               />
-            </NCard>
-         </div>
       </div>
       <div class="grid gap-4 print-entity">
          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -210,11 +223,6 @@
                <WarningLevelChart :theme="props.theme" :static="props.static" />
             </NCard>
          </div>
-         <NCard title="Findings">
-            <NText :depth="3">
-               {{ reports.findings }}
-            </NText>
-         </NCard>
       </div>
    </div>
 </template>
@@ -226,9 +234,10 @@ import { computed, inject } from "vue";
 import { RouterLink } from "vue-router";
 import { totalTime } from "@/lib/datetime";
 import {
-   createStudentsIndividualReports,
+   getAndExplainZScores,
    createMonitorLogsReports,
    computeExpectedMonitorLogCount,
+   explainLogCountRatio,
 } from "@/lib/reports";
 import IntegrityScoreChart from "./charts/integrity-score-chart.vue";
 import FeatureImpactChart from "./charts/feature-impact-chart.vue";
@@ -257,19 +266,20 @@ const teacher = inject(TEACHER_INJECTION_KEY)!;
 const monitorLogs = inject(MONITOR_LOGS_INJECTION_KEY)!;
 const reports = computed(() => createMonitorLogsReports(monitorLogs.value));
 const studentIndividualReport = computed(() =>
-   createStudentsIndividualReports(Array.from(allStudents.value.values())).get(
+   getAndExplainZScores(Array.from(allStudents.value.values())).get(
       student.value!.id,
    ),
 );
 const studentLogCountRatio = computed(() =>
    student.value && room.value?.timeStarted && room.value?.timeEnded
-      ? (
-           student.value.monitorLogCount /
-           computeExpectedMonitorLogCount(
-              room.value.timeStarted,
-              room.value.timeEnded,
-           )
-        ).toFixed(2)
-      : "N/A",
+      ? student.value.monitorLogCount /
+        computeExpectedMonitorLogCount(
+           room.value.timeStarted,
+           room.value.timeEnded,
+        )
+      : 1,
+);
+const ratioExplanation = computed(() =>
+   explainLogCountRatio(studentLogCountRatio.value),
 );
 </script>

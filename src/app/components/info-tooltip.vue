@@ -1,9 +1,7 @@
 <template>
    <NTooltip>
       <template #trigger>
-         <NIcon>
-            <PhInfo :color="themeVars.textColor3" />
-         </NIcon>
+         <NText :depth="3" class="text-lg cursor-help">ⓘ</NText>
       </template>
       <div class="max-w-[500px]">
          <slot></slot>
@@ -12,8 +10,7 @@
 </template>
 
 <script setup lang="ts">
-import { PhInfo } from "@phosphor-icons/vue";
-import { NTooltip, NIcon, useThemeVars } from "naive-ui";
+import { NTooltip, NText, useThemeVars } from "naive-ui";
 
 const themeVars = useThemeVars();
 </script>

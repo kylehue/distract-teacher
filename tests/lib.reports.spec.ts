@@ -3,7 +3,7 @@ import {
    computeExpectedMonitorLogCount,
    computeStdDev,
    createMonitorLogsReports,
-   createStudentsIndividualReports,
+   getAndExplainZScores,
    explainIntegrity,
    explainIntegrityAndStdDev,
    explainStdDev,
@@ -103,13 +103,13 @@ describe("lib/reports", () => {
    });
 
    it("creates student individual z-score reports", () => {
-      const out = createStudentsIndividualReports([
+      const out = getAndExplainZScores([
          { id: "s1", monitorLogCount: 10 },
          { id: "s2", monitorLogCount: 10 },
       ] as any);
       expect(out.get("s1")?.zScore).toBe(0);
 
-      const varied = createStudentsIndividualReports([
+      const varied = getAndExplainZScores([
          { id: "s1", monitorLogCount: 1 },
          { id: "s2", monitorLogCount: 20 },
          { id: "s3", monitorLogCount: 18 },
@@ -118,6 +118,6 @@ describe("lib/reports", () => {
    });
 
    it("returns empty z-score report map for empty student list", () => {
-      expect(createStudentsIndividualReports([] as any).size).toBe(0);
+      expect(getAndExplainZScores([] as any).size).toBe(0);
    });
 });

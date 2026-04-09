@@ -210,7 +210,7 @@
                         {{ student.zScoreReports.zScore.toFixed(2) }}
                      </Statistic>
                      <Statistic title="Expected Log Count Ratio">
-                        {{ (student.expectedLogCountRatio * 100).toFixed(2) }}%
+                        {{ student.expectedLogCountRatio.toFixed(2) }}
                      </Statistic>
                   </div>
                </template>
@@ -270,7 +270,7 @@ import { MonitorLog, RoomInfo, StudentInfo } from "@/lib/typings";
 import {
    computeExpectedMonitorLogCount,
    createMonitorLogsReports,
-   createStudentsIndividualReports,
+   getAndExplainZScores,
 } from "@/lib/reports";
 import RowCard from "./row-card.vue";
 import Statistic from "./statistic.vue";
@@ -305,7 +305,7 @@ const patchGrantPermitStudent = useFetch(
 );
 
 const students = computed(() => {
-   const zScoreReports = createStudentsIndividualReports(props.students);
+   const zScoreReports = getAndExplainZScores(props.students);
    const timeStarted = props.room?.timeStarted;
    const timeEnded = props.room?.timeEnded;
    const expectedLogCount =
@@ -335,7 +335,7 @@ const students = computed(() => {
          zScoreReports: zScoreReports.get(student.id)!,
          expectedLogCountRatio:
             expectedLogCount === 0
-               ? 0
+               ? 1
                : student.monitorLogCount / expectedLogCount,
          phoneDetectionsCount: store.countPhoneDetectionsOfStudent(student.id),
          warningLevelDistribution,

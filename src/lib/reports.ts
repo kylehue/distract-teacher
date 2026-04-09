@@ -12,49 +12,84 @@ export function computeStdDev(values: number[]): number {
 }
 
 export function explainIntegrityAndStdDev(std: number, score: number) {
-   let explanation: string;
+   let integrityDesc: string;
+   let consistencyDesc: string;
+   let diagnosis: string;
 
+   // Integrity (overall behavior)
+   if (score >= 0.85) {
+      integrityDesc = "high integrity";
+   } else if (score >= 0.65) {
+      integrityDesc = "moderate integrity";
+   } else {
+      integrityDesc = "low integrity";
+   }
+
+   // Consistency (stability of behavior)
    if (std < 0.05) {
-      explanation =
-         "The student exhibited consistent integrity behavior throughout the session, with minimal variation in integrity scores.";
-   } else if (std < 0.15) {
-      explanation =
-         "The student showed moderate fluctuations in integrity scores, indicating occasional irregular behavior during the session.";
+      consistencyDesc = "very consistent";
+   } else if (std < 0.1) {
+      consistencyDesc = "mostly consistent";
+   } else if (std < 0.2) {
+      consistencyDesc = "inconsistent at times";
    } else {
-      explanation =
-         "The student demonstrated highly variable integrity scores, suggesting inconsistent behavior and potential integrity concerns.";
+      consistencyDesc = "highly inconsistent";
    }
 
-   if (score >= 0.8) {
-      explanation +=
-         " Despite these variations, the overall integrity score remained relatively high.";
-   } else if (score >= 0.6) {
-      explanation +=
-         " The overall integrity score falls within a moderate range.";
+   // Combined diagnosis (this is the important part)
+   if (score >= 0.85 && std < 0.1) {
+      diagnosis =
+         "The student remained focused and stable throughout the session with no meaningful signs of suspicious behavior.";
+   } else if (score >= 0.85 && std >= 0.1) {
+      diagnosis =
+         "The student was generally attentive, but there were noticeable moments of distraction or irregular behavior.";
+   } else if (score >= 0.65 && std < 0.1) {
+      diagnosis =
+         "The student showed steady but only moderate focus, suggesting consistent but not fully attentive behavior.";
+   } else if (score >= 0.65 && std >= 0.1) {
+      diagnosis =
+         "The student's behavior fluctuated between attentive and distracted, indicating inconsistent focus.";
+   } else if (score < 0.65 && std < 0.1) {
+      diagnosis =
+         "The student consistently showed signs of low integrity, indicating persistent suspicious or distracted behavior.";
    } else {
-      explanation +=
-         " The overall integrity score was low, which may warrant further review.";
+      diagnosis =
+         "The student frequently switched between normal and suspicious behavior, which may indicate attempts to avoid detection.";
    }
 
-   return explanation;
+   return `The student showed ${consistencyDesc} behavior with an overall level of ${integrityDesc}. ${diagnosis}`;
 }
 
 export function explainIntegrity(score: number): string {
    if (score >= 0.9)
-      return "Excellent integrity, very attentive during sessions.";
-   if (score >= 0.75) return "Good integrity, minor lapses observed.";
-   if (score >= 0.5) return "Moderate integrity, some distractions detected.";
-   if (score > 0) return "Low integrity, frequent lapses observed.";
-   return "No data available to assess integrity.";
+      return "The student maintained a very high level of focus and showed no noticeable signs of suspicious behavior.";
+
+   if (score >= 0.75)
+      return "The student was generally focused, with only minor moments that may indicate brief distractions.";
+
+   if (score >= 0.5)
+      return "The student showed inconsistent focus, with several moments that may indicate distraction or unusual behavior.";
+
+   if (score > 0)
+      return "The student frequently showed signs of distraction or suspicious behavior throughout the session.";
+
+   return "There is not enough data to assess the student's behavior.";
 }
 
 export function explainStdDev(std: number): string {
-   if (std < 0.05) return "Student's behavior is very consistent.";
-   if (std < 0.1) return "Student's behavior is mostly consistent.";
-   if (std < 0.2) return "Student's behavior is somewhat inconsistent.";
+   if (std < 0.05)
+      return "The student's behavior was very stable and consistent from start to finish.";
+
+   if (std < 0.1)
+      return "The student's behavior was mostly consistent, with only small changes over time.";
+
+   if (std < 0.2)
+      return "The student's behavior changed at several points, suggesting periods of distraction or irregular activity.";
+
    if (std >= 0.2)
-      return "Student's behavior is highly variable during sessions.";
-   return "Insufficient data to determine variability.";
+      return "The student's behavior was highly inconsistent, with frequent changes that may indicate ongoing distractions or issues.";
+
+   return "There is not enough data to determine how consistent the student's behavior was.";
 }
 
 export const FEATURE_GROUPS_MAP: Record<
@@ -160,7 +195,31 @@ export function computeExpectedMonitorLogCount(
    return Math.floor(durationMs / monitorIntervalMs);
 }
 
-export function createStudentsIndividualReports(
+export function explainLogCountRatio(ratio: number): string {
+   if (ratio >= 0.95) {
+      return "The student's monitoring data was recorded consistently throughout the session, indicating stable connectivity and no signs of monitoring interruption.";
+   }
+
+   if (ratio >= 0.8) {
+      return "The student's monitoring data was mostly complete, with only minor gaps that may be due to brief connectivity issues.";
+   }
+
+   if (ratio >= 0.6) {
+      return "The student's monitoring data shows noticeable gaps, suggesting periods where monitoring may have been interrupted.";
+   }
+
+   if (ratio >= 0.4) {
+      return "The student's monitoring data is incomplete, with several missing intervals that may indicate repeated disconnections or interruptions during the session.";
+   }
+
+   if (ratio > 0) {
+      return "The student's monitoring data is significantly incomplete, indicating frequent or prolonged interruptions that may have affected continuous monitoring.";
+   }
+
+   return "No monitoring data was recorded for this student, suggesting a complete loss of connection or absence during the session.";
+}
+
+export function getAndExplainZScores(
    students: StudentInfo[],
 ): Map<string, { zScore: number; explanation: string }> {
    if (!students.length) return new Map();
@@ -170,7 +229,6 @@ export function createStudentsIndividualReports(
    const mean = counts.reduce((sum, c) => sum + c, 0) / counts.length;
    const stdDev = computeStdDev(counts);
 
-   // Everyone logged the same amount (no meaningful comparison)
    if (stdDev === 0) {
       return new Map(
          students.map((s) => [
@@ -178,7 +236,7 @@ export function createStudentsIndividualReports(
             {
                zScore: 0,
                explanation:
-                  "All students produced similar activity logs; no abnormal behavior detected.",
+                  "All students showed nearly identical activity levels, so there are no noticeable differences in monitoring behavior.",
             },
          ]),
       );
@@ -190,18 +248,27 @@ export function createStudentsIndividualReports(
 
          let explanation: string;
 
-         if (z < -3) {
+         if (z <= -3) {
             explanation =
-               "Log activity is extremely low compared to the class, suggesting prolonged disconnection or monitoring avoidance.";
-         } else if (z < -2) {
+               "This student recorded far fewer activity logs than the rest of the class. This strongly suggests long periods without monitoring, possibly due to disconnection or leaving the session.";
+         } else if (z <= -2) {
             explanation =
-               "Log activity is significantly lower than most students and may indicate intermittent disconnection.";
-         } else if (z < -1) {
+               "This student recorded significantly fewer logs than most students. This may indicate repeated disconnections or unstable participation during the session.";
+         } else if (z <= -1) {
             explanation =
-               "Log activity is slightly below average but still within a normal range.";
+               "This student recorded slightly fewer logs than average. While still within a normal range, it may reflect minor interruptions or brief disconnections.";
+         } else if (z < 1) {
+            explanation =
+               "This student's activity level is in line with the rest of the class, showing consistent participation and monitoring.";
+         } else if (z < 2) {
+            explanation =
+               "This student recorded slightly more logs than average. This may indicate more movement or slightly higher activity, but it is still within a normal range.";
+         } else if (z < 3) {
+            explanation =
+               "This student recorded significantly more logs than most of the class. This could indicate frequent movement or unusual behavior being captured.";
          } else {
             explanation =
-               "Log activity falls within the normal range for this session.";
+               "This student recorded far more logs than others. This suggests consistently high activity or repeated detection events that may require closer review.";
          }
 
          return [
