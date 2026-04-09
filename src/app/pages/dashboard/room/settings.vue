@@ -144,7 +144,7 @@
             </div>
          </template>
       </NCard>
-      <!-- <NCard>
+      <NCard>
          <template #header>Joining Permission</template>
          <NForm
             @keydown.enter="saveJoiningPermissionSettings()"
@@ -208,7 +208,7 @@
                </NButton>
             </div>
          </template>
-      </NCard> -->
+      </NCard>
       <NCard>
          <template #header>Others</template>
          <NForm class="flex flex-col gap-2 items-start justify-start">
