@@ -51,7 +51,7 @@ describe("lib/reports", () => {
    });
 
    it("creates monitor log reports", () => {
-      const out = createMonitorLogsReports([
+      const out = createMonitorLogsReports(null, [
          { integrityScore: 0.8, isPhonePresent: false },
          { integrityScore: 0.6, isPhonePresent: true },
       ] as any);
@@ -61,7 +61,7 @@ describe("lib/reports", () => {
    });
 
    it("creates safe defaults for empty monitor log reports", () => {
-      const out = createMonitorLogsReports([] as any);
+      const out = createMonitorLogsReports(null, [] as any);
       expect(out.integrityScoreAverage).toBe(0);
       expect(out.standardDeviation).toBe(0);
       expect(out.phoneDetectionCount).toBe(0);
