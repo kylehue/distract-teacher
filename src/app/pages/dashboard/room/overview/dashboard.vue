@@ -249,6 +249,7 @@ const top5CheatingStudentsData: DataTableColumns<StudentInfo> = reactive([
                circle: true,
                objectFit: "cover",
                size: "large",
+               fallbackSrc: "/avatar.svg",
             }),
             h(
                RouterLink,
@@ -288,6 +289,7 @@ const top5NormalStudentsData: DataTableColumns<StudentInfo> = reactive([
                circle: true,
                objectFit: "cover",
                size: "large",
+               fallbackSrc: "/avatar.svg",
             }),
             h(
                RouterLink,

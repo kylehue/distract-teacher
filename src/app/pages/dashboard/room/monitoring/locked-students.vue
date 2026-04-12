@@ -74,6 +74,7 @@
                   class="size-[100px]!"
                   object-fit="cover"
                   :src="student.avatarUrl"
+                  fallback-src="/avatar.svg"
                ></NAvatar>
             </template>
             <template #content>

@@ -9,6 +9,7 @@
                   class="size-[200px]!"
                   object-fit="cover"
                   :src="student.avatarUrl"
+                  fallback-src="/avatar.svg"
                ></NAvatar>
                <Statistic title="Student" size="large">
                   {{ student.name }}

@@ -237,6 +237,7 @@ export function createStudent(overrides: Partial<Student> = {}): Student {
       monitorLogCount: randInt(0, 40),
       integrityScoreSum: randInt(0, 4000),
       createdAt,
+      avatarUrl: "/avatarx.jpg",
    };
 
    return { ...base, ...overrides };

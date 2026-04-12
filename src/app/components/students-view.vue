@@ -152,6 +152,7 @@
                      class="size-[100px]!"
                      object-fit="cover"
                      :src="student.avatarUrl"
+                     fallback-src="/avatar.svg"
                   ></NAvatar>
                </template>
                <template #title>
@@ -471,6 +472,7 @@ const tableColumns = computed<DataTableColumns<StudentRow>>(() => [
                class: "size-[100px]! m-auto",
                src: row.avatarUrl,
                objectFit: "cover",
+               fallbackSrc: "/avatar.svg",
             }),
          ]);
       },

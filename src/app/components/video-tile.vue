@@ -2,8 +2,13 @@
    <div class="tile">
       <video ref="videoRef" autoplay playsinline muted class="tile-video" />
       <div v-if="!videoTrack" class="tile-no-video">
-         <PhUser v-if="!preview" size="50%" />
-         <img v-else :src="preview" class="tile-preview" />
+         <PhUser v-if="!preview || previewError" size="50%" />
+         <img
+            v-else
+            :src="preview"
+            class="tile-preview"
+            @error="previewError = true"
+         />
       </div>
    </div>
 </template>
@@ -18,6 +23,7 @@ const props = defineProps<{
    preview?: string;
 }>();
 
+const previewError = ref(false);
 const videoRef = ref<HTMLVideoElement | null>(null);
 
 function attach(track: RemoteTrack | null | undefined) {
