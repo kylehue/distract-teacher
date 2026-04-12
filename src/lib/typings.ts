@@ -70,6 +70,7 @@ export interface StudentInfo {
    monitorLogCount: number;
    integrityScoreSum: number;
    createdAt: string;
+   avatarUrl: string;
 }
 
 export interface TeacherInfo {

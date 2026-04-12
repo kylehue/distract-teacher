@@ -4,13 +4,18 @@
       <div class="grid gap-4 print-entity mt-4">
          <NText class="text-xl font-medium">General Information</NText>
          <div class="grid grid-cols-2 gap-4">
-            <NCard title="" content-class="flex flex-wrap gap-x-16 gap-y-8">
-               <Statistic title="Student Name" size="large">
+            <NCard title="" content-class="flex flex-wrap gap-4">
+               <NAvatar
+                  class="size-[200px]!"
+                  object-fit="cover"
+                  :src="student.avatarUrl"
+               ></NAvatar>
+               <Statistic title="Student" size="large">
                   {{ student.name }}
                </Statistic>
             </NCard>
-            <NCard title="" content-class="flex flex-wrap gap-x-16 gap-y-8">
-               <Statistic title="Teacher Name" size="large">
+            <NCard title="" content-class="flex flex-wrap">
+               <Statistic title="Teacher" size="large">
                   {{ teacher.displayName }}
                </Statistic>
             </NCard>
@@ -115,7 +120,7 @@
             </NCard>
             <NCard>
                <Statistic
-                  title="Integrity Score Standard Deviation"
+                  title="Inconsistency"
                   :description="reports.standardDeviationSummary"
                   size="large"
                   class="min-h-32"
@@ -229,7 +234,7 @@
 
 <script setup lang="ts">
 import { PhArrowSquareOut } from "@phosphor-icons/vue";
-import { NButton, NText, NCard } from "naive-ui";
+import { NButton, NText, NCard, NAvatar } from "naive-ui";
 import { computed, inject } from "vue";
 import { RouterLink } from "vue-router";
 import { totalTime } from "@/lib/datetime";
@@ -264,7 +269,9 @@ const student = inject(STUDENT_INJECTION_KEY)!;
 const room = inject(ROOM_INJECTION_KEY)!;
 const teacher = inject(TEACHER_INJECTION_KEY)!;
 const monitorLogs = inject(MONITOR_LOGS_INJECTION_KEY)!;
-const reports = computed(() => createMonitorLogsReports(student.value, monitorLogs.value));
+const reports = computed(() =>
+   createMonitorLogsReports(student.value, monitorLogs.value),
+);
 const studentIndividualReport = computed(() =>
    getAndExplainZScores(Array.from(allStudents.value.values())).get(
       student.value!.id,

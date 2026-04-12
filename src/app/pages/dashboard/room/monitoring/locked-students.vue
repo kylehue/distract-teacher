@@ -69,6 +69,13 @@
       </template>
       <template #item="{ item: student }">
          <RowCard bordered>
+            <template #icon>
+               <NAvatar
+                  class="size-[100px]!"
+                  object-fit="cover"
+                  :src="student.avatarUrl"
+               ></NAvatar>
+            </template>
             <template #content>
                <MonitorLogItem
                   :monitorLog="student.lockMonitorLog"
@@ -107,7 +114,7 @@
 </template>
 
 <script setup lang="ts">
-import { NButton, useMessage, NEmpty } from "naive-ui";
+import { NButton, useMessage, NEmpty, NAvatar } from "naive-ui";
 import { computed, inject } from "vue";
 import { StudentInfo } from "@/lib/typings";
 import { RouterLink } from "vue-router";

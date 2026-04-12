@@ -147,6 +147,13 @@
                   },
                ]"
             >
+               <template #icon>
+                  <NAvatar
+                     class="size-[100px]!"
+                     object-fit="cover"
+                     :src="student.avatarUrl"
+                  ></NAvatar>
+               </template>
                <template #title>
                   <NText class="flex items-center gap-1">
                      <PhUser />
@@ -160,6 +167,17 @@
                </template>
                <template #content>
                   <div class="flex flex-wrap gap-x-12 gap-y-4">
+                     <Statistic title="Avg Integrity Score">
+                        <template #icon>
+                           <PhChartLine />
+                        </template>
+                        {{
+                           (
+                              student.monitorLogsReports.integrityScoreAverage *
+                              100
+                           ).toFixed(2)
+                        }}%
+                     </Statistic>
                      <Statistic title="Total Warnings">
                         <template #icon>
                            <PhWarning />
@@ -190,18 +208,7 @@
                         </template>
                         {{ student.phoneDetectionsCount }}
                      </Statistic>
-                     <Statistic title="Average Integrity Score">
-                        <template #icon>
-                           <PhChartLine />
-                        </template>
-                        {{
-                           (
-                              student.monitorLogsReports.integrityScoreAverage *
-                              100
-                           ).toFixed(2)
-                        }}%
-                     </Statistic>
-                     <Statistic title="Integrity Score Standard Deviation">
+                     <Statistic title="Inconsistency">
                         {{
                            (
                               student.monitorLogsReports.standardDeviation * 100
@@ -297,7 +304,11 @@
                :row-key="(row) => row.id"
                size="small"
                striped
-               :scroll-x="!props.static && filteredTableStudents.length ? 900 : undefined"
+               :scroll-x="
+                  !props.static && filteredTableStudents.length
+                     ? 900
+                     : undefined
+               "
             />
          </div>
       </template>
@@ -314,7 +325,7 @@ import {
    NDataTable,
    NInput,
    NSelect,
-   NRadioGroup,
+   NAvatar,
    NRadioButton,
    NTag,
    type DataTableColumns,
@@ -450,26 +461,30 @@ const tableColumns = computed<DataTableColumns<StudentRow>>(() => [
          return h("div", { class: "flex flex-col gap-1" }, [
             h(
                RouterLink,
-               { to: `/dashboard/student-reports/${row.id}`, class: "link" },
+               {
+                  to: `/dashboard/student-reports/${row.id}`,
+                  class: "link w-full text-center",
+               },
                () => row.name,
             ),
-            h("div", { class: "flex gap-1 flex-wrap" }, [
-               !row.active
-                  ? h(
-                       NTag,
-                       { size: "small", type: "default" },
-                       () => "Inactive",
-                    )
-                  : null,
-               !row.permitted
-                  ? h(
-                       NTag,
-                       { size: "small", type: "error" },
-                       () => "Unpermitted",
-                    )
-                  : null,
-            ]),
+            h(NAvatar, {
+               class: "size-[100px]! m-auto",
+               src: row.avatarUrl,
+               objectFit: "cover",
+            }),
          ]);
+      },
+   },
+   {
+      title: "Avg Integrity Score",
+      key: "integrityScoreAverage",
+      sorter: (a, b) =>
+         a.monitorLogsReports.integrityScoreAverage -
+         b.monitorLogsReports.integrityScoreAverage,
+      render(row) {
+         return `${(row.monitorLogsReports.integrityScoreAverage * 100).toFixed(
+            2,
+         )}%`;
       },
    },
    {
@@ -507,19 +522,7 @@ const tableColumns = computed<DataTableColumns<StudentRow>>(() => [
       },
    },
    {
-      title: "Avg Integrity Score",
-      key: "integrityScoreAverage",
-      sorter: (a, b) =>
-         a.monitorLogsReports.integrityScoreAverage -
-         b.monitorLogsReports.integrityScoreAverage,
-      render(row) {
-         return `${(row.monitorLogsReports.integrityScoreAverage * 100).toFixed(
-            2,
-         )}%`;
-      },
-   },
-   {
-      title: "Integrity Score Std Dev",
+      title: "Inconsistency",
       key: "standardDeviation",
       sorter: (a, b) =>
          a.monitorLogsReports.standardDeviation -

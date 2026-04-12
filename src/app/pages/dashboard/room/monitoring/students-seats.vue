@@ -124,6 +124,7 @@
                      <!-- Video of students should show up here -->
                      <VideoTile
                         :video-track="mappedParticipants[student.uuid]?.track"
+                        :preview="student.avatarUrl"
                      />
                      <NDivider class="m-0!">
                         <NText class="text-xs! font-normal!" :depth="3">

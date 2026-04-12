@@ -7,10 +7,8 @@
    >
       <div class="flex flex-row gap-2">
          <div class="flex min-w-0 flex-1 items-start gap-2 sm:gap-4">
-            <div v-if="$slots.icon" class="shrink-0 pt-0.5">
-               <NIcon :size="props.iconSize">
-                  <slot name="icon" />
-               </NIcon>
+            <div v-if="$slots.icon" class="pt-0.5 flex-none size-fit">
+               <slot name="icon" />
             </div>
 
             <div class="min-w-0 flex-1 flex flex-col gap-2">

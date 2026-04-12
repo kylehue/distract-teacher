@@ -2,7 +2,8 @@
    <div class="tile">
       <video ref="videoRef" autoplay playsinline muted class="tile-video" />
       <div v-if="!videoTrack" class="tile-no-video">
-         <PhUser size="50%" />
+         <PhUser v-if="!preview" size="50%" />
+         <img v-else :src="preview" class="tile-preview" />
       </div>
    </div>
 </template>
@@ -14,6 +15,7 @@ import { PhUser } from "@phosphor-icons/vue";
 
 const props = defineProps<{
    videoTrack: RemoteTrack | null | undefined;
+   preview?: string;
 }>();
 
 const videoRef = ref<HTMLVideoElement | null>(null);
@@ -64,5 +66,12 @@ onUnmounted(() => {
    justify-content: center;
    color: #555;
    font-size: 14px;
+}
+.tile-preview {
+   position: absolute;
+   inset: 0;
+   width: 100%;
+   height: 100%;
+   object-fit: cover;
 }
 </style>

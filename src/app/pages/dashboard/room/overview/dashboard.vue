@@ -158,7 +158,7 @@
 </template>
 
 <script setup lang="ts">
-import { NText, NCard, NDataTable, DataTableColumns } from "naive-ui";
+import { NText, NCard, NDataTable, NAvatar, DataTableColumns } from "naive-ui";
 import { computed, h, inject, reactive } from "vue";
 import { totalTime } from "@/lib/datetime";
 import { explainIntegrity } from "@/lib/reports";
@@ -235,21 +235,31 @@ const top5CheatingStudentsData: DataTableColumns<StudentInfo> = reactive([
    {
       title: "Rank",
       key: "rank",
+      width: 70,
+      align: "center",
       render: (row, index) => index + 1,
    },
    {
-      title: "Student Name",
+      title: "Student",
       key: "name",
       render: (row) => {
-         return h(
-            RouterLink,
-            { to: `/dashboard/student-reports/${row.id}`, class: "link" },
-            () => row.name,
-         );
+         return h("div", { class: "flex gap-2 items-center" }, [
+            h(NAvatar, {
+               src: row.avatarUrl,
+               circle: true,
+               objectFit: "cover",
+               size: "large",
+            }),
+            h(
+               RouterLink,
+               { to: `/dashboard/student-reports/${row.id}`, class: "link" },
+               () => row.name,
+            ),
+         ]);
       },
    },
    {
-      title: "Average Integrity Score",
+      title: "Avg Integrity Score",
       key: "score",
       render: (row) =>
          (
@@ -264,21 +274,31 @@ const top5NormalStudentsData: DataTableColumns<StudentInfo> = reactive([
    {
       title: "Rank",
       key: "rank",
+      width: 70,
+      align: "center",
       render: (row, index) => index + 1,
    },
    {
-      title: "Student Name",
+      title: "Student",
       key: "name",
       render: (row) => {
-         return h(
-            RouterLink,
-            { to: `/dashboard/student-reports/${row.id}`, class: "link" },
-            () => row.name,
-         );
+         return h("div", { class: "flex gap-2 items-center" }, [
+            h(NAvatar, {
+               src: row.avatarUrl,
+               circle: true,
+               objectFit: "cover",
+               size: "large",
+            }),
+            h(
+               RouterLink,
+               { to: `/dashboard/student-reports/${row.id}`, class: "link" },
+               () => row.name,
+            ),
+         ]);
       },
    },
    {
-      title: "Average Integrity Score",
+      title: "Avg Integrity Score",
       key: "score",
       render: (row) =>
          (

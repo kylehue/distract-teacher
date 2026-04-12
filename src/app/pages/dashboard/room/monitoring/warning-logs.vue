@@ -95,6 +95,13 @@
                },
             ]"
          >
+            <template #icon>
+               <NAvatar
+                  class="size-[100px]!"
+                  object-fit="cover"
+                  :src="monitorLog.student.avatarUrl"
+               ></NAvatar>
+            </template>
             <template #content>
                <MonitorLogItem
                   :monitorLog="monitorLog"
@@ -108,7 +115,7 @@
 </template>
 
 <script setup lang="ts">
-import { NEmpty } from "naive-ui";
+import { NEmpty, NAvatar } from "naive-ui";
 import { computed, inject, onMounted, useTemplateRef } from "vue";
 import { useRoute } from "vue-router";
 import {
